@@ -1,10 +1,7 @@
 import { connect } from "@/dbConfig/dbConfig.ts";
-
 import User from "@/models/userModel"
 import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs"
-import toast from "react-hot-toast";
-import { error } from "console";
 import jwt from "jsonwebtoken"
 
 
@@ -13,6 +10,15 @@ connect()
 
 export async function POST(request:NextRequest) {
     try {
+
+
+        console.log("MONGO_URI:", process.env.MONGO_URI);
+console.log("TOKEN_SECRET:", process.env.TOKEN_SECRET);
+console.log("DOMAIN:", process.env.DOMAIN);
+
+
+
+
         const reqBody = await request.json()
         const {email,password} = reqBody
         console.log(reqBody)
