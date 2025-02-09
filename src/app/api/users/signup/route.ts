@@ -4,6 +4,8 @@ import { connect } from "@/dbConfig/dbConfig.ts";
 import User from "@/models/userModel"
 import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs"
+import { sendEmail } from "@/helpers/mailer";
+
 
 
 
@@ -79,7 +81,13 @@ export async function POST( request: NextRequest) {
         // });
 
 
+        // send verification email
 
+        await sendEmail({
+            email, // extracted from newUser
+            emailType : "VERIFY", 
+            userId : savedUser._id,
+        })
 
 
 
