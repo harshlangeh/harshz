@@ -1,5 +1,5 @@
 // import { connect } from "../../dbConfig/dbConfig";
-import { connect } from "@/dbConfig/dbConfig.ts";
+import { connect } from "@/dbConfig/dbConfig";
 
 import User from "@/models/userModel"
 import { NextRequest, NextResponse } from "next/server";
