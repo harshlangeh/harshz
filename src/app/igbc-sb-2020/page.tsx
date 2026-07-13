@@ -281,7 +281,7 @@ export default function IgbcSb2020Page() {
   }); // 'New' or 'Existing'
   const [scores, setScores] = useState({});
 
-  const handleScoreChange = (id, value, max) => {
+  const handleScoreChange = (id: string, value: string, max: number) => {
     let num = parseInt(value);
     if (isNaN(num)) num = 0;
     if (num > max) num = max;
@@ -290,7 +290,7 @@ export default function IgbcSb2020Page() {
     setScores(prev => ({ ...prev, [id]: num }));
   };
 
-  const getSectionTotal = (section) => {
+  const getSectionTotal = (section: any) => {
     return section.criteria.reduce((sum, c) => {
       const max = buildingType === 'New' ? c.maxNew : c.maxExisting;
       if (max === 'NA' || max === 'Mandatory') return sum;

@@ -33,13 +33,13 @@ export default function Home() {
     }
   }, []);
 
-  const handleProjectInfoChange = (field, value) => {
+  const handleProjectInfoChange = (field: string, value: string) => {
     const newInfo = { ...projectInfo, [field]: value };
     setProjectInfo(newInfo);
     localStorage.setItem('project_info', JSON.stringify(newInfo));
   };
 
-  const renderStars = (count, colorClass) => {
+  const renderStars = (count: number, colorClass: string) => {
     return Array(5).fill(0).map((_, i) => (
       <Star key={i} className={`w-4 h-4 ${i < count ? `fill-${colorClass} text-${colorClass} glow-${colorClass}` : "text-white/20"}`} />
     ));

@@ -271,7 +271,7 @@ export default function GrihaV6Page() {
     return Array(35).fill(0);
   });
 
-  const handleScoreChange = (id, value, max) => {
+  const handleScoreChange = (id: number, value: string, max: number) => {
     let num = parseInt(value);
     if (isNaN(num)) num = 0;
     if (num > max) num = max;
@@ -282,7 +282,7 @@ export default function GrihaV6Page() {
     setScores(newScores);
   };
 
-  const getSectionTotal = (section) => {
+  const getSectionTotal = (section: any) => {
     return section.criteria.reduce((sum, c) => sum + scores[c.id], 0);
   };
 
