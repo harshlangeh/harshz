@@ -1,0 +1,127 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-07-14",
+  "documents": [
+    {
+      "id": "GRIHA-V6",
+      "name": "GRIHA V6",
+      "fullName": "Green Rating for Integrated Habitat Assessment — Version 6",
+      "color": "orange",
+      "rating": "stars",
+      "maxPoints": 105,
+      "basePoints": 100,
+      "bonusPoints": 5,
+      "keywords": [
+        "griha", "v6", "version 6", "griha v6", "griha6", "griha version 6",
+        "green rating", "integrated habitat", "star rating", "sustainable",
+        "site planning", "energy optimisation", "water management", "solid waste",
+        "building materials", "life cycle", "socio economic", "performance monitoring",
+        "innovation", "commissioning", "metering", "lca", "lcc"
+      ],
+      "description": "The latest GRIHA rating system (Version 6). Evaluates buildings across 10 base sections (100 pts) plus 1 innovation section (5 pts). Star rating from 1 to 5 stars based on total points.",
+      "readme": "/docs/GRIHA-V6/README.md",
+      "sections": [
+        { "id": "01-Sustainable-Site-Planning", "title": "Sustainable Site Planning", "points": 12, "keywords": ["site", "site planning", "green infrastructure", "UHIE", "urban heat island", "low impact design", "imperviousness", "landscape", "biodiversity"] },
+        { "id": "02-Construction-Management", "title": "Construction Management", "points": 4, "keywords": ["construction", "air pollution", "soil pollution", "topsoil", "preservation", "construction management", "waste during construction"] },
+        { "id": "03-Energy-Optimisation", "title": "Energy Optimisation", "points": 17, "keywords": ["energy", "energy optimisation", "energy optimization", "renewable energy", "solar", "ODP", "GWP", "refrigerants", "passive design", "energy efficiency"] },
+        { "id": "04-Occupant-Comfort", "title": "Occupant Comfort", "points": 13, "keywords": ["comfort", "occupant", "visual comfort", "daylighting", "thermal comfort", "acoustic comfort", "indoor air quality", "IAQ", "ventilation", "VOC"] },
+        { "id": "05-Water-Management", "title": "Water Management", "points": 16, "keywords": ["water", "water management", "demand reduction", "wastewater", "rainwater", "water quality", "self sufficiency", "fixtures", "reuse", "recharge"] },
+        { "id": "06-Solid-Waste-Management", "title": "Solid Waste Management", "points": 6, "keywords": ["waste", "solid waste", "post occupancy", "organic waste", "composting", "segregation"] },
+        { "id": "07-Sustainable-Building-Materials", "title": "Sustainable Building Materials", "points": 7, "keywords": ["materials", "building materials", "alternative materials", "fly ash", "AAC", "external site", "embodied energy"] },
+        { "id": "08-Life-Cycle-Assessment-and-Costing", "title": "Life Cycle Assessment and Costing", "points": 8, "keywords": ["life cycle", "LCA", "LCC", "life cycle assessment", "life cycle costing", "global warming potential", "GWP", "carbon"] },
+        { "id": "09-Socio-Economic-Strategies", "title": "Socio-Economic Strategies", "points": 7, "keywords": ["socio economic", "labour safety", "sanitation", "universal accessibility", "service staff", "positive social impact", "workers"] },
+        { "id": "10-Performance-Monitoring-and-Metering", "title": "Performance Monitoring and Metering", "points": 10, "keywords": ["performance", "monitoring", "metering", "commissioning", "smart metering", "operation", "maintenance", "BMS"] },
+        { "id": "11-Innovation", "title": "Innovation", "points": 5, "keywords": ["innovation", "innovative design", "bonus", "extra points"] }
+      ]
+    },
+    {
+      "id": "GRIHA-V2019",
+      "name": "GRIHA V2019",
+      "fullName": "Green Rating for Integrated Habitat Assessment — Version 2019",
+      "color": "green",
+      "rating": "stars",
+      "maxPoints": 105,
+      "basePoints": 100,
+      "bonusPoints": 5,
+      "keywords": [
+        "griha", "v2019", "2019", "griha 2019", "griha v2019",
+        "green rating", "integrated habitat", "star rating",
+        "site planning", "energy optimization", "water management",
+        "building materials", "life cycle costing", "socio economic",
+        "performance metering", "indoor air quality"
+      ],
+      "description": "GRIHA 2019 rating system. 100 base points across 10 sections + 5 innovation bonus. Star rating 1–5 based on total score.",
+      "readme": "/docs/GRIHA-V2019/README.md",
+      "sections": [
+        { "id": "01-Sustainable-Site-Planning", "title": "Sustainable Site Planning", "points": 12, "keywords": ["site", "green infrastructure", "UHIE", "low impact design"] },
+        { "id": "02-Construction-Management", "title": "Construction Management", "points": 4, "keywords": ["construction", "air pollution", "topsoil", "construction management"] },
+        { "id": "03-Energy-Optimization", "title": "Energy Optimization", "points": 18, "keywords": ["energy", "renewable energy", "ODP", "GWP", "refrigerants"] },
+        { "id": "04-Occupant-Comfort", "title": "Occupant Comfort", "points": 12, "keywords": ["comfort", "visual comfort", "thermal comfort", "acoustic", "IAQ", "ventilation"] },
+        { "id": "05-Water-Management", "title": "Water Management", "points": 16, "keywords": ["water", "demand reduction", "wastewater", "rainwater", "water quality"] },
+        { "id": "06-Solid-Waste-Management", "title": "Solid Waste Management", "points": 6, "keywords": ["waste", "solid waste", "organic waste", "composting"] },
+        { "id": "07-Sustainable-Building-Materials", "title": "Sustainable Building Materials", "points": 12, "keywords": ["materials", "alternative materials", "LCA", "global warming potential"] },
+        { "id": "08-Life-Cycle-Costing", "title": "Life Cycle Costing", "points": 5, "keywords": ["life cycle", "LCC", "life cycle costing", "cost analysis"] },
+        { "id": "09-Socio-Economic-Strategies", "title": "Socio-Economic Strategies", "points": 8, "keywords": ["socio economic", "labour safety", "universal accessibility", "social impact"] },
+        { "id": "10-Performance-Metering-and-Monitoring", "title": "Performance Metering and Monitoring", "points": 7, "keywords": ["performance", "metering", "monitoring", "commissioning", "operation maintenance"] },
+        { "id": "11-Innovation", "title": "Innovation", "points": 5, "keywords": ["innovation", "innovative", "bonus"] }
+      ]
+    },
+    {
+      "id": "GRIHA-V2015",
+      "name": "GRIHA V2015",
+      "fullName": "Green Rating for Integrated Habitat Assessment — Version 2015",
+      "color": "rose-red",
+      "rating": "stars",
+      "maxPoints": 104,
+      "basePoints": 100,
+      "bonusPoints": 4,
+      "keywords": [
+        "griha", "v2015", "2015", "griha 2015", "griha v2015",
+        "green rating", "integrated habitat", "star rating",
+        "site planning", "energy efficiency", "water", "occupant comfort",
+        "building materials", "solid waste", "socio economic", "performance"
+      ],
+      "description": "GRIHA 2015 rating system. 100 base points across 9 sections + 4 innovation bonus. Star rating 1–5 stars.",
+      "readme": "/docs/GRIHA-V2015/README.md",
+      "sections": [
+        { "id": "01-Site-Planning", "title": "Site Planning", "points": 8, "keywords": ["site", "site selection", "low impact design", "UHIE", "imperviousness"] },
+        { "id": "02-Construction-Management", "title": "Construction Management", "points": 9, "keywords": ["construction", "air pollution", "water pollution", "landscape", "topsoil"] },
+        { "id": "03-Energy", "title": "Energy", "points": 20, "keywords": ["energy", "energy efficiency", "renewable energy", "solar", "ODP", "zero ODP"] },
+        { "id": "04-Occupant-Comfort-and-Well-Being", "title": "Occupant Comfort and Well Being", "points": 12, "keywords": ["comfort", "visual comfort", "thermal comfort", "acoustic", "IAQ", "VOC", "ventilation"] },
+        { "id": "05-Water", "title": "Water", "points": 17, "keywords": ["water", "low flow fixtures", "landscape water", "water quality", "on-site water reuse", "rainwater recharge"] },
+        { "id": "06-Sustainable-Building-Materials", "title": "Sustainable Building Materials", "points": 14, "keywords": ["materials", "BIS", "waste materials", "embodied energy", "interiors", "low environmental impact"] },
+        { "id": "07-Solid-Waste-Management", "title": "Solid Waste Management", "points": 6, "keywords": ["waste", "solid waste", "landfill", "organic waste", "composting"] },
+        { "id": "08-Socio-Economic-Strategies", "title": "Socio-Economic Strategies", "points": 6, "keywords": ["socio economic", "labour safety", "universal accessibility", "service staff", "environmental awareness"] },
+        { "id": "09-Performance-Monitoring-and-Validation", "title": "Performance Monitoring and Validation", "points": 8, "keywords": ["performance", "monitoring", "validation", "smart metering", "operation maintenance", "final rating"] },
+        { "id": "10-Innovation", "title": "Innovation", "points": 4, "keywords": ["innovation", "innovative", "bonus"] }
+      ]
+    },
+    {
+      "id": "IGBC-SB-2020",
+      "name": "IGBC SB 2020",
+      "fullName": "Indian Green Building Council — Sustainable Buildings Rating System 2020",
+      "color": "igbc-blue",
+      "rating": "certification",
+      "levels": ["Certified", "Silver", "Gold", "Platinum"],
+      "maxPointsNew": 60,
+      "maxPointsExisting": 50,
+      "keywords": [
+        "igbc", "igbc sb", "igbc sb 2020", "sustainable buildings", "Indian green building council",
+        "certified", "silver", "gold", "platinum", "certification",
+        "site planning", "water conservation", "energy efficiency", "building materials",
+        "health well being", "green measures", "new building", "existing building"
+      ],
+      "description": "IGBC Sustainable Buildings 2020 rating. Separate points for New and Existing buildings. Certification levels: Certified, Silver, Gold, Platinum.",
+      "readme": "/docs/IGBC-SB-2020/README.md",
+      "sections": [
+        { "id": "01-Site-Planning-and-Design", "title": "Site Planning and Design", "pointsNew": 7, "pointsExisting": 7, "keywords": ["site planning", "erosion", "sedimentation", "sustainable landscape", "heat island", "green education"] },
+        { "id": "02-Water-Conservation", "title": "Water Conservation", "pointsNew": 8, "pointsExisting": 7, "keywords": ["water", "rainwater harvesting", "water efficient", "plumbing fixtures", "water metering"] },
+        { "id": "03-Energy-Efficiency", "title": "Energy Efficiency", "pointsNew": 20, "pointsExisting": 20, "keywords": ["energy", "energy efficiency", "passive architecture", "enhanced energy", "renewable energy", "energy metering", "appliances"] },
+        { "id": "04-Building-Materials-and-Resources", "title": "Building Materials and Resources", "pointsNew": 8, "pointsExisting": 1, "keywords": ["materials", "building materials", "eco labelled", "alternative construction", "wood based", "waste materials", "green procurement"] },
+        { "id": "05-Health-and-Well-being", "title": "Health and Well-being", "pointsNew": 7, "pointsExisting": 5, "keywords": ["health", "well being", "fresh air", "ventilation", "no smoking", "daylighting", "low emitting", "housekeeping", "drinking water", "refrigerants", "universal design"] },
+        { "id": "06-Green-Measures-Beyond-the-Fence", "title": "Green Measures Beyond the Fence", "pointsNew": 4, "pointsExisting": 4, "keywords": ["green measures", "beyond fence", "community", "neighbourhood"] },
+        { "id": "07-Innovation-and-Performance", "title": "Innovation and Performance", "pointsNew": 6, "pointsExisting": 6, "keywords": ["innovation", "performance", "IGBC accredited professional", "cost analysis", "water performance", "energy performance"] }
+      ]
+    }
+  ]
+}
