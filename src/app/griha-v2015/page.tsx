@@ -1,9 +1,10 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Star } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
+import { DownloadSection } from '@/components/DownloadSection';
 
 const sections = [
   { id: 1, title: "Site Planning", max: 8, criteria: [
@@ -76,6 +77,12 @@ export default function GrihaV2015Page() {
     return Array(35).fill(0);
   });
 
+  const [projectInfo, setProjectInfo] = useState<Record<string, string>>({});
+  useEffect(() => {
+    const saved = localStorage.getItem('project_info');
+    if (saved) setProjectInfo(JSON.parse(saved));
+  }, []);
+
   const handleScore = (id: number, value: string, max: number) => {
     let n = parseInt(value);
     if (isNaN(n)) n = 0;
@@ -101,6 +108,26 @@ export default function GrihaV2015Page() {
     localStorage.setItem('scores_v2015', JSON.stringify(scores));
     localStorage.setItem('stats_v2015', JSON.stringify({ points: grandTotal, stars }));
   }, [scores, grandTotal, stars]);
+
+  const downloadData = useMemo(() => ({
+    ratingName: 'GRIHA V2015',
+    brandColor: '#c0504d',
+    totalPoints: grandTotal,
+    maxPoints: 104,
+    starsCount: stars,
+    projectInfo,
+    sections: sections.map(s => ({
+      title: s.title,
+      maxPoints: s.max,
+      sectionScore: s.criteria.reduce((sum, c) => sum + (scores[c.id] || 0), 0),
+      criteria: s.criteria.map(c => ({
+        no: c.id,
+        name: c.name,
+        maxPoints: c.max,
+        score: scores[c.id] || 0,
+      })),
+    })),
+  }), [grandTotal, stars, scores, projectInfo]);
 
   return (
     <div className="container">
@@ -264,6 +291,8 @@ export default function GrihaV2015Page() {
           </div>
         </CardContent>
       </Card>
+
+      <DownloadSection data={downloadData} />
     </div>
   );
 }
