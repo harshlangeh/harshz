@@ -127,65 +127,107 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="mb-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <Link href="/griha-v2015" className="no-underline block h-full">
-            <div className="glass-card cursor-pointer text-center p-8 md:p-10 h-full flex flex-col justify-center border-t-rose-red">
-              <h3 className="text-xl md:text-2xl font-bold mb-4 text-rose-red">GRIHA V2015</h3>
-              <div className="mb-4 flex flex-col items-center glass-panel p-4">
-                <div className="text-3xl font-bold text-rose-red mb-2">{stats.v2015.points} <span className="text-sm font-normal text-foreground/60">pts</span></div>
-                <div className="flex gap-1">
-                  {renderStars(stats.v2015.stars, 'rose-red')}
-                </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 mb-16">
+        {/* GRIHA V2015 */}
+        <Link href="/griha-v2015" className="no-underline block h-full">
+          <div className="glass-card cursor-pointer p-6 h-full flex flex-col border-t-rose-red group">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-rose-red">GRIHA V2015</h3>
+              <div className="flex gap-1">
+                {renderStars(stats.v2015.stars, 'rose-red')}
               </div>
-              <p className="opacity-80 text-foreground leading-relaxed text-sm">Initiate and manage a project strictly following the GRIHA Version 2015 standards.</p>
             </div>
-          </Link>
+            <div className="mb-6 flex flex-col glass-panel p-4 flex-grow justify-center">
+              <div className="text-4xl font-bold text-rose-red mb-1">{stats.v2015.points} <span className="text-sm font-normal text-foreground/60">pts</span></div>
+              <div className="w-full bg-foreground/10 rounded-full h-2 mt-2 mb-1">
+                <div className="bg-rose-red h-2 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, stats.v2015.points)}%` }}></div>
+              </div>
+              <div className="text-xs text-foreground/60 flex justify-between">
+                <span>Progress</span>
+                <span>100 pts target</span>
+              </div>
+            </div>
+            <div className="text-sm text-foreground/80 font-medium group-hover:text-rose-red transition-colors flex justify-between items-center">
+              <span>View Details &rarr;</span>
+            </div>
+          </div>
+        </Link>
 
-          <Link href="/griha-v2019" className="no-underline block h-full">
-            <div className="glass-card cursor-pointer text-center p-8 md:p-10 h-full flex flex-col justify-center border-t-green">
-              <h3 className="text-xl md:text-2xl font-bold mb-4 text-green">GRIHA V2019</h3>
-              <div className="mb-4 flex flex-col items-center glass-panel p-4">
-                <div className="text-3xl font-bold text-green mb-2">{stats.v2019.points} <span className="text-sm font-normal text-foreground/60">pts</span></div>
-                <div className="flex gap-1">
-                  {renderStars(stats.v2019.stars, 'green')}
-                </div>
+        {/* GRIHA V2019 */}
+        <Link href="/griha-v2019" className="no-underline block h-full">
+          <div className="glass-card cursor-pointer p-6 h-full flex flex-col border-t-green group">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-green">GRIHA V2019</h3>
+              <div className="flex gap-1">
+                {renderStars(stats.v2019.stars, 'green')}
               </div>
-              <p className="opacity-80 text-foreground leading-relaxed text-sm">Initiate and manage a project strictly following the GRIHA Version 2019 standards.</p>
             </div>
-          </Link>
+            <div className="mb-6 flex flex-col glass-panel p-4 flex-grow justify-center">
+              <div className="text-4xl font-bold text-green mb-1">{stats.v2019.points} <span className="text-sm font-normal text-foreground/60">pts</span></div>
+              <div className="w-full bg-foreground/10 rounded-full h-2 mt-2 mb-1">
+                <div className="bg-green h-2 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, stats.v2019.points)}%` }}></div>
+              </div>
+              <div className="text-xs text-foreground/60 flex justify-between">
+                <span>Progress</span>
+                <span>100 pts target</span>
+              </div>
+            </div>
+            <div className="text-sm text-foreground/80 font-medium group-hover:text-green transition-colors flex justify-between items-center">
+              <span>View Details &rarr;</span>
+            </div>
+          </div>
+        </Link>
 
-          <Link href="/griha-v6" className="no-underline block h-full">
-            <div className="glass-card cursor-pointer text-center p-8 md:p-10 h-full flex flex-col justify-center border-t-orange">
-              <h3 className="text-xl md:text-2xl font-bold mb-4 text-orange">GRIHA V6</h3>
-              <div className="mb-4 flex flex-col items-center glass-panel p-4">
-                <div className="text-3xl font-bold text-orange mb-2">{stats.v6.points} <span className="text-sm font-normal text-foreground/60">pts</span></div>
-                <div className="flex gap-1">
-                  {renderStars(stats.v6.stars, 'orange')}
-                </div>
+        {/* GRIHA V6 */}
+        <Link href="/griha-v6" className="no-underline block h-full">
+          <div className="glass-card cursor-pointer p-6 h-full flex flex-col border-t-orange group">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-orange">GRIHA V6</h3>
+              <div className="flex gap-1">
+                {renderStars(stats.v6.stars, 'orange')}
               </div>
-              <p className="opacity-80 text-foreground leading-relaxed text-sm">Initiate and manage a project strictly following the latest GRIHA Version 6 standards.</p>
             </div>
-          </Link>
-        </div>
-      </div>
+            <div className="mb-6 flex flex-col glass-panel p-4 flex-grow justify-center">
+              <div className="text-4xl font-bold text-orange mb-1">{stats.v6.points} <span className="text-sm font-normal text-foreground/60">pts</span></div>
+              <div className="w-full bg-foreground/10 rounded-full h-2 mt-2 mb-1">
+                <div className="bg-orange h-2 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, stats.v6.points)}%` }}></div>
+              </div>
+              <div className="text-xs text-foreground/60 flex justify-between">
+                <span>Progress</span>
+                <span>100 pts target</span>
+              </div>
+            </div>
+            <div className="text-sm text-foreground/80 font-medium group-hover:text-orange transition-colors flex justify-between items-center">
+              <span>View Details &rarr;</span>
+            </div>
+          </div>
+        </Link>
 
-      <div className="mb-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <Link href="/igbc-sb-2020" className="no-underline block h-full">
-            <div className="glass-card cursor-pointer text-center p-8 md:p-10 h-full flex flex-col justify-center border-t-igbc-blue">
-              <h3 className="text-xl md:text-2xl font-bold mb-4 text-igbc-blue">IGBC SB 2020</h3>
-              <div className="mb-4 flex flex-col items-center glass-panel p-4">
-                <div className="text-3xl font-bold text-igbc-blue mb-2">{stats.igbc.points} <span className="text-sm font-normal text-foreground/60">pts</span></div>
-                <div className={`flex items-center gap-2 font-bold ${stats.igbc.level === 'Certified' ? 'text-igbc-certified' : stats.igbc.level === 'Silver' ? 'text-igbc-silver' : stats.igbc.level === 'Gold' ? 'text-igbc-gold' : stats.igbc.level === 'Platinum' ? 'text-igbc-platinum' : 'text-igbc-blue'}`}>
-                  <Award className={`w-5 h-5 ${stats.igbc.level === 'Certified' ? 'glow-igbc-certified' : stats.igbc.level === 'Silver' ? 'glow-igbc-silver' : stats.igbc.level === 'Gold' ? 'glow-igbc-gold' : stats.igbc.level === 'Platinum' ? 'glow-igbc-platinum' : 'opacity-40'}`} />
-                  {stats.igbc.level !== 'None' ? stats.igbc.level : 'Not Certified'}
-                </div>
+        {/* IGBC SB 2020 */}
+        <Link href="/igbc-sb-2020" className="no-underline block h-full">
+          <div className="glass-card cursor-pointer p-6 h-full flex flex-col border-t-igbc-blue group">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-igbc-blue">IGBC SB 2020</h3>
+              <div className={`flex items-center gap-1 font-bold text-sm ${stats.igbc.level === 'Certified' ? 'text-igbc-certified' : stats.igbc.level === 'Silver' ? 'text-igbc-silver' : stats.igbc.level === 'Gold' ? 'text-igbc-gold' : stats.igbc.level === 'Platinum' ? 'text-igbc-platinum' : 'text-igbc-blue'}`}>
+                <Award className={`w-4 h-4 ${stats.igbc.level !== 'None' ? 'opacity-100' : 'opacity-40'}`} />
+                {stats.igbc.level !== 'None' ? stats.igbc.level : 'None'}
               </div>
-              <p className="opacity-80 text-foreground leading-relaxed text-sm">Initiate and manage a project strictly following the IGBC Service Buildings 2020 standards.</p>
             </div>
-          </Link>
-        </div>
+            <div className="mb-6 flex flex-col glass-panel p-4 flex-grow justify-center">
+              <div className="text-4xl font-bold text-igbc-blue mb-1">{stats.igbc.points} <span className="text-sm font-normal text-foreground/60">pts</span></div>
+              <div className="w-full bg-foreground/10 rounded-full h-2 mt-2 mb-1">
+                <div className="bg-igbc-blue h-2 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, stats.igbc.points)}%` }}></div>
+              </div>
+              <div className="text-xs text-foreground/60 flex justify-between">
+                <span>Progress</span>
+                <span>100 pts target</span>
+              </div>
+            </div>
+            <div className="text-sm text-foreground/80 font-medium group-hover:text-igbc-blue transition-colors flex justify-between items-center">
+              <span>View Details &rarr;</span>
+            </div>
+          </div>
+        </Link>
       </div>
     </div>
   );
