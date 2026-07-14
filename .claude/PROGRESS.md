@@ -47,6 +47,32 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-14 23:30 IST] Claude (claude-sonnet-4-6) — Replace flat area inputs with dynamic multi-area list
+**Files changed:**
+- Modified: `src/app/page.tsx`
+
+**What was done:**
+- [x] Replaced single `siteArea` / `builtUpArea` text inputs with `AreaItem[]` lists
+- [x] New `AreaList` sub-component: name input + sqm number input + delete (X) button per row; computed total shown at top-right; "Add area" button at bottom
+- [x] `AreaItem` interface: `{ id: string; name: string; value: string }`
+- [x] `migrateProjectInfo()` handles existing localStorage data (old string → single AreaItem)
+- [x] `saveProjectInfo()` writes new arrays + computed string totals for backward compat with download code
+- [x] Layout: 4-col grid for basic fields → Separator → 2-col grid (site areas | built-up areas) on lg screens
+- [x] Build passed: all 13 routes generated static
+- [x] Committed + pushed to `claude/new-session-fqgdu4`; PR #4 updated with new commit
+- [x] Vercel preview building: `harshz-git-claude-new-session-fqgdu4-harshs-projects-cf1bfbf4.vercel.app`
+
+**Decisions made:**
+- Areas stored as `AreaItem[]` in localStorage; backward compat via migration on load and string-totals on save
+- `newId()` uses `Date.now() + Math.random()` to avoid collisions when adding multiple areas quickly
+- Placeholder text guides users: site "e.g. Landscape area, Hard paved area…"; built-up "e.g. Ground floor, First floor…"
+
+**Blockers / next steps:**
+- PR #4 open as draft — user should review and merge
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-14 23:07 IST] Claude (claude-sonnet-4-6) — Add download checklist section (Excel, PDF, PPT, Word)
 **Files changed:**
 - New: `src/types/download.ts`, `src/lib/downloads/excel.ts`, `src/lib/downloads/pdf.ts`, `src/lib/downloads/ppt.ts`, `src/lib/downloads/word.ts`, `src/components/DownloadSection.tsx`
