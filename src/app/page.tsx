@@ -132,7 +132,7 @@ export default function Home() {
         <Link href="/griha-v2015" className="no-underline block h-full">
           <div className="glass-card cursor-pointer p-6 h-full flex flex-col border-t-rose-red group">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-rose-red">GRIHA V2015</h3>
+              <h3 className="text-base font-bold text-rose-red whitespace-nowrap">GRIHA V2015</h3>
               <div className="flex gap-1">
                 {renderStars(stats.v2015.stars, 'rose-red')}
               </div>
@@ -157,7 +157,7 @@ export default function Home() {
         <Link href="/griha-v2019" className="no-underline block h-full">
           <div className="glass-card cursor-pointer p-6 h-full flex flex-col border-t-green group">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-green">GRIHA V2019</h3>
+              <h3 className="text-base font-bold text-green whitespace-nowrap">GRIHA V2019</h3>
               <div className="flex gap-1">
                 {renderStars(stats.v2019.stars, 'green')}
               </div>
@@ -182,7 +182,7 @@ export default function Home() {
         <Link href="/griha-v6" className="no-underline block h-full">
           <div className="glass-card cursor-pointer p-6 h-full flex flex-col border-t-orange group">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-orange">GRIHA V6</h3>
+              <h3 className="text-base font-bold text-orange whitespace-nowrap">GRIHA V6</h3>
               <div className="flex gap-1">
                 {renderStars(stats.v6.stars, 'orange')}
               </div>
@@ -207,7 +207,7 @@ export default function Home() {
         <Link href="/igbc-sb-2020" className="no-underline block h-full">
           <div className="glass-card cursor-pointer p-6 h-full flex flex-col border-t-igbc-blue group">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-igbc-blue">IGBC SB 2020</h3>
+              <h3 className="text-base font-bold text-igbc-blue whitespace-nowrap">IGBC SB 2020</h3>
               <div className={`flex items-center gap-1 font-bold text-sm ${stats.igbc.level === 'Certified' ? 'text-igbc-certified' : stats.igbc.level === 'Silver' ? 'text-igbc-silver' : stats.igbc.level === 'Gold' ? 'text-igbc-gold' : stats.igbc.level === 'Platinum' ? 'text-igbc-platinum' : 'text-igbc-blue'}`}>
                 <Award className={`w-4 h-4 ${stats.igbc.level !== 'None' ? 'opacity-100' : 'opacity-40'}`} />
                 {stats.igbc.level !== 'None' ? stats.igbc.level : 'None'}

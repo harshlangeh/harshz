@@ -7,7 +7,9 @@ import { Sidebar } from './Sidebar';
 import { Chatbot } from './Chatbot';
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : true
+  );
   const [chatbotCollapsed, setChatbotCollapsed] = useState(true);
 
   return (
