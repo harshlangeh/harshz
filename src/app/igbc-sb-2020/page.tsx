@@ -1,11 +1,12 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Award } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { DownloadSection } from '@/components/DownloadSection';
 
 const sections = [
   { id: 1, title: "Site Planning and Design", maxNew: 7, maxExisting: 7, criteria: [
@@ -122,6 +123,45 @@ export default function IgbcSb2020Page() {
     const m = buildingType === 'New' ? s.maxNew : s.maxExisting;
     return sum + (typeof m === 'number' ? m : 0);
   }, 0);
+
+  const downloadData = useMemo(() => {
+    const bt = buildingType;
+    return {
+      ratingName: 'IGBC SB 2020',
+      brandColor: '#0284c7',
+      totalPoints: grandTotal,
+      maxPoints: totalPossible,
+      level,
+      projectInfo: (() => {
+        try {
+          return JSON.parse(localStorage.getItem('project_info') || '{}');
+        } catch { return {}; }
+      })(),
+      sections: sections.map(s => {
+        const sMax = bt === 'New' ? s.maxNew : s.maxExisting;
+        return {
+          title: s.title,
+          maxPoints: typeof sMax === 'number' ? sMax : 0,
+          sectionScore: s.criteria.reduce((sum, c) => {
+            const cm = bt === 'New' ? c.maxNew : c.maxExisting;
+            if (cm === 'NA' || cm === 'Mandatory') return sum;
+            return sum + (scores[c.id] || 0);
+          }, 0),
+          criteria: s.criteria.map(c => {
+            const cm = bt === 'New' ? c.maxNew : c.maxExisting;
+            const isMandatory = cm === 'Mandatory';
+            const isNA = cm === 'NA';
+            return {
+              no: c.id,
+              name: c.name,
+              maxPoints: isMandatory ? 'Mandatory' : isNA ? 'N/A' : cm,
+              score: isMandatory ? 'Mandatory' : isNA ? 'N/A' : (scores[c.id] || 0),
+            };
+          }),
+        };
+      }),
+    };
+  }, [grandTotal, level, scores, buildingType, totalPossible]);
 
   return (
     <div className="container">
@@ -266,6 +306,8 @@ export default function IgbcSb2020Page() {
           </div>
         </CardContent>
       </Card>
+
+      <DownloadSection data={downloadData} />
     </div>
   );
 }
