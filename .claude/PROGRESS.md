@@ -47,6 +47,39 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-14 13:45 IST] Claude (claude-sonnet-4-6) — Install shadcn/ui and rebuild all pages with proper components
+
+**Files changed:**
+- New: `src/lib/utils.ts`, `components.json`
+- New: `src/components/ui/button.tsx`, `card.tsx`, `input.tsx`, `badge.tsx`, `progress.tsx`, `select.tsx`, `separator.tsx`, `table.tsx`
+- Rewritten: `src/app/globals.css`, `src/app/page.tsx`, `src/app/griha-v6/page.tsx`, `src/app/griha-v2015/page.tsx`, `src/app/griha-v2019/page.tsx`, `src/app/igbc-sb-2020/page.tsx`
+- Modified: `package.json` (added shadcn peer deps)
+
+**What was done:**
+- [x] Attempted `npx shadcn@latest init` — blocked by proxy (403 on `ui.shadcn.com`); worked around by manually writing all component files
+- [x] Installed peer packages: `class-variance-authority`, `clsx`, `tailwind-merge`, `@radix-ui/react-slot`, `@radix-ui/react-select`, `@radix-ui/react-progress`, `@radix-ui/react-separator`, `tw-animate-css`
+- [x] Created `cn()` helper in `src/lib/utils.ts`
+- [x] Hand-wrote all 8 shadcn UI components (Button with CVA variants, Card, Input, Badge with 10 variants, Progress with `indicatorClassName`, Select/Radix, Separator, Table)
+- [x] Rewrote `globals.css`: Tailwind v4 with `@theme` static brand colors + `@theme inline` for dynamic shadcn CSS-variable tokens, 3-mode theme (light/dark/high-contrast)
+- [x] Rebuilt dashboard (`page.tsx`): project info card with shadcn Input/Select, 4 rating cards with brand-colored borders + Progress bars, IGBC card with Badge
+- [x] Rebuilt all 4 rating pages with shadcn Card, Input, Badge, Progress; HTML tables (not shadcn Table) for the checklist
+- [x] Fixed orange color: `#d97706` in light mode, `#F9BD77` in dark mode via CSS variable
+- [x] Build passed: `✓ Compiled successfully in 4.1s`, all 13 routes generated static
+- [x] Committed + pushed to `claude/shadcn-ui`; PR #2 opened as draft
+- [x] Vercel preview deployed: `harshz-git-claude-shadcn-ui-harshs-projects-cf1bfbf4.vercel.app` — Ready
+
+**Decisions made:**
+- shadcn components hand-written (not CLI) because proxy blocks `ui.shadcn.com`
+- `@theme inline` maps CSS vars → Tailwind utilities so brand colors change per theme
+- All rating pages use plain HTML `<table>` inside a Card (not shadcn Table) for dense data layout
+- Badge variants added: `mandatory`, `partly-mandatory`, `optional`, `certified`, `silver`, `gold`, `platinum`
+
+**Blockers / next steps:**
+- PR #2 (`claude/shadcn-ui`) is open as draft — user should review and merge
+- PROGRESS.md needs updating after shadcn rebuild (this entry)
+
+---
+
 <!--
 SESSION ENTRY TEMPLATE — copy this block, fill it in, paste at the TOP of the Session Log:
 
