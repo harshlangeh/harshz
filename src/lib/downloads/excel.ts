@@ -1,4 +1,5 @@
 import type { DownloadData } from '@/types/download';
+import { getBranding } from '@/types/branding';
 
 function starsText(count: number): string {
   return '★'.repeat(count) + '☆'.repeat(5 - count);
@@ -6,14 +7,40 @@ function starsText(count: number): string {
 
 export async function downloadExcel(data: DownloadData): Promise<void> {
   const XLSX = await import('xlsx');
+  const branding = getBranding();
 
   const wb = XLSX.utils.book_new();
 
-  // ── Summary sheet ─────────────────────────────────────────────────────────
-  const ratingRow = data.starsCount !== undefined
-    ? ['Star Rating', starsText(data.starsCount) + `  (${data.starsCount}/5)`]
-    : ['Certification Level', data.level || 'None'];
+  // ── Cover sheet ───────────────────────────────────────────────────────────
+  const ratingStr = data.starsCount !== undefined
+    ? starsText(data.starsCount) + `  (${data.starsCount}/5 stars)`
+    : (data.level || 'None');
 
+  const coverRows: (string | number)[][] = [
+    [branding.companyName],
+    [branding.tagline],
+    [],
+    [data.ratingName + ' — Compliance Checklist'],
+    [],
+    ['Project',     data.projectInfo.name          || '—'],
+    ['Site Area',   data.projectInfo.siteArea ? data.projectInfo.siteArea + ' sq.m' : '—'],
+    ['Built-up',    data.projectInfo.builtUpArea ? data.projectInfo.builtUpArea + ' sq.m' : '—'],
+    ['Occupancy',   `${data.projectInfo.occupancyFixed || '—'} fixed / ${data.projectInfo.occupancyFloating || '—'} floating`],
+    ['Climate Zone', data.projectInfo.climateZone  || '—'],
+    [],
+    ['Total Score', `${data.totalPoints} / ${data.maxPoints} pts`],
+    ['Rating',      ratingStr],
+    [],
+    ['Generated',   new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST'],
+    [],
+    ['Powered by Harshz — Green Building Automation'],
+  ];
+
+  const wsCover = XLSX.utils.aoa_to_sheet(coverRows);
+  wsCover['!cols'] = [{ wch: 20 }, { wch: 50 }];
+  XLSX.utils.book_append_sheet(wb, wsCover, 'Cover');
+
+  // ── Summary sheet ─────────────────────────────────────────────────────────
   const summaryRows: (string | number)[][] = [
     ['Harshz Green Building Automation'],
     [data.ratingName + ' Checklist'],
@@ -29,7 +56,7 @@ export async function downloadExcel(data: DownloadData): Promise<void> {
     ['RATING SUMMARY'],
     ['Total Points Scored', data.totalPoints],
     ['Maximum Points',      data.maxPoints],
-    ratingRow,
+    [data.starsCount !== undefined ? 'Star Rating' : 'Certification Level', ratingStr],
     ['Generated On', new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST'],
   ];
 
@@ -52,7 +79,6 @@ export async function downloadExcel(data: DownloadData): Promise<void> {
     checklistRows.push(['', 'Section Total', section.maxPoints, section.sectionScore, '']);
     checklistRows.push([]);
   }
-
   checklistRows.push(['', 'GRAND TOTAL', data.maxPoints, data.totalPoints, '']);
 
   const wsChecklist = XLSX.utils.aoa_to_sheet(checklistRows);

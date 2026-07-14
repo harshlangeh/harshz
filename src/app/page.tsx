@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Star, Award, ArrowRight, Building2, Leaf, Plus, X } from 'lucide-react';
+import { BrandingSection } from '@/components/BrandingSection';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -321,6 +322,8 @@ export default function Home() {
           </div>
         </CardContent>
       </Card>
+
+      <BrandingSection />
 
       {/* Rating cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">

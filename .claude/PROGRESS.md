@@ -47,6 +47,35 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-14 23:55 IST] Claude (claude-sonnet-4-6) — Branding section, cover page templates & download preview
+**Files changed:**
+- New: `src/types/branding.ts`, `src/components/CoverPageVisual.tsx`, `src/components/BrandingSection.tsx`, `src/components/ui/dialog.tsx`
+- Modified: `src/app/page.tsx`, `src/components/DownloadSection.tsx`, `src/lib/downloads/pdf.ts`, `src/lib/downloads/ppt.ts`, `src/lib/downloads/word.ts`, `src/lib/downloads/excel.ts`
+
+**What was done:**
+- [x] `BrandingInfo` type + `getBranding()`/`saveBranding()` helpers in `src/types/branding.ts`; stored under `branding_info` key
+- [x] `CoverPageVisual` component: pure inline-style A4 cover page for 4 templates (Classic/Modern/Minimal/Bold); `scale` prop for thumbnails vs full preview
+- [x] `BrandingSection` dashboard card: logo uploader (base64 via FileReader), company name/tagline inputs, 4-template picker with live thumbnails, full-size preview Dialog
+- [x] Custom `Dialog` component (no Radix dependency): Escape key + backdrop click to close, body overflow lock
+- [x] All 4 download formats (PDF, PPT, Word, Excel) now generate a branded cover page as the first page/sheet using the stored branding + template
+- [x] `DownloadSection` updated: "Preview before downloading" CSS toggle; when on, clicking a format button opens a preview modal with cover visual + document info before the download triggers
+- [x] `<BrandingSection />` inserted in dashboard between Project Information card and Rating Cards grid
+- [x] Build passed; committed + pushed to `claude/new-session-fqgdu4`; PR #5 opened as draft
+- [x] Vercel preview deployed: `harshz-git-claude-new-session-fqgdu4-harshs-projects-cf1bfbf4.vercel.app` — Ready
+- [x] PR #5 merged to main (squash)
+
+**Decisions made:**
+- Download libs call `getBranding()` directly (read from localStorage) — avoids touching `DownloadData` type or all 4 rating pages
+- `CoverPageVisual` uses pure inline styles (not Tailwind/CSS classes) so it renders correctly in the preview dialog regardless of theme
+- Thumbnail scaling: CSS `transform: scale(N)` with `transformOrigin: top left`; outer div clips to scaled dimensions
+- `saveProjectInfo()` continues to write computed flat `siteArea`/`builtUpArea` strings for download-lib backward compat
+
+**Blockers / next steps:**
+- Supabase still not wired; chatbot still stub; no auth
+- Could add more template designs, or allow custom brand color per document
+
+---
+
 ### [2026-07-14 23:30 IST] Claude (claude-sonnet-4-6) — Replace flat area inputs with dynamic multi-area list
 **Files changed:**
 - Modified: `src/app/page.tsx`
