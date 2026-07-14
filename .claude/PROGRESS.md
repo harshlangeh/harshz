@@ -47,6 +47,36 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-14 23:07 IST] Claude (claude-sonnet-4-6) — Add download checklist section (Excel, PDF, PPT, Word)
+**Files changed:**
+- New: `src/types/download.ts`, `src/lib/downloads/excel.ts`, `src/lib/downloads/pdf.ts`, `src/lib/downloads/ppt.ts`, `src/lib/downloads/word.ts`, `src/components/DownloadSection.tsx`
+- Modified: `src/app/griha-v6/page.tsx`, `src/app/griha-v2019/page.tsx`, `src/app/griha-v2015/page.tsx`, `src/app/igbc-sb-2020/page.tsx`, `package.json`, `package-lock.json`
+
+**What was done:**
+- [x] Installed `xlsx`, `jspdf`, `jspdf-autotable`, `pptxgenjs`, `docx` (all loaded lazily via dynamic import)
+- [x] Created shared `DownloadData` type in `src/types/download.ts`
+- [x] Excel: SheetJS export — Summary sheet (project info + star rating) + Checklist sheet (all sections/criteria)
+- [x] PDF: jsPDF + autotable — A4 portrait, branded header, star rating drawn as filled/empty circles, full criteria table
+- [x] PPT: pptxgenjs — title/summary slide + one slide per section + section-summary slide
+- [x] Word: docx — branded heading, project info table, rating summary, full criteria table
+- [x] `DownloadSection` component with 4 format buttons, loading spinners, error state
+- [x] All 4 rating pages updated with `useMemo` DownloadData + DownloadSection at bottom
+- [x] Build passed: all 13 routes generated static
+- [x] Committed + pushed to `claude/new-session-fqgdu4`; PR #4 opened as draft
+- [x] Vercel preview deployed: `harshz-git-claude-new-session-fqgdu4-harshs-projects-cf1bfbf4.vercel.app` — Ready
+
+**Decisions made:**
+- All download libraries loaded via dynamic import — zero bundle impact on initial page load
+- Star rating rendered as drawn filled/empty circles in PDF; Unicode ★/☆ in Excel, PPT, Word
+- IGBC page normalizes its `maxNew`/`maxExisting` structure into the shared `DownloadData` type
+- `DownloadSection` reads project info from `localStorage` inside `useMemo` (IGBC) or via dedicated `useEffect` (GRIHA pages)
+
+**Blockers / next steps:**
+- PR #4 open as draft — user should review and merge
+- Supabase still not wired; chatbot still stub; no auth; no export addressed in earlier sessions
+
+---
+
 ### [2026-07-14 13:45 IST] Claude (claude-sonnet-4-6) — Install shadcn/ui and rebuild all pages with proper components
 
 **Files changed:**
