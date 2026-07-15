@@ -47,6 +47,29 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-15 08:00 IST] Claude (claude-sonnet-5) — Fix mobile sizing of document previews
+**Files changed:**
+- Modified: `src/components/DownloadSection.tsx`, `src/components/PptSlidesPreview.tsx`
+
+**What was done:**
+- [x] Found via mobile Playwright screenshots that the exact-preview feature (previous session) broke on narrow viewports: Word preview rendered at fixed desktop width and got cropped, PowerPoint slide mockups (fixed 720px) were cut off on the right, Excel's second table column scrolled off-screen invisibly
+- [x] `PptSlidesPreview`: added `useScaleToFit()` — a `ResizeObserver`-driven scale factor capped at 1x (desktop unaffected), applied via the same clip+transform wrapper pattern `CoverPageVisual` already uses
+- [x] Word preview: after `docx-preview` renders the real document, measure its natural size and scale it down to fit with the same clip+transform technique
+- [x] Excel preview: table switched from `whitespace-nowrap` to `table-fixed` + wrapping cells, so both columns stay visible on narrow screens
+- [x] Preview modal height responsive: `70vh` on mobile vs `76vh` on larger screens
+- [x] Verified with Playwright: all 4 formats correct on 390×844 mobile viewport (no cropping) and unchanged on 1440px desktop (scale stays 1x)
+- [x] Build passed; committed + pushed to `claude/new-session-fqgdu4`; PR #8 opened as draft
+
+**Decisions made:**
+- Reused the existing clip-div + `transform: scale()` pattern from `CoverPageVisual` rather than inventing a new responsive technique, for consistency
+- Scale factors are measured via `ResizeObserver` (not a one-time calculation) so resizing the browser window while the modal is open stays correct
+
+**Blockers / next steps:**
+- PR #8 open as draft — user should review and merge
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-15 07:15 IST] Claude (claude-sonnet-5) — Exact document preview before download
 **Files changed:**
 - New: `src/components/PptSlidesPreview.tsx`

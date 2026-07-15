@@ -40,7 +40,10 @@ export function DownloadSection({ data }: Props) {
   const [excelSheets, setExcelSheets] = useState<{ sheetName: string; html: string }[] | null>(null);
   const [activeSheet, setActiveSheet] = useState(0);
   const [docxBlob, setDocxBlob]       = useState<Blob | null>(null);
+  const [docxScale, setDocxScale]     = useState(1);
+  const [docxNaturalSize, setDocxNaturalSize] = useState<{ w: number; h: number } | null>(null);
 
+  const docxOuterRef     = useRef<HTMLDivElement | null>(null);
   const docxContainerRef = useRef<HTMLDivElement | null>(null);
 
   const triggerDownload = async (format: Format) => {
@@ -74,6 +77,8 @@ export function DownloadSection({ data }: Props) {
     setExcelSheets(null);
     setActiveSheet(0);
     setDocxBlob(null);
+    setDocxScale(1);
+    setDocxNaturalSize(null);
     setPreviewError(null);
     setPreviewFmt(null);
   };
@@ -123,6 +128,9 @@ export function DownloadSection({ data }: Props) {
         if (cancelled || !container) return;
         container.innerHTML = '';
         await renderAsync(docxBlob, container);
+        if (cancelled) return;
+        // Measure the rendered page's natural (unscaled) size so it can be scaled to fit narrow screens
+        setDocxNaturalSize({ w: container.scrollWidth, h: container.scrollHeight });
       } catch (err) {
         console.error('Word preview render error:', err);
         if (!cancelled) setPreviewError('Failed to render Word preview.');
@@ -130,6 +138,22 @@ export function DownloadSection({ data }: Props) {
     })();
     return () => { cancelled = true; };
   }, [docxBlob, previewFmt]);
+
+  // Scale the rendered Word page(s) down to fit the available width (never scales up past 1x)
+  useEffect(() => {
+    if (!docxNaturalSize || !docxOuterRef.current) return;
+    const outer = docxOuterRef.current;
+    const update = () => {
+      const available = outer.clientWidth;
+      if (available > 0 && docxNaturalSize.w > 0) {
+        setDocxScale(Math.min(1, available / docxNaturalSize.w));
+      }
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(outer);
+    return () => ro.disconnect();
+  }, [docxNaturalSize]);
 
   return (
     <>
@@ -204,7 +228,7 @@ export function DownloadSection({ data }: Props) {
           title={`Preview — ${previewFmt.label}${previewFmt.ext} (exactly as downloaded)`}
           size="full"
         >
-          <div className="flex flex-col" style={{ height: '76vh' }}>
+          <div className="flex flex-col h-[70vh] sm:h-[76vh]">
             {/* Scrollable document preview */}
             <div className="flex-1 min-h-0 overflow-auto bg-muted/30 rounded-t-none">
               {previewLoading && (
@@ -246,19 +270,34 @@ export function DownloadSection({ data }: Props) {
                     ))}
                   </div>
                   <div
-                    className="bg-background rounded-md border border-border p-3 overflow-auto [&_table]:border-collapse [&_table]:w-full [&_td]:border [&_td]:border-border [&_td]:px-2 [&_td]:py-1 [&_td]:text-xs [&_td]:whitespace-nowrap [&_th]:border [&_th]:border-border [&_th]:px-2 [&_th]:py-1 [&_th]:text-xs [&_th]:bg-muted"
+                    className="bg-background rounded-md border border-border p-3 overflow-auto [&_table]:border-collapse [&_table]:table-fixed [&_table]:w-full [&_td]:border [&_td]:border-border [&_td]:px-2 [&_td]:py-1 [&_td]:text-xs [&_td]:break-words [&_th]:border [&_th]:border-border [&_th]:px-2 [&_th]:py-1 [&_th]:text-xs [&_th]:bg-muted [&_th]:break-words"
                     dangerouslySetInnerHTML={{ __html: excelSheets[activeSheet]?.html || '' }}
                   />
                 </div>
               )}
 
-              {/* Word container stays mounted so its ref is ready before generation finishes */}
+              {/* Word container stays mounted so its ref is ready before generation finishes.
+                  Outer div clips + reserves the correctly-scaled height; inner div holds the
+                  real (unscaled) docx-preview output, scaled down to fit narrow screens. */}
               <div
-                ref={docxContainerRef}
-                className={`p-4 [&_.docx-wrapper]:!bg-transparent [&_.docx-wrapper]:flex [&_.docx-wrapper]:flex-col [&_.docx-wrapper]:items-center [&_.docx-wrapper]:gap-4 ${
-                  previewFmt.id === 'word' && !previewLoading && !previewError ? '' : 'hidden'
-                }`}
-              />
+                ref={docxOuterRef}
+                style={{
+                  overflow: 'hidden',
+                  height: docxNaturalSize ? docxNaturalSize.h * docxScale : undefined,
+                  opacity: docxNaturalSize ? 1 : 0,
+                }}
+                className={previewFmt.id === 'word' && !previewLoading && !previewError ? '' : 'hidden'}
+              >
+                <div
+                  ref={docxContainerRef}
+                  style={{
+                    transform: `scale(${docxScale})`,
+                    transformOrigin: 'top left',
+                    width: docxNaturalSize ? docxNaturalSize.w : undefined,
+                  }}
+                  className="p-4 [&_.docx-wrapper]:!bg-transparent [&_.docx-wrapper]:flex [&_.docx-wrapper]:flex-col [&_.docx-wrapper]:items-center [&_.docx-wrapper]:gap-4"
+                />
+              </div>
 
               {!previewLoading && !previewError && previewFmt.id === 'ppt' && (
                 <div className="p-4">

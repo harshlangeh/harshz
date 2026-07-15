@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { DownloadData } from '@/types/download';
 import type { BrandingInfo } from '@/types/branding';
 
@@ -15,13 +15,37 @@ interface Props {
 const SLIDE_W = 720;
 const SLIDE_H = 405; // 16:9, matches pptxgenjs's LAYOUT_16x9
 
-function Slide({ children }: { children: React.ReactNode }) {
+/** Scales slides down to fit narrow (mobile) containers; never scales up past 1x. */
+function useScaleToFit(naturalWidth: number) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => {
+      const w = el.clientWidth;
+      if (w > 0) setScale(Math.min(1, w / naturalWidth));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [naturalWidth]);
+  return { ref, scale };
+}
+
+function Slide({ scale, children }: { scale: number; children: React.ReactNode }) {
   return (
-    <div
-      className="shadow-lg rounded-md overflow-hidden border border-border bg-white text-[#1E293B] mx-auto"
-      style={{ width: SLIDE_W, height: SLIDE_H, position: 'relative', fontFamily: 'sans-serif' }}
-    >
-      {children}
+    <div className="mx-auto" style={{ width: SLIDE_W * scale, height: SLIDE_H * scale }}>
+      <div
+        className="shadow-lg rounded-md overflow-hidden border border-border bg-white text-[#1E293B]"
+        style={{
+          width: SLIDE_W, height: SLIDE_H, position: 'relative', fontFamily: 'sans-serif',
+          transform: `scale(${scale})`, transformOrigin: 'top left',
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -33,15 +57,16 @@ function Slide({ children }: { children: React.ReactNode }) {
  * actual downloaded file).
  */
 export function PptSlidesPreview({ data, branding }: Props) {
+  const { ref, scale } = useScaleToFit(SLIDE_W);
   const hex = data.brandColor;
   const pi = data.projectInfo;
   const scoreStr = `${data.totalPoints} / ${data.maxPoints}`;
   const starStr = data.starsCount !== undefined ? starsText(data.starsCount) : (data.level || 'None');
 
   return (
-    <div className="flex flex-col items-center gap-6 py-2">
+    <div ref={ref} className="flex flex-col items-center gap-4 py-2 w-full">
       {/* Slide 1: Cover */}
-      <Slide>
+      <Slide scale={scale}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 56, background: hex }} />
         <div style={{ position: 'absolute', top: 8, left: 16, color: '#fff' }}>
           <div style={{ fontSize: 15, fontWeight: 700 }}>{branding.companyName}</div>
@@ -60,7 +85,7 @@ export function PptSlidesPreview({ data, branding }: Props) {
       </Slide>
 
       {/* Slide 2: Summary */}
-      <Slide>
+      <Slide scale={scale}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 62, background: hex }} />
         <div style={{ position: 'absolute', top: 8, left: 16, color: '#fff' }}>
           <div style={{ fontSize: 17, fontWeight: 700 }}>Harshz Green Building Automation</div>
@@ -88,7 +113,7 @@ export function PptSlidesPreview({ data, branding }: Props) {
 
       {/* Section slides */}
       {data.sections.map((section, si) => (
-        <Slide key={si}>
+        <Slide key={si} scale={scale}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 32, background: hex, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 12px' }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{section.title}</span>
             <span style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>{section.sectionScore} / {section.maxPoints} pts</span>
@@ -121,7 +146,7 @@ export function PptSlidesPreview({ data, branding }: Props) {
       ))}
 
       {/* Final slide: Section Summary table */}
-      <Slide>
+      <Slide scale={scale}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 32, background: hex, display: 'flex', alignItems: 'center', padding: '0 12px' }}>
           <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Section Summary</span>
         </div>
