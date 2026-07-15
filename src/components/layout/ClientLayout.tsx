@@ -1,16 +1,20 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useLayoutEffect } from 'react';
 import Link from 'next/link';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { Chatbot } from './Chatbot';
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() =>
-    typeof window !== 'undefined' ? window.innerWidth < 768 : true
-  );
+  // Start collapsed on both server and client to avoid a hydration mismatch, then
+  // expand on desktop widths via a layout effect (runs before paint, so no visible flash).
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [chatbotCollapsed, setChatbotCollapsed] = useState(true);
+
+  useLayoutEffect(() => {
+    if (window.innerWidth >= 768) setSidebarCollapsed(false);
+  }, []);
 
   return (
     <div className="app-container">

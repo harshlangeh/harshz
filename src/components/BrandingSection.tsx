@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef, useState, useEffect } from 'react';
-import { Palette, Upload, X, Eye } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Upload, X, Eye } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
@@ -52,17 +52,7 @@ export function BrandingSection() {
   return (
     <>
       <Card className="mb-8">
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-2">
-            <Palette className="h-4 w-4 text-muted-foreground" />
-            <CardTitle className="text-base">Branding</CardTitle>
-          </div>
-          <CardDescription>
-            Customise the cover page shown on every downloaded document
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 pt-6">
           {/* Logo + name/tagline row */}
           <div className="flex flex-col sm:flex-row gap-4 items-start">
             {/* Logo uploader */}

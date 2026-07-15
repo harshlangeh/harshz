@@ -358,6 +358,11 @@ body {
   color: var(--foreground);
 }
 
+.nav-link.active {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
 /* ── Chatbot ────────────────────────────────────────────────────────────── */
 .chatbot-panel {
   width: 320px;
