@@ -47,6 +47,29 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-15 06:00 IST] Claude (claude-sonnet-5) — Total occupancy readout + project address fields
+**Files changed:**
+- Modified: `src/app/page.tsx`, `src/types/download.ts`, `src/lib/downloads/pdf.ts`, `src/lib/downloads/ppt.ts`, `src/lib/downloads/word.ts`, `src/lib/downloads/excel.ts`
+
+**What was done:**
+- [x] Added read-only "Total Occupancy" field to the dashboard's Project Information card — auto-sums Occupancy Fixed + Occupancy Floating
+- [x] Added an Address fieldset: Country (defaults to `India`), State, City — all free-text inputs
+- [x] `ProjectInfo` (page.tsx) gains `country`/`state`/`city`; `saveProjectInfo()` now also writes a computed `occupancyTotal` string for backward-compatible download consumption
+- [x] `ProjectInfo` type in `src/types/download.ts` gains `occupancyTotal`, `country`, `state`, `city`
+- [x] All 4 download formats (PDF, PPT, Word, Excel) updated to show Occupancy (Fixed/Floating/Total) and Address in their project-info tables/slides
+- [x] Build passed; verified with Playwright screenshots on desktop (1280px) and mobile (390px) viewports — Total Occupancy computed correctly (200+30=230), Country prefilled to India
+- [x] Committed + pushed to `claude/new-session-fqgdu4` (branch reset from latest `main` since PR #5 had merged); PR #6 opened as draft, marked ready, and merged by user
+
+**Decisions made:**
+- Total Occupancy is derived/read-only (not a stored independent field) to avoid drift from Fixed/Floating — computed both in the UI and again in `saveProjectInfo()` for the persisted payload
+- Country/State/City kept as plain text inputs (not a dropdown) for simplicity; Country pre-fills to `India` by default per project's primary market
+
+**Blockers / next steps:**
+- Supabase still not wired; chatbot still stub; no auth
+- Could later validate State against Indian state names or offer a country dropdown if multi-country projects are added
+
+---
+
 ### [2026-07-14 23:55 IST] Claude (claude-sonnet-4-6) — Branding section, cover page templates & download preview
 **Files changed:**
 - New: `src/types/branding.ts`, `src/components/CoverPageVisual.tsx`, `src/components/BrandingSection.tsx`, `src/components/ui/dialog.tsx`
