@@ -234,10 +234,46 @@ SESSION ENTRY TEMPLATE — copy this block, fill it in, paste at the TOP of the 
 
 ---
 
+### [2026-07-14 IST] Claude (claude-sonnet-4-6) — Knowledge base + chatbot navigator
+
+**Branch:** `claude/knowledge-base-chatbot`
+**PR:** #3 (draft)
+
+**Files changed:**
+- `public/docs/index.json` — root index with all 4 rating systems, keywords, section metadata
+- `public/docs/GRIHA-V6/` — README + 11 section .md files (01–11)
+- `public/docs/GRIHA-V2019/` — README + 11 section .md files (01–11)
+- `public/docs/GRIHA-V2015/` — README + 10 section .md files (01–10)
+- `public/docs/IGBC-SB-2020/` — README + 7 section .md files (01–07)
+- `src/components/layout/Chatbot.tsx` — complete rebuild as knowledge base navigator
+- `src/app/globals.css` — added `kb-*` CSS classes for markdown rendering
+
+**What was done:**
+- [x] Created `public/docs/` knowledge base: 43 files (index.json + 4 READMEs + 38 section files)
+- [x] Each section file contains criteria summary table, points breakdown, mandatory requirements, documentation requirements
+- [x] Rebuilt `Chatbot.tsx` from scratch: three-view navigator (home → doc → section), no AI/RAG
+- [x] Keyword scoring algorithm (`scoreDoc`, `findSections`) — pure string matching, no vector embeddings
+- [x] Inline markdown renderer (regex-based, zero new npm dependencies): tables, headings, bold, code, lists, blockquotes, hr
+- [x] Lazy loading: section .md files fetched on demand via `fetch('/docs/{id}/{section}.md')`
+- [x] Breadcrumb navigation + back buttons in chatbot footer
+- [x] Added `kb-content`, `kb-h1/h2/h3`, `kb-table`, `kb-table-wrap`, `kb-ul`, `kb-p`, `kb-code`, `kb-pre`, `kb-blockquote`, `kb-hr` CSS classes to `globals.css`
+- [x] `npm run build` passes clean — 0 TypeScript errors, all 13 pages static
+
+**Decisions made:**
+- `public/docs/` chosen over root `docs/` — Next.js serves `public/` directly, accessible via `fetch('/docs/...')` from client components with no API routes needed
+- Chatbot returns `null` when collapsed (vs previous CSS `width: 0`) — cleaner, avoids phantom DOM element
+- Markdown rendering via inline regex (no new library) — keeps bundle size unchanged
+
+**Blockers / next steps:**
+- Chatbot search is keyword-only; no semantic understanding — users must use terms like "energy", "water", "rainwater", etc.
+- README files in each folder are not yet surfaced in the chatbot (only used as reference for content authoring); could be added as a "Section Overview" view
+
+---
+
 ## Pending / Known Gaps
 
 - [ ] **Supabase not wired** — project is provisioned but no tables created and no client integration in the codebase yet
-- [ ] **Chatbot has no backend** — `Chatbot.tsx` is a UI stub; no AI or API connected
+- [ ] **Chatbot uses keyword search only** — no AI/semantic understanding; future upgrade path is RAG or LLM integration
 - [ ] **No auth** — any user can access all data; no login/session
 - [ ] **Single-user** — localStorage means data is device-local; no sync or sharing
 - [ ] **No export** — users cannot export their scoring data (PDF, CSV, etc.)
