@@ -47,6 +47,55 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-15 07:15 IST] Claude (claude-sonnet-5) — Exact document preview before download
+**Files changed:**
+- New: `src/components/PptSlidesPreview.tsx`
+- Modified: `src/components/DownloadSection.tsx`, `src/lib/downloads/pdf.ts`, `src/lib/downloads/excel.ts`, `src/lib/downloads/word.ts`, `src/lib/downloads/ppt.ts`, `package.json`
+
+**What was done:**
+- [x] Preview modal now shows the real generated document instead of a cover-page mockup + info table
+- [x] PDF: `generatePdfBlob()` builds the actual jsPDF doc and returns it as a Blob; preview renders it in an `<iframe>` via an object URL — this is the literal file, pixel-identical, browser's native PDF viewer (verified: cover + all content pages render correctly)
+- [x] Excel: `generateExcelPreview()` returns every sheet (Cover/Summary/Checklist) from the same in-memory `XLSX.WorkBook` used for download, rendered as tabbed HTML tables (`XLSX.utils.sheet_to_html`) — exact cell content, tab-switchable
+- [x] Word: `generateDocxBlob()` returns the real `docx` Packer blob; rendered via the new `docx-preview` dependency's `renderAsync()` — real pagination, fonts, colors, tables (verified via scroll: cover page + content page with checklist tables both render correctly)
+- [x] PowerPoint: tried `pptx-preview` npm package first — it parsed our pptxgenjs-generated file but detected 0 slides (structural incompatibility, confirmed via debug logging), so it was removed. Replaced with `PptSlidesPreview.tsx`, a content-accurate slide-by-slide mockup (cover, summary, one card per section with its criteria table, final section-summary table) built from the same `data` prop — same order/content as the real deck, with a caption explaining the visual template appears once opened in PowerPoint
+- [x] All 4 `lib/downloads/*.ts` modules refactored: internal `build*`/generate* functions return the in-memory document (blob/workbook/presentation) without saving; both the direct-download path and the preview path call the same builder, so there's a single source of truth
+- [x] Download button inside the preview modal still triggers a real save (regenerates fresh, cheap for all 4 formats)
+- [x] Build passed; verified all 4 formats end-to-end with Playwright (desktop screenshots of every format, scroll-through of Word/PPT multi-page content, mobile viewport check, and a real download triggered from the preview modal's Download button)
+
+**Decisions made:**
+- PDF/Excel/Word previews are literally the generated file (or the exact same in-memory data), not a recreation — this is the strongest fidelity guarantee possible
+- PPT could not reach the same bar: no reliable client-side .pptx renderer exists that's compatible with pptxgenjs output; rather than ship a blank/broken preview, shipped an honest content-accurate mockup and said so in the UI
+- Kept regenerating the file on "Download" from the preview modal (rather than reusing the cached preview blob) for simplicity — the cost is sub-second and avoids stale-cache edge cases
+
+**Blockers / next steps:**
+- Supabase still not wired; chatbot still stub; no auth
+- If a maintained pptx renderer becomes available (or a server-side conversion step is ever introduced), PPT preview could be upgraded to real rendering like the other 3 formats
+
+---
+
+### [2026-07-15 06:00 IST] Claude (claude-sonnet-5) — Total occupancy readout + project address fields
+**Files changed:**
+- Modified: `src/app/page.tsx`, `src/types/download.ts`, `src/lib/downloads/pdf.ts`, `src/lib/downloads/ppt.ts`, `src/lib/downloads/word.ts`, `src/lib/downloads/excel.ts`
+
+**What was done:**
+- [x] Added read-only "Total Occupancy" field to the dashboard's Project Information card — auto-sums Occupancy Fixed + Occupancy Floating
+- [x] Added an Address fieldset: Country (defaults to `India`), State, City — all free-text inputs
+- [x] `ProjectInfo` (page.tsx) gains `country`/`state`/`city`; `saveProjectInfo()` now also writes a computed `occupancyTotal` string for backward-compatible download consumption
+- [x] `ProjectInfo` type in `src/types/download.ts` gains `occupancyTotal`, `country`, `state`, `city`
+- [x] All 4 download formats (PDF, PPT, Word, Excel) updated to show Occupancy (Fixed/Floating/Total) and Address in their project-info tables/slides
+- [x] Build passed; verified with Playwright screenshots on desktop (1280px) and mobile (390px) viewports — Total Occupancy computed correctly (200+30=230), Country prefilled to India
+- [x] Committed + pushed to `claude/new-session-fqgdu4` (branch reset from latest `main` since PR #5 had merged); PR #6 opened as draft, marked ready, and merged by user
+
+**Decisions made:**
+- Total Occupancy is derived/read-only (not a stored independent field) to avoid drift from Fixed/Floating — computed both in the UI and again in `saveProjectInfo()` for the persisted payload
+- Country/State/City kept as plain text inputs (not a dropdown) for simplicity; Country pre-fills to `India` by default per project's primary market
+
+**Blockers / next steps:**
+- Supabase still not wired; chatbot still stub; no auth
+- Could later validate State against Indian state names or offer a country dropdown if multi-country projects are added
+
+---
+
 ### [2026-07-14 23:55 IST] Claude (claude-sonnet-4-6) — Branding section, cover page templates & download preview
 **Files changed:**
 - New: `src/types/branding.ts`, `src/components/CoverPageVisual.tsx`, `src/components/BrandingSection.tsx`, `src/components/ui/dialog.tsx`
