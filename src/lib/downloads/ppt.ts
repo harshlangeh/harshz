@@ -122,10 +122,11 @@ export async function downloadPPT(data: DownloadData): Promise<void> {
   const infoLines = [
     `Project: ${pi.name || '—'}`,
     `Site Area: ${pi.siteArea ? pi.siteArea + ' sq.m' : '—'}   Built-up: ${pi.builtUpArea ? pi.builtUpArea + ' sq.m' : '—'}`,
-    `Occupancy: ${pi.occupancyFixed || '—'} fixed / ${pi.occupancyFloating || '—'} floating`,
+    `Occupancy: ${pi.occupancyFixed || '—'} fixed / ${pi.occupancyFloating || '—'} floating / ${pi.occupancyTotal || '—'} total`,
     `Climate Zone: ${pi.climateZone || '—'}`,
+    `Address: ${[pi.city, pi.state, pi.country].filter(Boolean).join(', ') || '—'}`,
   ];
-  slide1.addText(infoLines.join('\n'), { x: 0.4, y: 1.85, w: 5.2, h: 2.2, fontSize: 11, color: darkText, lineSpacingMultiple: 1.4 });
+  slide1.addText(infoLines.join('\n'), { x: 0.4, y: 1.85, w: 5.2, h: 2.6, fontSize: 10.5, color: darkText, lineSpacingMultiple: 1.35 });
 
   slide1.addShape('rect', { x: 6.0, y: 1.75, w: 3.6, h: 2.4, fill: { color: lightBg }, line: { color: hex, width: 2 } });
   slide1.addText(`${data.totalPoints} / ${data.maxPoints}`, { x: 6.0, y: 1.9, w: 3.6, h: 0.75, fontSize: 30, bold: true, color: hex, align: 'center' });

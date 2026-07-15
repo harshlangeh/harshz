@@ -19,7 +19,11 @@ export interface ProjectInfo {
   builtUpArea?: string;
   occupancyFixed?: string;
   occupancyFloating?: string;
+  occupancyTotal?: string;
   climateZone?: string;
+  country?: string;
+  state?: string;
+  city?: string;
 }
 
 export interface DownloadData {

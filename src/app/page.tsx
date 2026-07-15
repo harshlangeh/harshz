@@ -133,6 +133,9 @@ interface ProjectInfo {
   occupancyFixed: string;
   occupancyFloating: string;
   climateZone: string;
+  country: string;
+  state: string;
+  city: string;
 }
 
 const DEFAULT_PROJECT: ProjectInfo = {
@@ -142,6 +145,9 @@ const DEFAULT_PROJECT: ProjectInfo = {
   occupancyFixed: '',
   occupancyFloating: '',
   climateZone: 'Composite',
+  country: 'India',
+  state: '',
+  city: '',
 };
 
 function migrateProjectInfo(raw: any): ProjectInfo {
@@ -163,6 +169,9 @@ function migrateProjectInfo(raw: any): ProjectInfo {
     occupancyFixed:    raw.occupancyFixed    || '',
     occupancyFloating: raw.occupancyFloating || '',
     climateZone:       raw.climateZone       || 'Composite',
+    country:           raw.country           || 'India',
+    state:             raw.state             || '',
+    city:              raw.city              || '',
     siteAreas,
     builtUpAreas,
   };
@@ -172,8 +181,9 @@ function saveProjectInfo(info: ProjectInfo) {
   // Include computed totals so rating-page download code still works
   const payload = {
     ...info,
-    siteArea:    String(sumAreas(info.siteAreas)),
-    builtUpArea: String(sumAreas(info.builtUpAreas)),
+    siteArea:        String(sumAreas(info.siteAreas)),
+    builtUpArea:     String(sumAreas(info.builtUpAreas)),
+    occupancyTotal:  String((parseFloat(info.occupancyFixed) || 0) + (parseFloat(info.occupancyFloating) || 0)),
   };
   localStorage.setItem('project_info', JSON.stringify(payload));
 }
@@ -205,6 +215,8 @@ export default function Home() {
     setProjectInfo(updated);
     saveProjectInfo(updated);
   };
+
+  const totalOccupancy = (parseFloat(projectInfo.occupancyFixed) || 0) + (parseFloat(projectInfo.occupancyFloating) || 0);
 
   const renderStars = (count: number, colorClass: string) =>
     Array(5).fill(0).map((_, i) => (
@@ -284,6 +296,12 @@ export default function Home() {
               />
             </div>
             <div className="space-y-1.5">
+              <label className="text-sm font-medium">Total Occupancy</label>
+              <div className="flex h-9 items-center rounded-md border border-input bg-muted/50 px-3 text-sm font-semibold">
+                {fmtSqm(totalOccupancy)}
+              </div>
+            </div>
+            <div className="space-y-1.5">
               <label className="text-sm font-medium">Climate Zone</label>
               <Select
                 value={projectInfo.climateZone}
@@ -300,6 +318,39 @@ export default function Home() {
                   <SelectItem value="Cold">Cold</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Address */}
+          <div className="space-y-2.5">
+            <span className="text-sm font-semibold">Address</span>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Country</label>
+                <Input
+                  placeholder="Country"
+                  value={projectInfo.country}
+                  onChange={e => setField('country', e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">State</label>
+                <Input
+                  placeholder="e.g. Maharashtra"
+                  value={projectInfo.state}
+                  onChange={e => setField('state', e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">City</label>
+                <Input
+                  placeholder="e.g. Mumbai"
+                  value={projectInfo.city}
+                  onChange={e => setField('city', e.target.value)}
+                />
+              </div>
             </div>
           </div>
 

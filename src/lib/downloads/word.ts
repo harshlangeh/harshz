@@ -156,7 +156,9 @@ export async function downloadWord(data: DownloadData): Promise<void> {
         new TableRow({ children: [dataCell('Built-up Area (sq.m)', true), dataCell(pi.builtUpArea || '—')] }),
         new TableRow({ children: [dataCell('Occupancy — Fixed', true), dataCell(pi.occupancyFixed || '—')] }),
         new TableRow({ children: [dataCell('Occupancy — Floating', true), dataCell(pi.occupancyFloating || '—')] }),
+        new TableRow({ children: [dataCell('Occupancy — Total', true), dataCell(pi.occupancyTotal || '—')] }),
         new TableRow({ children: [dataCell('Climate Zone', true), dataCell(pi.climateZone || '—')] }),
+        new TableRow({ children: [dataCell('Address', true), dataCell([pi.city, pi.state, pi.country].filter(Boolean).join(', ') || '—')] }),
       ],
     }),
 
