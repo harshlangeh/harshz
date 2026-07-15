@@ -47,6 +47,32 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-16 01:00 IST] Claude (claude-sonnet-5) — Branding moved to its own sidebar-linked page
+**Files changed:**
+- New: `src/app/branding/page.tsx`
+- Modified: `src/components/layout/Sidebar.tsx`, `src/components/layout/ClientLayout.tsx`, `src/components/BrandingSection.tsx`, `src/app/page.tsx`, `src/app/globals.css`
+
+**What was done:**
+- [x] `<BrandingSection />` removed from the dashboard (`src/app/page.tsx`)
+- [x] New route `/branding` (`src/app/branding/page.tsx`) hosts it standalone with its own page header
+- [x] `BrandingSection`'s internal `CardHeader` (title + description) removed — was duplicating the new page-level header
+- [x] `Sidebar.tsx` rewritten as a client component with `usePathname()`-driven active-link highlighting; added a "Branding" link (Palette icon) next to "Dashboard" (LayoutDashboard icon)
+- [x] `.nav-link.active` style added to `globals.css`
+- [x] **Found + fixed a pre-existing bug while testing:** `ClientLayout`'s sidebar-collapsed state was computed from `window.innerWidth` inside `useState`'s lazy initializer — always `true` during SSR (no `window`), but `false` on a real desktop client. This server/client mismatch made React skip patching the `<aside>`'s `className` on hydration ("won't be patched up"), so the sidebar rendered invisible on desktop until toggled *twice*. Fixed by starting both environments at `collapsed=true` and expanding via `useLayoutEffect` on desktop widths (no visible flash, no mismatch)
+- [x] Verified with Playwright: sidebar shows expanded by default on a 1440px viewport with both nav links and correct active-state styling; on a 390px mobile viewport it still defaults to collapsed, opens as an overlay, and navigating to Branding works and highlights correctly
+- [x] Build passed; committed + pushed to `claude/new-session-fqgdu4`; PR opened as draft
+
+**Decisions made:**
+- Fixed the sidebar-collapse hydration bug in-scope since it made the very link this session added functionally invisible on first load — same branch/PR, called out explicitly in the commit message
+- Used `useLayoutEffect` (not `useEffect`) for the desktop-expand correction specifically to avoid a visible flash of collapsed-then-expanded
+
+**Blockers / next steps:**
+- PR open as draft — user should review and merge
+- Sidebar drawer doesn't auto-close after a link tap on mobile (pre-existing behavior, not fixed this session — low priority polish)
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-15 08:00 IST] Claude (claude-sonnet-5) — Fix mobile sizing of document previews
 **Files changed:**
 - Modified: `src/components/DownloadSection.tsx`, `src/components/PptSlidesPreview.tsx`
