@@ -5,7 +5,7 @@ function starsText(count: number): string {
   return '★'.repeat(count) + '☆'.repeat(5 - count);
 }
 
-export async function downloadExcel(data: DownloadData): Promise<void> {
+async function buildWorkbook(data: DownloadData) {
   const XLSX = await import('xlsx');
   const branding = getBranding();
 
@@ -88,5 +88,19 @@ export async function downloadExcel(data: DownloadData): Promise<void> {
   wsChecklist['!cols'] = [{ wch: 14 }, { wch: 52 }, { wch: 14 }, { wch: 16 }, { wch: 22 }];
   XLSX.utils.book_append_sheet(wb, wsChecklist, 'Checklist');
 
+  return { XLSX, wb };
+}
+
+export async function downloadExcel(data: DownloadData): Promise<void> {
+  const { XLSX, wb } = await buildWorkbook(data);
   XLSX.writeFile(wb, `${data.ratingName.replace(/\s+/g, '_')}_Checklist.xlsx`);
+}
+
+/** Renders every sheet of the exact workbook as HTML tables, for exact preview before download. */
+export async function generateExcelPreview(data: DownloadData): Promise<{ sheetName: string; html: string }[]> {
+  const { XLSX, wb } = await buildWorkbook(data);
+  return wb.SheetNames.map((sheetName: string) => ({
+    sheetName,
+    html: XLSX.utils.sheet_to_html(wb.Sheets[sheetName], { editable: false }),
+  }));
 }

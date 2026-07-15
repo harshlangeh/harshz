@@ -5,7 +5,7 @@ function starsText(count: number): string {
   return '★'.repeat(count) + '☆'.repeat(5 - count);
 }
 
-export async function downloadPPT(data: DownloadData): Promise<void> {
+async function buildPresentation(data: DownloadData): Promise<any> {
   const { default: PptxGenJS } = await import('pptxgenjs');
   const branding = getBranding();
   const prs = new PptxGenJS();
@@ -216,5 +216,10 @@ export async function downloadPPT(data: DownloadData): Promise<void> {
     rowH: 0.32,
   });
 
+  return prs;
+}
+
+export async function downloadPPT(data: DownloadData): Promise<void> {
+  const prs = await buildPresentation(data);
   await prs.writeFile({ fileName: `${data.ratingName.replace(/\s+/g, '_')}_Checklist.pptx` });
 }

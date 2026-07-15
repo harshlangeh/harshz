@@ -9,7 +9,7 @@ function hexNoHash(hex: string) {
   return hex.replace('#', '').toUpperCase();
 }
 
-export async function downloadWord(data: DownloadData): Promise<void> {
+async function buildDocxBlob(data: DownloadData): Promise<Blob> {
   const {
     Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
     WidthType, AlignmentType, HeadingLevel, ShadingType, BorderStyle,
@@ -203,11 +203,20 @@ export async function downloadWord(data: DownloadData): Promise<void> {
   }));
 
   const doc = new Document({ sections: [{ children: [...coverChildren, ...contentChildren] }] });
-  const blob = await Packer.toBlob(doc);
+  return Packer.toBlob(doc);
+}
+
+export async function downloadWord(data: DownloadData): Promise<void> {
+  const blob = await buildDocxBlob(data);
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = `${data.ratingName.replace(/\s+/g, '_')}_Checklist.docx`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
+
+/** Generates the exact .docx file as a Blob, for pixel-close preview (rendered via docx-preview) before download. */
+export async function generateDocxBlob(data: DownloadData): Promise<Blob> {
+  return buildDocxBlob(data);
 }

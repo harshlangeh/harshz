@@ -342,7 +342,7 @@ async function addCoverPage(doc: any, data: DownloadData) {
   }
 }
 
-export async function downloadPDF(data: DownloadData): Promise<void> {
+async function buildPdfDoc(data: DownloadData): Promise<any> {
   const { jsPDF } = await import('jspdf');
   const autoTable = (await import('jspdf-autotable')).default;
 
@@ -515,5 +515,16 @@ export async function downloadPDF(data: DownloadData): Promise<void> {
     );
   }
 
+  return doc;
+}
+
+export async function downloadPDF(data: DownloadData): Promise<void> {
+  const doc = await buildPdfDoc(data);
   doc.save(`${data.ratingName.replace(/\s+/g, '_')}_Checklist.pdf`);
+}
+
+/** Generates the exact PDF file as a Blob, for pixel-perfect preview before download. */
+export async function generatePdfBlob(data: DownloadData): Promise<Blob> {
+  const doc = await buildPdfDoc(data);
+  return doc.output('blob');
 }
