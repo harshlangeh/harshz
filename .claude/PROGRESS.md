@@ -47,6 +47,31 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-17 01:00 IST] Claude (claude-sonnet-5) — Exempted status (applicability check) + appraisal 1.1.2 Tree Preservation
+**Files changed:**
+- Modified: `src/data/griha-v6-appraisals.ts`, `src/components/AttemptStatusRadio.tsx`, `src/app/griha-v6/page.tsx`, `src/app/griha-v6/appraisal/[code]/page.tsx`
+
+**What was done:**
+- [x] Added a 4th appraisal status, `'exempted'`, gated behind a new `AppraisalMeta.exemptable` flag so it only shows up where explicitly enabled (per user: "exemption is only for limited appraisal only")
+- [x] Added `1.1.2 Tree Preservation` under Criterion 1 — type `Mandatory`, `exemptable: true`; no point value yet
+- [x] `AttemptStatusRadio` renders a 4th "Exempted" radio only when `exemptable` is passed
+- [x] New `appraisalMaxDisplay()`: shows the appraisal's points normally, or **"Ex"** in gold once exempted
+- [x] `appraisalTargetDisplay()` extended: Exempted + Mandatory → **"M"** green (exemption counts as compliant); Exempted + Optional → **"Ex"** gold
+- [x] New `criterionEffectiveMax()`: a criterion's Max cell now subtracts the points of any of its appraisals marked Exempted (the Target/sum column is unaffected, since exempted items already contribute 0, same as Non-Attempting)
+- [x] Wired the same Exempted option + helper text into the appraisal detail page's Status card for consistency
+- [x] Verified with Playwright (temporarily set `1.1.2`'s `points: 2` for testing, then reverted): confirmed exactly one "Exempted" radio exists on the page (only for 1.1.2, not 1.1.1), selecting it reduces Criterion 1's Max from 5→3, shows "Ex" gold on 1.1.2's own Max badge, and "M" green as its target
+- [x] Build passed; committed + pushed to `claude/new-session-fqgdu4` (added to open PR #11)
+
+**Decisions made:**
+- Scoped the Max reduction to the criterion's row only — did not propagate it up into section totals, the "100"/"105" base/grand denominators, or star thresholds, since that's a materially larger recalculation not explicitly requested; flagged as a possible follow-up if the user wants exemptions to affect the overall certification math too
+
+**Blockers / next steps:**
+- Still waiting on point values for `1.1.1 Project Approvals` and `1.1.2 Tree Preservation`, plus compliance type for `1.1.1`
+- PR #11 open as draft (now includes both the NC/M indicator work and this exemption feature) — user should review and merge
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-17 00:15 IST] Claude (claude-sonnet-5) — Mandatory appraisal target indicators (NC/M) + Points→Target rename
 **Files changed:**
 - Modified: `src/data/griha-v6-appraisals.ts`, `src/app/griha-v6/page.tsx`
