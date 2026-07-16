@@ -1,11 +1,17 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
-import { Star } from 'lucide-react';
+import Link from 'next/link';
+import { Star, ChevronDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { DownloadSection } from '@/components/DownloadSection';
+import { AttemptStatusRadio } from '@/components/AttemptStatusRadio';
+import {
+  CRITERION_APPRAISALS, getAppraisalState, saveAppraisalState, appraisalContribution,
+  type AppraisalStatus,
+} from '@/data/griha-v6-appraisals';
 
 const sections = [
   { id: 1, title: "Sustainable Site Planning", max: 12, criteria: [
@@ -97,6 +103,42 @@ export default function GrihaV6Page() {
     if (saved) setProjectInfo(JSON.parse(saved));
   }, []);
 
+  const [expandedCriterion, setExpandedCriterion] = useState<number | null>(null);
+  const [appraisalStatuses, setAppraisalStatuses] = useState<Record<string, AppraisalStatus | null>>({});
+
+  useEffect(() => {
+    const all: Record<string, AppraisalStatus | null> = {};
+    Object.values(CRITERION_APPRAISALS).flat().forEach(a => {
+      all[a.code] = getAppraisalState(a.code).status;
+    });
+    setAppraisalStatuses(all);
+  }, []);
+
+  const updateAppraisalStatus = (code: string, status: AppraisalStatus) => {
+    setAppraisalStatuses(prev => ({ ...prev, [code]: status }));
+    saveAppraisalState(code, { status });
+  };
+
+  const appraisalCriterionTotal = (criterionId: number) =>
+    (CRITERION_APPRAISALS[criterionId] || []).reduce(
+      (sum, a) => sum + appraisalContribution(a, appraisalStatuses[a.code]), 0,
+    );
+
+  // Criteria broken into appraisals get their score computed from those appraisals instead of manual entry
+  useEffect(() => {
+    const criterionIds = Object.keys(CRITERION_APPRAISALS).map(Number);
+    if (criterionIds.length === 0) return;
+    setScores(prev => {
+      let changed = false;
+      const next = [...prev];
+      criterionIds.forEach(id => {
+        const total = appraisalCriterionTotal(id);
+        if (next[id] !== total) { next[id] = total; changed = true; }
+      });
+      return changed ? next : prev;
+    });
+  }, [appraisalStatuses]);
+
   const handleScore = (id: number, value: string, max: number) => {
     let n = parseInt(value);
     if (isNaN(n)) n = 0;
@@ -143,6 +185,93 @@ export default function GrihaV6Page() {
       })),
     })),
   }), [grandTotal, stars, scores, projectInfo]);
+
+  const renderCriterionRow = (c: typeof sections[0]['criteria'][0]) => {
+    const appraisals = CRITERION_APPRAISALS[c.id];
+
+    if (!appraisals) {
+      return (
+        <tr key={c.id} className={`border-b border-border ${rowClass(c.type)}`}>
+          <td className="px-4 py-2.5 text-center text-muted-foreground">{c.id}</td>
+          <td className="px-4 py-2.5">{c.name}</td>
+          <td className="px-4 py-2.5 text-center text-muted-foreground">{c.max}</td>
+          <td className="px-4 py-2.5 text-center">
+            <Input
+              type="number"
+              min={0}
+              max={c.max}
+              value={scores[c.id] || ''}
+              onChange={e => handleScore(c.id, e.target.value, c.max)}
+              placeholder="0"
+              className="h-7 w-16 text-center mx-auto text-xs px-2"
+              disabled={c.max === 0}
+            />
+          </td>
+          <td className="px-4 py-2.5">{complianceBadge(c.type)}</td>
+        </tr>
+      );
+    }
+
+    const expanded = expandedCriterion === c.id;
+    return (
+      <React.Fragment key={c.id}>
+        <tr
+          onClick={() => setExpandedCriterion(expanded ? null : c.id)}
+          className={`border-b border-border cursor-pointer hover:bg-muted/40 transition-colors ${rowClass(c.type)}`}
+        >
+          <td className="px-4 py-2.5 text-center text-muted-foreground">{c.id}</td>
+          <td className="px-4 py-2.5">
+            <span className="flex items-center gap-1.5">
+              <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${expanded ? '' : '-rotate-90'}`} />
+              {c.name}
+            </span>
+          </td>
+          <td className="px-4 py-2.5 text-center text-muted-foreground">{c.max}</td>
+          <td className="px-4 py-2.5 text-center">
+            <div className="font-semibold">{appraisalCriterionTotal(c.id)}</div>
+            <div className="text-[10px] text-muted-foreground whitespace-nowrap">from appraisals</div>
+          </td>
+          <td className="px-4 py-2.5">{complianceBadge(c.type)}</td>
+        </tr>
+        {expanded && (
+          <tr className="border-b border-border bg-muted/20">
+            <td colSpan={5} className="px-4 py-4">
+              <div className="space-y-3 pl-6">
+                {appraisals.map(a => (
+                  <div key={a.code} className="rounded-lg border border-border bg-background p-4">
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <p className="text-sm font-semibold">{a.code} — {a.title}</p>
+                      {appraisalStatuses[a.code] === 'attempting' && (
+                        <Link
+                          href={`/griha-v6/appraisal/${a.code}`}
+                          onClick={e => e.stopPropagation()}
+                          className="text-xs font-medium text-primary hover:underline"
+                        >
+                          Open Appraisal →
+                        </Link>
+                      )}
+                    </div>
+                    <div className="mt-3" onClick={e => e.stopPropagation()}>
+                      <AttemptStatusRadio
+                        name={`appraisal-${a.code}`}
+                        value={appraisalStatuses[a.code] ?? null}
+                        onChange={s => updateAppraisalStatus(a.code, s)}
+                      />
+                    </div>
+                    {appraisalStatuses[a.code] === 'later' && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Details shared at final submission — full points counted toward target.
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </td>
+          </tr>
+        )}
+      </React.Fragment>
+    );
+  };
 
   return (
     <div className="container">
@@ -205,26 +334,7 @@ export default function GrihaV6Page() {
                     <td className="px-4 py-2.5 text-center font-bold text-orange">{sectionTotal(section)}</td>
                     <td className="px-4 py-2.5" />
                   </tr>
-                  {section.criteria.map(c => (
-                    <tr key={c.id} className={`border-b border-border ${rowClass(c.type)}`}>
-                      <td className="px-4 py-2.5 text-center text-muted-foreground">{c.id}</td>
-                      <td className="px-4 py-2.5">{c.name}</td>
-                      <td className="px-4 py-2.5 text-center text-muted-foreground">{c.max}</td>
-                      <td className="px-4 py-2.5 text-center">
-                        <Input
-                          type="number"
-                          min={0}
-                          max={c.max}
-                          value={scores[c.id] || ''}
-                          onChange={e => handleScore(c.id, e.target.value, c.max)}
-                          placeholder="0"
-                          className="h-7 w-16 text-center mx-auto text-xs px-2"
-                          disabled={c.max === 0}
-                        />
-                      </td>
-                      <td className="px-4 py-2.5">{complianceBadge(c.type)}</td>
-                    </tr>
-                  ))}
+                  {section.criteria.map(renderCriterionRow)}
                 </React.Fragment>
               ))}
 
@@ -246,25 +356,7 @@ export default function GrihaV6Page() {
                     <td className="px-4 py-2.5 text-center font-bold text-orange">{sectionTotal(section)}</td>
                     <td />
                   </tr>
-                  {section.criteria.map(c => (
-                    <tr key={c.id} className={`border-b border-border ${rowClass(c.type)}`}>
-                      <td className="px-4 py-2.5 text-center text-muted-foreground">{c.id}</td>
-                      <td className="px-4 py-2.5">{c.name}</td>
-                      <td className="px-4 py-2.5 text-center text-muted-foreground">{c.max}</td>
-                      <td className="px-4 py-2.5 text-center">
-                        <Input
-                          type="number"
-                          min={0}
-                          max={c.max}
-                          value={scores[c.id] || ''}
-                          onChange={e => handleScore(c.id, e.target.value, c.max)}
-                          placeholder="0"
-                          className="h-7 w-16 text-center mx-auto text-xs px-2"
-                        />
-                      </td>
-                      <td className="px-4 py-2.5">{complianceBadge(c.type)}</td>
-                    </tr>
-                  ))}
+                  {section.criteria.map(renderCriterionRow)}
                 </React.Fragment>
               ))}
 

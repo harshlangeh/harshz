@@ -47,6 +47,35 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-16 03:00 IST] Claude (claude-sonnet-5) — GRIHA V6 criterion appraisals (accordion + detail page)
+**Files changed:**
+- New: `src/data/griha-v6-appraisals.ts`, `src/components/AttemptStatusRadio.tsx`, `src/components/RichTextEditor.tsx`, `src/app/griha-v6/appraisal/[code]/page.tsx`
+- Modified: `src/app/griha-v6/page.tsx`, `src/app/globals.css`
+
+**What was done:**
+- [x] Criteria can now be broken into official GRIHA V6 "appraisals" (sub-criteria) — starting with Criterion 1 (Green Infrastructure), which has one appraisal so far: `1.1.1 Project Approvals` (points not yet provided by user)
+- [x] Criteria with appraisals defined render as an expandable accordion row (click to toggle) instead of a flat point-entry row; other 29 criteria are unaffected
+- [x] Each appraisal gets a three-way status: **Attempting** / **Non-Attempting** / **Later** — Attempting and Later both contribute the appraisal's full points (Later = "details shared at final submission, but full points count toward target" per user's spec); Non-Attempting contributes 0
+- [x] Criterion's score becomes the sum of its appraisals' contributions, synced into the existing `scores` array so section/grand totals, stars, and downloads all keep working unchanged
+- [x] When an appraisal is marked Attempting, an "Open Appraisal →" link appears, navigating to a dedicated detail page at `/griha-v6/appraisal/[code]`
+- [x] Detail page has three sections per user's spec: **Narrative** (a minimal Word-style rich text box — bold/italic/underline/bullet/numbered list — built with `contentEditable` + `execCommand`, no new dependency), **Calculation** (blank placeholder — "calculator prefilled from Project Information and rating-specific data" to be wired up per-appraisal later), **Data** (blank placeholder for future file uploads)
+- [x] Appraisal status + narrative persist to `localStorage` under `appraisals_v6`, keyed by appraisal code
+- [x] Verified with Playwright: accordion expand/collapse, 3-way radio selection, navigation to detail page, narrative typing + bold formatting + persistence across reload, and mobile viewport rendering of the standalone detail page
+- [x] Build passed; committed + pushed to `claude/new-session-fqgdu4`; PR opened as draft
+
+**Decisions made:**
+- Appraisal registry lives in `src/data/griha-v6-appraisals.ts` (not inlined in the page) since it must be shared between the checklist page and the separate detail-page route — an intentional exception to the "inline sections arrays" convention, scoped narrowly to just the appraisal data
+- Rich text editor uses the browser's `document.execCommand` rather than pulling in a WYSIWYG library — matches the user's "simple text box" ask and keeps zero new dependencies
+- Single contribution rule (points count if Attempting OR Later) rather than tracking separate "target" vs "achieved" totals — the page's own subtitle already frames all entries as "target points," so this needed no new dual-total concept
+
+**Blockers / next steps:**
+- Still waiting on the point value for `1.1.1 Project Approvals` and further appraisal breakdowns (title/points/numbering) for the remaining criteria — user is sharing these incrementally
+- Calculation and Data sections are intentionally blank placeholders pending per-appraisal specs (calculator formulas, required documents) from the user
+- PR open as draft — user should review and merge
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-16 01:00 IST] Claude (claude-sonnet-5) — Branding moved to its own sidebar-linked page
 **Files changed:**
 - New: `src/app/branding/page.tsx`
