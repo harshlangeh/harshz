@@ -47,6 +47,27 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-17 01:30 IST] Claude (claude-sonnet-5) — Placeholder appraisal for every GRIHA V6 criterion
+**Files changed:**
+- Modified: `src/data/griha-v6-appraisals.ts`
+
+**What was done:**
+- [x] Every criterion (2–30) now gets one placeholder appraisal, code `<criterionId>.1.1`, title "Appraisal 1 (name pending)" — generated with a small loop rather than hand-authoring 29 entries
+- [x] This makes all 30 criteria clickable accordions (previously only Criterion 1 had appraisals defined)
+- [x] No new page files needed — the existing dynamic route `/griha-v6/appraisal/[code]` already resolves any code via `getAppraisalMeta()`, so every placeholder immediately gets a working Narrative/Calculation/Data detail page
+- [x] Verified with Playwright: Criterion 3 ("Design to Mitigate UHIE") expands to show `3.1.1`, marking it Attempting reveals "Open Appraisal →", which navigates correctly to its detail page; spot-checked Criterion 30's appraisal page too (`/griha-v6/appraisal/30.1.1`)
+- [x] Build passed; committed + pushed to `claude/new-session-fqgdu4` (added to open PR #11)
+
+**Decisions made:**
+- Reused the flat `<criterionId>.1.1` code scheme already established for Criterion 1 (`1.1.1`, `1.1.2`) rather than a Section.Criterion.Appraisal scheme, since the user's own example ("criterion number 3 → appraisal 3.1.1") confirmed criterion-id-first numbering
+
+**Blockers / next steps:**
+- All 29 placeholder appraisals need real titles (and eventually points/compliance types) from the user, one at a time as before
+- PR #11 open as draft (now also includes this change) — user should review and merge
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-17 01:00 IST] Claude (claude-sonnet-5) — Exempted status (applicability check) + appraisal 1.1.2 Tree Preservation
 **Files changed:**
 - Modified: `src/data/griha-v6-appraisals.ts`, `src/components/AttemptStatusRadio.tsx`, `src/app/griha-v6/page.tsx`, `src/app/griha-v6/appraisal/[code]/page.tsx`
