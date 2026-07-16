@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { DownloadSection } from '@/components/DownloadSection';
 import { AttemptStatusRadio } from '@/components/AttemptStatusRadio';
 import {
-  CRITERION_APPRAISALS, getAppraisalState, saveAppraisalState, appraisalContribution,
+  CRITERION_APPRAISALS, getAppraisalState, saveAppraisalState, appraisalContribution, appraisalTargetDisplay,
   type AppraisalStatus,
 } from '@/data/griha-v6-appraisals';
 
@@ -237,10 +237,15 @@ export default function GrihaV6Page() {
           <tr className="border-b border-border bg-muted/20">
             <td colSpan={5} className="px-4 py-4">
               <div className="space-y-3 pl-6">
-                {appraisals.map(a => (
+                {appraisals.map(a => {
+                  const target = appraisalTargetDisplay(a, appraisalStatuses[a.code]);
+                  return (
                   <div key={a.code} className="rounded-lg border border-border bg-background p-4">
                     <div className="flex items-center justify-between gap-3 flex-wrap">
-                      <p className="text-sm font-semibold">{a.code} — {a.title}</p>
+                      <div className="flex items-center gap-3">
+                        <p className="text-sm font-semibold">{a.code} — {a.title}</p>
+                        <span className={`text-xs font-bold ${target.colorClass}`}>{target.text}</span>
+                      </div>
                       {appraisalStatuses[a.code] === 'attempting' && (
                         <Link
                           href={`/griha-v6/appraisal/${a.code}`}
@@ -264,7 +269,8 @@ export default function GrihaV6Page() {
                       </p>
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </td>
           </tr>
@@ -320,7 +326,7 @@ export default function GrihaV6Page() {
                 <th className="px-4 py-3 text-center font-semibold w-12">No.</th>
                 <th className="px-4 py-3 text-left font-semibold">Criterion</th>
                 <th className="px-4 py-3 text-center font-semibold w-20">Max</th>
-                <th className="px-4 py-3 text-center font-semibold w-24">Points</th>
+                <th className="px-4 py-3 text-center font-semibold w-24">Target</th>
                 <th className="px-4 py-3 text-left font-semibold w-40">Compliance</th>
               </tr>
             </thead>

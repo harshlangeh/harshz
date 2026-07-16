@@ -1,11 +1,15 @@
 export type AppraisalStatus = 'attempting' | 'non-attempting' | 'later';
 
+export type AppraisalComplianceType = 'Mandatory' | 'Optional';
+
 export interface AppraisalMeta {
   code: string;
   title: string;
   criterionId: number;
   /** Max points for this appraisal. Undefined until provided per-appraisal. */
   points?: number;
+  /** Whether this appraisal is Mandatory or Optional. Undefined until provided per-appraisal. */
+  type?: AppraisalComplianceType;
 }
 
 /** Appraisal breakdown per criterion. Only criteria with entries here become accordions. */
@@ -58,4 +62,28 @@ export function saveAppraisalState(code: string, patch: Partial<AppraisalState>)
 export function appraisalContribution(a: AppraisalMeta, status: AppraisalStatus | null | undefined): number {
   if (status === 'attempting' || status === 'later') return a.points ?? 0;
   return 0;
+}
+
+export interface AppraisalTargetDisplay {
+  text: string;
+  colorClass: string;
+}
+
+/**
+ * How to render an appraisal's target points, per user spec:
+ * - Mandatory + Non-Attempting → "NC" in red (non-compliant)
+ * - Mandatory + Attempting/Later → "M" in green (mandatory met)
+ * - Optional + Non-Attempting → "0"
+ * - Optional + Attempting/Later → the full points
+ */
+export function appraisalTargetDisplay(a: AppraisalMeta, status: AppraisalStatus | null | undefined): AppraisalTargetDisplay {
+  const met = status === 'attempting' || status === 'later';
+  if (a.type === 'Mandatory') {
+    return met
+      ? { text: 'M', colorClass: 'text-green-600' }
+      : { text: 'NC', colorClass: 'text-red-500' };
+  }
+  return met
+    ? { text: String(a.points ?? 0), colorClass: '' }
+    : { text: '0', colorClass: '' };
 }
