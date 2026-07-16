@@ -22,6 +22,14 @@ export const CRITERION_APPRAISALS: Record<number, AppraisalMeta[]> = {
   ],
 };
 
+// Every other criterion (2–30) gets a placeholder first appraisal so it's clickable and has a
+// working detail page too — titles, points, and compliance types to be provided per-appraisal later.
+for (let id = 2; id <= 30; id++) {
+  CRITERION_APPRAISALS[id] = [
+    { code: `${id}.1.1`, title: 'Appraisal 1 (name pending)', criterionId: id },
+  ];
+}
+
 export function getAppraisalMeta(code: string): AppraisalMeta | undefined {
   for (const list of Object.values(CRITERION_APPRAISALS)) {
     const found = list.find(a => a.code === code);
