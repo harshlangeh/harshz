@@ -47,6 +47,28 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-17 00:15 IST] Claude (claude-sonnet-5) — Mandatory appraisal target indicators (NC/M) + Points→Target rename
+**Files changed:**
+- Modified: `src/data/griha-v6-appraisals.ts`, `src/app/griha-v6/page.tsx`
+
+**What was done:**
+- [x] `AppraisalMeta` gains an optional `type: 'Mandatory' | 'Optional'` field
+- [x] New `appraisalTargetDisplay()` helper: Mandatory+Non-Attempting → "NC" red; Mandatory+(Attempting|Later) → "M" green; Optional+Non-Attempting → "0"; Optional+(Attempting|Later) → full points
+- [x] Rendered next to each appraisal's title in the checklist accordion
+- [x] Renamed the checklist table's "Points" column header to "Target" per user's note
+- [x] Verified with Playwright (temporarily setting `type:'Mandatory', points:5` on 1.1.1, then reverting): NC shows red when Non-Attempting, M shows green when Attempting, and the criterion/grand total correctly reflect the points — confirmed the display and scoring math both work before reverting the test values
+- [x] Build passed; committed + pushed to `claude/new-session-fqgdu4`; PR opened as draft
+
+**Decisions made:**
+- `1.1.1 Project Approvals` still has no confirmed `type` or `points` from the user — left both undefined so it falls back to the Optional/0-points display until real values are provided
+
+**Blockers / next steps:**
+- Still waiting on: compliance type (Mandatory/Optional) and point value for `1.1.1 Project Approvals`, plus further appraisal breakdowns for other criteria
+- PR open as draft — user should review and merge
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-16 03:00 IST] Claude (claude-sonnet-5) — GRIHA V6 criterion appraisals (accordion + detail page)
 **Files changed:**
 - New: `src/data/griha-v6-appraisals.ts`, `src/components/AttemptStatusRadio.tsx`, `src/components/RichTextEditor.tsx`, `src/app/griha-v6/appraisal/[code]/page.tsx`
