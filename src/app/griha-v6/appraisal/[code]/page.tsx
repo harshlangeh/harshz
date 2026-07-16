@@ -68,11 +68,21 @@ export default function AppraisalDetailPage() {
           <CardDescription>Are you attempting this appraisal?</CardDescription>
         </CardHeader>
         <CardContent>
-          <AttemptStatusRadio name="appraisal-status" value={status} onChange={updateStatus} />
+          <AttemptStatusRadio
+            name="appraisal-status"
+            value={status}
+            onChange={updateStatus}
+            exemptable={meta.exemptable}
+          />
           {status === 'later' && (
             <p className="text-xs text-muted-foreground mt-3">
               Supporting details for this appraisal will be shared at final submission. Its full points are
               counted toward your target score until then.
+            </p>
+          )}
+          {status === 'exempted' && (
+            <p className="text-xs text-muted-foreground mt-3">
+              Marked not applicable to this project — excluded from the criterion&rsquo;s max.
             </p>
           )}
         </CardContent>
