@@ -47,6 +47,19 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-17 20:15 IST] Claude (claude-sonnet-5) — PR #13 merged; auto-merge enabled going forward
+
+**What was done:**
+- [x] Verified `npm run build` passes, marked PR #13 ready for review, squash-merged into `main` (commit `58ddb5d`)
+- [x] Dev branch restarted from the new `main`
+- [x] User instructed: from now on, merge PRs automatically after a successful build rather than waiting for manual review/merge approval each time
+
+**Blockers / next steps:**
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-17 08:20 IST] Claude (claude-sonnet-5) — Mandatory appraisals excluded from scoring
 
 **Files changed:**
