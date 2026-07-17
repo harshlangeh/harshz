@@ -105,6 +105,7 @@ export default function GrihaV6Page() {
   }, []);
 
   const [expandedCriterion, setExpandedCriterion] = useState<number | null>(null);
+  const [expandedAppraisal, setExpandedAppraisal] = useState<string | null>(null);
   const [appraisalStatuses, setAppraisalStatuses] = useState<Record<string, AppraisalStatus | null>>({});
 
   useEffect(() => {
@@ -239,52 +240,81 @@ export default function GrihaV6Page() {
         {expanded && (
           <tr className="border-b border-border bg-muted/20">
             <td colSpan={5} className="px-4 py-4">
-              <div className="space-y-3 pl-6">
-                {appraisals.map(a => {
-                  const status = appraisalStatuses[a.code] ?? null;
-                  const target = appraisalTargetDisplay(a, status);
-                  const max = appraisalMaxDisplay(a, status);
-                  return (
-                  <div key={a.code} className="rounded-lg border border-border bg-background p-4">
-                    <div className="flex items-center justify-between gap-3 flex-wrap">
-                      <div className="flex items-center gap-3">
-                        <p className="text-sm font-semibold">{a.code} — {a.title}</p>
-                        <span className="text-xs text-muted-foreground">
-                          Max <span className={`font-bold ${max.colorClass}`}>{max.text}</span>
-                        </span>
-                        <span className={`text-xs font-bold ${target.colorClass}`}>{target.text}</span>
-                      </div>
-                      {status === 'attempting' && (
-                        <Link
-                          href={`/griha-v6/appraisal/${a.code}`}
-                          onClick={e => e.stopPropagation()}
-                          className="text-xs font-medium text-primary hover:underline"
-                        >
-                          Open Appraisal →
-                        </Link>
-                      )}
-                    </div>
-                    <div className="mt-3" onClick={e => e.stopPropagation()}>
-                      <AttemptStatusRadio
-                        name={`appraisal-${a.code}`}
-                        value={status}
-                        onChange={s => updateAppraisalStatus(a.code, s)}
-                        exemptable={a.exemptable}
-                      />
-                    </div>
-                    {status === 'later' && (
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Details shared at final submission — full points counted toward target.
-                      </p>
-                    )}
-                    {status === 'exempted' && (
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Marked not applicable to this project — excluded from the criterion&rsquo;s max.
-                      </p>
-                    )}
-                  </div>
-                  );
-                })}
+              <div className="pl-6 rounded-md overflow-hidden border border-border">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-orange/80 text-white">
+                      <th className="px-4 py-2 text-center font-semibold w-16">No.</th>
+                      <th className="px-4 py-2 text-left font-semibold">Appraisal</th>
+                      <th className="px-4 py-2 text-center font-semibold w-20">Max</th>
+                      <th className="px-4 py-2 text-center font-semibold w-20">Target</th>
+                      <th className="px-4 py-2 text-left font-semibold w-36">Compliance</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {appraisals.map(a => {
+                      const status = appraisalStatuses[a.code] ?? null;
+                      const target = appraisalTargetDisplay(a, status);
+                      const max = appraisalMaxDisplay(a, status);
+                      const appExpanded = expandedAppraisal === a.code;
+                      return (
+                        <React.Fragment key={a.code}>
+                          <tr
+                            onClick={e => { e.stopPropagation(); setExpandedAppraisal(appExpanded ? null : a.code); }}
+                            className="border-b border-border last:border-0 cursor-pointer hover:bg-muted/40 transition-colors bg-background"
+                          >
+                            <td className="px-4 py-2.5 text-center text-muted-foreground">{a.code}</td>
+                            <td className="px-4 py-2.5">
+                              <span className="flex items-center gap-1.5">
+                                <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${appExpanded ? '' : '-rotate-90'}`} />
+                                {a.title}
+                              </span>
+                            </td>
+                            <td className="px-4 py-2.5 text-center">
+                              <span className={`font-bold ${max.colorClass}`}>{max.text}</span>
+                            </td>
+                            <td className="px-4 py-2.5 text-center">
+                              <span className={`font-bold ${target.colorClass}`}>{target.text}</span>
+                            </td>
+                            <td className="px-4 py-2.5">{complianceBadge(a.type || 'Optional')}</td>
+                          </tr>
+                          {appExpanded && (
+                            <tr className="border-b border-border last:border-0 bg-muted/10">
+                              <td colSpan={5} className="px-4 py-4">
+                                <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
+                                  <AttemptStatusRadio
+                                    name={`appraisal-${a.code}`}
+                                    value={status}
+                                    onChange={s => updateAppraisalStatus(a.code, s)}
+                                    exemptable={a.exemptable}
+                                  />
+                                  {status === 'attempting' && (
+                                    <Link
+                                      href={`/griha-v6/appraisal/${a.code}`}
+                                      className="text-xs font-medium text-primary hover:underline"
+                                    >
+                                      Open Appraisal →
+                                    </Link>
+                                  )}
+                                </div>
+                                {status === 'later' && (
+                                  <p className="text-xs text-muted-foreground">
+                                    Details shared at final submission — full points counted toward target.
+                                  </p>
+                                )}
+                                {status === 'exempted' && (
+                                  <p className="text-xs text-muted-foreground">
+                                    Marked not applicable to this project — excluded from the criterion&rsquo;s max.
+                                  </p>
+                                )}
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </td>
           </tr>
