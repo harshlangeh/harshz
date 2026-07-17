@@ -71,24 +71,28 @@ export function saveAppraisalState(code: string, patch: Partial<AppraisalState>)
 
 /**
  * Points contributed by an appraisal toward its criterion's total/target.
+ * Mandatory appraisals never contribute — they're a compliance gate, not a point source.
  * Exempted appraisals contribute 0 — they're excluded from scoring entirely
  * (their points are instead removed from the criterion's max, see `criterionEffectiveMax`).
  */
 export function appraisalContribution(a: AppraisalMeta, status: AppraisalStatus | null | undefined): number {
+  if (a.type === 'Mandatory') return 0;
   if (status === 'attempting' || status === 'later') return a.points ?? 0;
   return 0;
 }
 
-/** A criterion's max, reduced by the points of any of its appraisals marked Exempted. */
+/** A criterion's max, reduced by the points of any Mandatory appraisal (never scored) or appraisal marked Exempted. */
 export function criterionEffectiveMax(
   originalMax: number,
   appraisals: AppraisalMeta[],
   statuses: Record<string, AppraisalStatus | null | undefined>,
 ): number {
-  const exempted = appraisals.reduce(
-    (sum, a) => sum + (statuses[a.code] === 'exempted' ? (a.points ?? 0) : 0), 0,
-  );
-  return originalMax - exempted;
+  const excluded = appraisals.reduce((sum, a) => {
+    if (a.type === 'Mandatory') return sum + (a.points ?? 0);
+    if (statuses[a.code] === 'exempted') return sum + (a.points ?? 0);
+    return sum;
+  }, 0);
+  return originalMax - excluded;
 }
 
 export interface AppraisalDisplay {
@@ -96,8 +100,9 @@ export interface AppraisalDisplay {
   colorClass: string;
 }
 
-/** How to render an appraisal's own max-points badge — "Ex" in gold once exempted. */
+/** How to render an appraisal's own max-points badge — "M" for Mandatory (never scored), "Ex" in gold once exempted. */
 export function appraisalMaxDisplay(a: AppraisalMeta, status: AppraisalStatus | null | undefined): AppraisalDisplay {
+  if (a.type === 'Mandatory') return { text: 'M', colorClass: 'text-green-600' };
   if (status === 'exempted') return { text: 'Ex', colorClass: 'text-amber-500' };
   return { text: a.points !== undefined ? String(a.points) : '—', colorClass: '' };
 }
