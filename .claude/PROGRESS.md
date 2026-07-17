@@ -47,6 +47,25 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-17 02:00 IST] Claude (claude-sonnet-5) — Appraisal rows restyled to match criterion table, status as nested accordion
+**Files changed:**
+- Modified: `src/app/griha-v6/page.tsx`
+
+**What was done:**
+- [x] Appraisals inside an expanded criterion now render as a mini table matching the outer criteria table's look (same orange header, No./Appraisal/Max/Target/Compliance columns) instead of loose cards
+- [x] Each appraisal row is now itself clickable and expands to reveal its status radio (Attempting/Non-Attempting/Later/Exempted) and "Open Appraisal" link — nested accordion, buttons no longer always visible
+- [x] Added `expandedAppraisal` state (single-expand, mirrors `expandedCriterion`'s pattern)
+- [x] `complianceBadge()` reused for the appraisal's own Compliance column (defaults to "Optional" badge when `type` is unset, matching existing fallback behavior)
+- [x] Verified with Playwright: nested table renders correctly, clicking an appraisal row (e.g. `1.1.1 — Project Approvals`) reveals the status buttons, selecting Attempting shows "Open Appraisal →" inline in the expanded row and still navigates correctly
+- [x] Build passed; committed + pushed to `claude/new-session-fqgdu4`; PR opened as draft
+
+**Blockers / next steps:**
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- PR open as draft — user should review and merge
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-17 01:30 IST] Claude (claude-sonnet-5) — Placeholder appraisal for every GRIHA V6 criterion
 **Files changed:**
 - Modified: `src/data/griha-v6-appraisals.ts`
