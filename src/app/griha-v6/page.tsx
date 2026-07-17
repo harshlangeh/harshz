@@ -9,7 +9,8 @@ import { Input } from '@/components/ui/input';
 import { DownloadSection } from '@/components/DownloadSection';
 import { AttemptStatusRadio } from '@/components/AttemptStatusRadio';
 import {
-  CRITERION_APPRAISALS, getAppraisalState, saveAppraisalState, appraisalContribution,
+  CRITERION_APPRAISALS, getAppraisalState, saveAppraisalState, appraisalContribution, appraisalTargetDisplay,
+  appraisalMaxDisplay, criterionEffectiveMax,
   type AppraisalStatus,
 } from '@/data/griha-v6-appraisals';
 
@@ -226,7 +227,9 @@ export default function GrihaV6Page() {
               {c.name}
             </span>
           </td>
-          <td className="px-4 py-2.5 text-center text-muted-foreground">{c.max}</td>
+          <td className="px-4 py-2.5 text-center text-muted-foreground">
+            {criterionEffectiveMax(c.max, appraisals, appraisalStatuses)}
+          </td>
           <td className="px-4 py-2.5 text-center">
             <div className="font-semibold">{appraisalCriterionTotal(c.id)}</div>
             <div className="text-[10px] text-muted-foreground whitespace-nowrap">from appraisals</div>
@@ -237,11 +240,21 @@ export default function GrihaV6Page() {
           <tr className="border-b border-border bg-muted/20">
             <td colSpan={5} className="px-4 py-4">
               <div className="space-y-3 pl-6">
-                {appraisals.map(a => (
+                {appraisals.map(a => {
+                  const status = appraisalStatuses[a.code] ?? null;
+                  const target = appraisalTargetDisplay(a, status);
+                  const max = appraisalMaxDisplay(a, status);
+                  return (
                   <div key={a.code} className="rounded-lg border border-border bg-background p-4">
                     <div className="flex items-center justify-between gap-3 flex-wrap">
-                      <p className="text-sm font-semibold">{a.code} — {a.title}</p>
-                      {appraisalStatuses[a.code] === 'attempting' && (
+                      <div className="flex items-center gap-3">
+                        <p className="text-sm font-semibold">{a.code} — {a.title}</p>
+                        <span className="text-xs text-muted-foreground">
+                          Max <span className={`font-bold ${max.colorClass}`}>{max.text}</span>
+                        </span>
+                        <span className={`text-xs font-bold ${target.colorClass}`}>{target.text}</span>
+                      </div>
+                      {status === 'attempting' && (
                         <Link
                           href={`/griha-v6/appraisal/${a.code}`}
                           onClick={e => e.stopPropagation()}
@@ -254,17 +267,24 @@ export default function GrihaV6Page() {
                     <div className="mt-3" onClick={e => e.stopPropagation()}>
                       <AttemptStatusRadio
                         name={`appraisal-${a.code}`}
-                        value={appraisalStatuses[a.code] ?? null}
+                        value={status}
                         onChange={s => updateAppraisalStatus(a.code, s)}
+                        exemptable={a.exemptable}
                       />
                     </div>
-                    {appraisalStatuses[a.code] === 'later' && (
+                    {status === 'later' && (
                       <p className="text-xs text-muted-foreground mt-2">
                         Details shared at final submission — full points counted toward target.
                       </p>
                     )}
+                    {status === 'exempted' && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Marked not applicable to this project — excluded from the criterion&rsquo;s max.
+                      </p>
+                    )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </td>
           </tr>
@@ -320,7 +340,7 @@ export default function GrihaV6Page() {
                 <th className="px-4 py-3 text-center font-semibold w-12">No.</th>
                 <th className="px-4 py-3 text-left font-semibold">Criterion</th>
                 <th className="px-4 py-3 text-center font-semibold w-20">Max</th>
-                <th className="px-4 py-3 text-center font-semibold w-24">Points</th>
+                <th className="px-4 py-3 text-center font-semibold w-24">Target</th>
                 <th className="px-4 py-3 text-left font-semibold w-40">Compliance</th>
               </tr>
             </thead>

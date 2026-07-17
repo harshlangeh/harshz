@@ -8,16 +8,21 @@ const OPTIONS: { value: AppraisalStatus; label: string }[] = [
   { value: 'later', label: 'Later' },
 ];
 
+const EXEMPT_OPTION: { value: AppraisalStatus; label: string } = { value: 'exempted', label: 'Exempted' };
+
 interface Props {
   name: string;
   value: AppraisalStatus | null;
   onChange: (value: AppraisalStatus) => void;
+  /** Offers a 4th "Exempted" option (applicability check) — only for appraisals that allow it. */
+  exemptable?: boolean;
 }
 
-export function AttemptStatusRadio({ name, value, onChange }: Props) {
+export function AttemptStatusRadio({ name, value, onChange, exemptable }: Props) {
+  const options = exemptable ? [...OPTIONS, EXEMPT_OPTION] : OPTIONS;
   return (
     <div className="flex flex-wrap gap-4">
-      {OPTIONS.map(opt => (
+      {options.map(opt => (
         <label key={opt.value} className="flex items-center gap-1.5 text-sm cursor-pointer select-none">
           <input
             type="radio"

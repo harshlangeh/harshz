@@ -47,6 +47,74 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-17 01:30 IST] Claude (claude-sonnet-5) — Placeholder appraisal for every GRIHA V6 criterion
+**Files changed:**
+- Modified: `src/data/griha-v6-appraisals.ts`
+
+**What was done:**
+- [x] Every criterion (2–30) now gets one placeholder appraisal, code `<criterionId>.1.1`, title "Appraisal 1 (name pending)" — generated with a small loop rather than hand-authoring 29 entries
+- [x] This makes all 30 criteria clickable accordions (previously only Criterion 1 had appraisals defined)
+- [x] No new page files needed — the existing dynamic route `/griha-v6/appraisal/[code]` already resolves any code via `getAppraisalMeta()`, so every placeholder immediately gets a working Narrative/Calculation/Data detail page
+- [x] Verified with Playwright: Criterion 3 ("Design to Mitigate UHIE") expands to show `3.1.1`, marking it Attempting reveals "Open Appraisal →", which navigates correctly to its detail page; spot-checked Criterion 30's appraisal page too (`/griha-v6/appraisal/30.1.1`)
+- [x] Build passed; committed + pushed to `claude/new-session-fqgdu4` (added to open PR #11)
+
+**Decisions made:**
+- Reused the flat `<criterionId>.1.1` code scheme already established for Criterion 1 (`1.1.1`, `1.1.2`) rather than a Section.Criterion.Appraisal scheme, since the user's own example ("criterion number 3 → appraisal 3.1.1") confirmed criterion-id-first numbering
+
+**Blockers / next steps:**
+- All 29 placeholder appraisals need real titles (and eventually points/compliance types) from the user, one at a time as before
+- PR #11 open as draft (now also includes this change) — user should review and merge
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
+### [2026-07-17 01:00 IST] Claude (claude-sonnet-5) — Exempted status (applicability check) + appraisal 1.1.2 Tree Preservation
+**Files changed:**
+- Modified: `src/data/griha-v6-appraisals.ts`, `src/components/AttemptStatusRadio.tsx`, `src/app/griha-v6/page.tsx`, `src/app/griha-v6/appraisal/[code]/page.tsx`
+
+**What was done:**
+- [x] Added a 4th appraisal status, `'exempted'`, gated behind a new `AppraisalMeta.exemptable` flag so it only shows up where explicitly enabled (per user: "exemption is only for limited appraisal only")
+- [x] Added `1.1.2 Tree Preservation` under Criterion 1 — type `Mandatory`, `exemptable: true`; no point value yet
+- [x] `AttemptStatusRadio` renders a 4th "Exempted" radio only when `exemptable` is passed
+- [x] New `appraisalMaxDisplay()`: shows the appraisal's points normally, or **"Ex"** in gold once exempted
+- [x] `appraisalTargetDisplay()` extended: Exempted + Mandatory → **"M"** green (exemption counts as compliant); Exempted + Optional → **"Ex"** gold
+- [x] New `criterionEffectiveMax()`: a criterion's Max cell now subtracts the points of any of its appraisals marked Exempted (the Target/sum column is unaffected, since exempted items already contribute 0, same as Non-Attempting)
+- [x] Wired the same Exempted option + helper text into the appraisal detail page's Status card for consistency
+- [x] Verified with Playwright (temporarily set `1.1.2`'s `points: 2` for testing, then reverted): confirmed exactly one "Exempted" radio exists on the page (only for 1.1.2, not 1.1.1), selecting it reduces Criterion 1's Max from 5→3, shows "Ex" gold on 1.1.2's own Max badge, and "M" green as its target
+- [x] Build passed; committed + pushed to `claude/new-session-fqgdu4` (added to open PR #11)
+
+**Decisions made:**
+- Scoped the Max reduction to the criterion's row only — did not propagate it up into section totals, the "100"/"105" base/grand denominators, or star thresholds, since that's a materially larger recalculation not explicitly requested; flagged as a possible follow-up if the user wants exemptions to affect the overall certification math too
+
+**Blockers / next steps:**
+- Still waiting on point values for `1.1.1 Project Approvals` and `1.1.2 Tree Preservation`, plus compliance type for `1.1.1`
+- PR #11 open as draft (now includes both the NC/M indicator work and this exemption feature) — user should review and merge
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
+### [2026-07-17 00:15 IST] Claude (claude-sonnet-5) — Mandatory appraisal target indicators (NC/M) + Points→Target rename
+**Files changed:**
+- Modified: `src/data/griha-v6-appraisals.ts`, `src/app/griha-v6/page.tsx`
+
+**What was done:**
+- [x] `AppraisalMeta` gains an optional `type: 'Mandatory' | 'Optional'` field
+- [x] New `appraisalTargetDisplay()` helper: Mandatory+Non-Attempting → "NC" red; Mandatory+(Attempting|Later) → "M" green; Optional+Non-Attempting → "0"; Optional+(Attempting|Later) → full points
+- [x] Rendered next to each appraisal's title in the checklist accordion
+- [x] Renamed the checklist table's "Points" column header to "Target" per user's note
+- [x] Verified with Playwright (temporarily setting `type:'Mandatory', points:5` on 1.1.1, then reverting): NC shows red when Non-Attempting, M shows green when Attempting, and the criterion/grand total correctly reflect the points — confirmed the display and scoring math both work before reverting the test values
+- [x] Build passed; committed + pushed to `claude/new-session-fqgdu4`; PR opened as draft
+
+**Decisions made:**
+- `1.1.1 Project Approvals` still has no confirmed `type` or `points` from the user — left both undefined so it falls back to the Optional/0-points display until real values are provided
+
+**Blockers / next steps:**
+- Still waiting on: compliance type (Mandatory/Optional) and point value for `1.1.1 Project Approvals`, plus further appraisal breakdowns for other criteria
+- PR open as draft — user should review and merge
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-16 03:00 IST] Claude (claude-sonnet-5) — GRIHA V6 criterion appraisals (accordion + detail page)
 **Files changed:**
 - New: `src/data/griha-v6-appraisals.ts`, `src/components/AttemptStatusRadio.tsx`, `src/components/RichTextEditor.tsx`, `src/app/griha-v6/appraisal/[code]/page.tsx`
