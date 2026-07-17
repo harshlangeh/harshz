@@ -47,6 +47,24 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-17 08:20 IST] Claude (claude-sonnet-5) — Mandatory appraisals excluded from scoring
+
+**Files changed:**
+- Modified: `src/data/griha-v6-appraisals.ts`
+
+**What was done:**
+- [x] `appraisalMaxDisplay` now shows "M" (green) for any Mandatory appraisal's Max badge instead of its numeric points — Mandatory is a compliance gate, not a point source
+- [x] `appraisalContribution` returns 0 for Mandatory appraisals regardless of status, so they never add to a criterion's scored total
+- [x] `criterionEffectiveMax` now also subtracts Mandatory appraisals' points from the criterion's max (in addition to Exempted ones), so the max shown matches only the points that can actually be scored
+- [x] Verified the three functions against `1.1.2` (Tree Preservation, Mandatory) and `1.1.1` (Project Approvals, Optional): Max shows "M", contribution is 0, and a criterion max of 10 correctly reduces to 5 (only the Optional appraisal's points remain scorable)
+- [x] Build passed; committed to `claude/new-session-fqgdu4`
+
+**Blockers / next steps:**
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-17 08:05 IST] Claude (claude-sonnet-5) — PR #12 merged
 
 **What was done:**
