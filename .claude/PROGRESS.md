@@ -47,6 +47,19 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-17 08:05 IST] Claude (claude-sonnet-5) — PR #12 merged
+
+**What was done:**
+- [x] Verified `npm run build` passes on `claude/new-session-fqgdu4`
+- [x] Marked PR #12 ready for review and squash-merged into `main` (commit `2293d4b`)
+- [x] Unsubscribed from PR #12 activity; dev branch restarted from the new `main`
+
+**Blockers / next steps:**
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-17 02:00 IST] Claude (claude-sonnet-5) — Appraisal rows restyled to match criterion table, status as nested accordion
 **Files changed:**
 - Modified: `src/app/griha-v6/page.tsx`
