@@ -17,7 +17,7 @@ export interface AppraisalMeta {
 /** Appraisal breakdown per criterion. Only criteria with entries here become accordions. */
 export const CRITERION_APPRAISALS: Record<number, AppraisalMeta[]> = {
   1: [
-    { code: '1.1.1', title: 'Project Approvals', criterionId: 1 },
+    { code: '1.1.1', title: 'Project Approvals', criterionId: 1, type: 'Mandatory' },
     { code: '1.1.2', title: 'Tree Preservation', criterionId: 1, type: 'Mandatory', exemptable: true },
   ],
 };
