@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { DownloadSection } from '@/components/DownloadSection';
 import { AttemptStatusRadio } from '@/components/AttemptStatusRadio';
 import {
@@ -287,12 +288,11 @@ export default function GrihaV6Page() {
                                     exemptable={a.exemptable}
                                   />
                                   {status === 'attempting' && (
-                                    <Link
-                                      href={`/griha-v6/appraisal/${a.code}`}
-                                      className="text-xs font-medium text-primary hover:underline"
-                                    >
-                                      Open Appraisal →
-                                    </Link>
+                                    <Button asChild size="sm" className="bg-orange text-white hover:bg-orange/90">
+                                      <Link href={`/griha-v6/appraisal/${a.code}`}>
+                                        Open Appraisal →
+                                      </Link>
+                                    </Button>
                                   )}
                                 </div>
                                 {status === 'later' && (
