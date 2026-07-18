@@ -18,30 +18,28 @@ export const BUILDING_TYPOLOGIES: BuildingTypologyCategory[] = [
   {
     category: 'Institutional',
     types: [
-      'Universities', 'Schools', 'Hostels', 'Colleges', 'Libraries', 'Institutes',
-      'Research and development buildings', 'Gallery/Museum', 'Place of worship',
-      'Sports and leisure facilities', 'Auditorium/Theatre',
+      'Universities', 'Schools', 'Colleges', 'Libraries', 'Institutes', 'Sports complex',
+      'Research and development buildings', 'Place of worship',
     ],
   },
   {
     category: 'Office',
-    types: ['Offices', 'IT buildings/data centres', 'Owner-occupied buildings', 'Co-working spaces', 'Industries', 'Court'],
+    types: ['Core & shell buildings', 'IT buildings/data centres', 'Owner-occupied buildings', 'Co-working spaces', 'Industries', 'Court'],
   },
   {
     category: 'Residential',
-    types: ['Core & shell buildings', 'Multi-dwelling unit', 'Bungalows', 'Villas', 'Mansions', 'Military barracks'],
+    types: ['Multi-dwelling unit', 'Bungalows', 'Villas', 'Mansions', 'Military barracks', 'Hostels'],
   },
   {
     category: 'Retail',
-    types: ['Shopping complexes', 'Banquets/wedding halls', 'Restaurants', 'Food courts', 'Cafeterias', 'Multiplexes'],
+    types: [
+      'Shopping complexes', 'Banquets/wedding halls', 'Restaurants', 'Food courts', 'Cafeterias', 'Multiplexes',
+      'Gallery/Museum', 'Sports and leisure facilities', 'Auditorium/Theatre',
+    ],
   },
   {
     category: 'Transit Terminal',
     types: ['Airports', 'Heliports', 'Bus stands', 'Railway stations', 'Metro stations'],
-  },
-  {
-    category: 'Sports',
-    types: ['Sports complexes'],
   },
   {
     category: 'Mixed-use Development',

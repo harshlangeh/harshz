@@ -47,6 +47,25 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-19 04:20 IST] Claude (claude-sonnet-5) — Building Typology categories/sub-typologies corrected
+
+**Files changed:**
+- Modified: `src/data/building-typology.ts`
+
+**What was done:**
+- [x] Removed the standalone "Sports" category — down to exactly 7 categories + Mixed-use Development, per user correction
+- [x] Institutional now: Universities, Schools, Colleges, Libraries, Institutes, Sports complex, Research and development buildings, Place of worship (dropped Hostels/Gallery-Museum/Sports and leisure facilities/Auditorium-Theatre)
+- [x] Office: "Offices" replaced with "Core & shell buildings" (rest unchanged)
+- [x] Residential: "Core & shell buildings" removed, "Hostels" added
+- [x] Retail: added Gallery/Museum, Sports and leisure facilities, Auditorium/Theatre
+- [x] Build passed; committed to `claude/new-session-fqgdu4`
+
+**Blockers / next steps:**
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-19 04:05 IST] Claude (claude-sonnet-5) — Project Details section (Building Typology + Operation Schedule) added to GRIHA checklist pages
 
 **Files changed:**
