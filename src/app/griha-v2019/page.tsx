@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { DownloadSection } from '@/components/DownloadSection';
+import { ProjectDetailsSection } from '@/components/ProjectDetailsSection';
 
 const sections = [
   { id: 1, title: "Sustainable Site Planning", max: 12, criteria: [
@@ -181,6 +182,8 @@ export default function GrihaV2019Page() {
           </div>
         </CardContent>
       </Card>
+
+      <ProjectDetailsSection accentClass="border-t-green" />
 
       {/* Criteria table */}
       <Card className="mb-6 overflow-hidden">

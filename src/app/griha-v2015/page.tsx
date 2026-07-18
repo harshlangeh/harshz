@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { DownloadSection } from '@/components/DownloadSection';
+import { ProjectDetailsSection } from '@/components/ProjectDetailsSection';
 
 const sections = [
   { id: 1, title: "Site Planning", max: 8, criteria: [
@@ -166,6 +167,8 @@ export default function GrihaV2015Page() {
           </div>
         </CardContent>
       </Card>
+
+      <ProjectDetailsSection accentClass="border-t-rose-red" />
 
       {/* Criteria table */}
       <Card className="mb-6 overflow-hidden">
