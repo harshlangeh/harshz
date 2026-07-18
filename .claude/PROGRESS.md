@@ -47,6 +47,22 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-18 15:35 IST] Claude (claude-sonnet-5) — Project Approvals (1.1.1) marked Mandatory
+
+**Files changed:**
+- Modified: `src/data/griha-v6-appraisals.ts`
+
+**What was done:**
+- [x] `1.1.1` (Project Approvals) now has `type: 'Mandatory'`, so its Max badge shows "M" (green) like `1.1.2`, and it's excluded from criterion 1's scored max/total per the existing Mandatory handling
+- [x] Also fixed the tip-commit authorship flagged by the stop hook (amended `#14`'s squash-merge commit to `Claude <noreply@anthropic.com>` and force-pushed to the dev branch only, not `main`)
+- [x] Build passed; committed to `claude/new-session-fqgdu4`
+
+**Blockers / next steps:**
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-18 15:20 IST] Claude (claude-sonnet-5) — Nested appraisal table header removed, columns aligned with criterion table
 
 **Files changed:**
