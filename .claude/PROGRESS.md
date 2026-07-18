@@ -47,6 +47,26 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-19 05:35 IST] Claude (claude-sonnet-5) — Dynamic Project Approvals narrative, tabular layout
+
+**Files changed:**
+- Added: `src/lib/project-narrative.ts`
+- Modified: `src/app/griha-v6/appraisal/[code]/page.tsx`, `src/app/globals.css`
+
+**What was done:**
+- [x] `buildProjectApprovalsNarrative()` composes "The project **[Name]** is a **[Sub-typology] ([Category])**, having a total site area of **X sqm** and total built-up area of **Y sqm** across **N** building(s), operating on a schedule of **[daily]**, **[weekly]**, as per the details selected in Project Information and Project Details" from `project_info` + `project_typology` (localStorage), followed by an HTML details table (Project Name / Location / Climate Zone / Typology / Buildings / Areas / Schedule), plus a second per-building Name/Built-up-Area table when there's more than one building
+- [x] Wired only into appraisal `1.1.1` (Project Approvals) via a `DYNAMIC_NARRATIVE_BUILDERS` map keyed by code — other appraisals are untouched
+- [x] Auto-seeds the narrative on first visit if empty; added a "Generate from Project Details" button in the Narrative card header to re-run it on demand (overwrites current content — it's still freely editable afterwards since it's just HTML fed into the existing `RichTextEditor`)
+- [x] Added `.rich-text-content table/th/td` CSS (border-collapse, muted header row, bordered cells) since the editor previously had no table styling
+- [x] Verified with Playwright: seeded Project Info/Details render correctly into the sentence and both tables with correct sums; editing the narrative then clicking regenerate correctly overwrites the manual edit
+- [x] Build passed; committed to `claude/new-session-fqgdu4`
+
+**Blockers / next steps:**
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-19 05:10 IST] Claude (claude-sonnet-5) — Site/Built-up Area moved to Project Details; Number of Buildings added
 
 **Files changed:**
