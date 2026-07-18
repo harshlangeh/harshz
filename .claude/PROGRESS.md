@@ -47,6 +47,23 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-19 04:45 IST] Claude (claude-sonnet-5) — Fixed "Healthcare Facility looks default" on the typology dropdowns
+
+**Files changed:**
+- Modified: `src/components/ProjectDetailsSection.tsx`
+
+**What was done:**
+- [x] Root cause: with no value selected, Radix Select auto-focuses the first *enabled* item on open for accessibility, and that item's focus-highlight style made "Healthcare Facility" (first category) look like a pre-selected default even though the closed trigger correctly showed "Select a category"
+- [x] Fix: added an enabled `PLACEHOLDER` sentinel item ("Select a category" / "Select a sub-type" / "Select daily hours" / "Select weekly days") as the first entry in all four dropdowns, so it — not the first real option — receives the initial focus highlight; `onValueChange` treats the sentinel as clearing back to `''`. (A `disabled` placeholder was tried first but Radix skips disabled items when choosing what to auto-focus, so it didn't work.)
+- [x] Verified with Playwright: opening the category dropdown now highlights "Select a category" instead of "Healthcare Facility"; clicking the placeholder itself is a no-op; real selections (e.g. "Retail") still work and persist
+- [x] Build passed; committed to `claude/new-session-fqgdu4`
+
+**Blockers / next steps:**
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-19 04:20 IST] Claude (claude-sonnet-5) — Building Typology categories/sub-typologies corrected
 
 **Files changed:**
