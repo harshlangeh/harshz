@@ -1,134 +1,19 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Star, Award, ArrowRight, Building2, Leaf, Plus, X } from 'lucide-react';
+import { Star, Award, ArrowRight, Building2, Leaf } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-
-// ── Area list types & helpers ─────────────────────────────────────────────────
-
-interface AreaItem {
-  id: string;
-  name: string;
-  value: string;
-}
-
-function newId() {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-}
-
-function sumAreas(areas: AreaItem[]): number {
-  return areas.reduce((s, a) => s + (parseFloat(a.value) || 0), 0);
-}
-
-function fmtSqm(n: number): string {
-  if (n === 0) return '0';
-  return n % 1 === 0 ? n.toLocaleString('en-IN') : n.toFixed(2);
-}
-
-// ── AreaList sub-component ────────────────────────────────────────────────────
-
-function AreaList({
-  label,
-  items,
-  namePlaceholder,
-  onChange,
-}: {
-  label: string;
-  items: AreaItem[];
-  namePlaceholder: string;
-  onChange: (items: AreaItem[]) => void;
-}) {
-  const total = sumAreas(items);
-
-  const update = (id: string, field: 'name' | 'value', val: string) =>
-    onChange(items.map(a => (a.id === id ? { ...a, [field]: val } : a)));
-
-  const remove = (id: string) => onChange(items.filter(a => a.id !== id));
-
-  const add = () => onChange([...items, { id: newId(), name: '', value: '' }]);
-
-  return (
-    <div className="space-y-2.5">
-      {/* heading row */}
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold">{label}</span>
-        <span className="text-sm text-muted-foreground">
-          Total:{' '}
-          <span className="font-bold text-foreground">
-            {fmtSqm(total)} sqm
-          </span>
-        </span>
-      </div>
-
-      {/* area rows */}
-      {items.length > 0 && (
-        <div className="space-y-1.5">
-          {items.map(item => (
-            <div key={item.id} className="flex items-center gap-2">
-              {/* name */}
-              <Input
-                placeholder={namePlaceholder}
-                value={item.name}
-                onChange={e => update(item.id, 'name', e.target.value)}
-                className="flex-1 min-w-0 h-8 text-sm"
-              />
-              {/* value + unit */}
-              <div className="flex items-center border border-input rounded-md focus-within:ring-1 focus-within:ring-ring overflow-hidden bg-background">
-                <input
-                  type="number"
-                  min={0}
-                  step="any"
-                  placeholder="0"
-                  value={item.value}
-                  onChange={e => update(item.id, 'value', e.target.value)}
-                  className="w-24 h-8 px-2 text-sm text-right bg-transparent outline-none"
-                />
-                <span className="pr-2 text-xs text-muted-foreground select-none whitespace-nowrap">
-                  sqm
-                </span>
-              </div>
-              {/* delete */}
-              <button
-                type="button"
-                onClick={() => remove(item.id)}
-                aria-label="Remove area"
-                className="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {items.length === 0 && (
-        <p className="text-sm text-muted-foreground italic">No areas added yet.</p>
-      )}
-
-      {/* add button */}
-      <button
-        type="button"
-        onClick={add}
-        className="flex items-center gap-1.5 text-sm font-medium text-primary hover:opacity-75 transition-opacity"
-      >
-        <Plus className="h-3.5 w-3.5" />
-        Add area
-      </button>
-    </div>
-  );
-}
+import { fmtSqm } from '@/components/AreaList';
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 interface ProjectInfo {
   name: string;
-  siteAreas: AreaItem[];
-  builtUpAreas: AreaItem[];
   occupancyFixed: string;
   occupancyFloating: string;
   climateZone: string;
@@ -139,8 +24,6 @@ interface ProjectInfo {
 
 const DEFAULT_PROJECT: ProjectInfo = {
   name: '',
-  siteAreas: [],
-  builtUpAreas: [],
   occupancyFixed: '',
   occupancyFloating: '',
   climateZone: 'Composite',
@@ -150,19 +33,6 @@ const DEFAULT_PROJECT: ProjectInfo = {
 };
 
 function migrateProjectInfo(raw: any): ProjectInfo {
-  // Migrate from old flat format (siteArea / builtUpArea strings)
-  const siteAreas: AreaItem[] = Array.isArray(raw.siteAreas)
-    ? raw.siteAreas
-    : raw.siteArea
-    ? [{ id: 'site-0', name: 'Site Area', value: String(raw.siteArea) }]
-    : [];
-
-  const builtUpAreas: AreaItem[] = Array.isArray(raw.builtUpAreas)
-    ? raw.builtUpAreas
-    : raw.builtUpArea
-    ? [{ id: 'built-0', name: 'Built-up Area', value: String(raw.builtUpArea) }]
-    : [];
-
   return {
     name:              raw.name              || '',
     occupancyFixed:    raw.occupancyFixed    || '',
@@ -171,18 +41,23 @@ function migrateProjectInfo(raw: any): ProjectInfo {
     country:           raw.country           || 'India',
     state:             raw.state             || '',
     city:              raw.city              || '',
-    siteAreas,
-    builtUpAreas,
   };
 }
 
 function saveProjectInfo(info: ProjectInfo) {
-  // Include computed totals so rating-page download code still works
+  // Merge onto whatever's already stored (e.g. siteArea/builtUpArea, written by the
+  // Project Details section on the checklist pages) rather than overwriting it wholesale.
+  const existing = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('project_info') || '{}');
+    } catch {
+      return {};
+    }
+  })();
   const payload = {
+    ...existing,
     ...info,
-    siteArea:        String(sumAreas(info.siteAreas)),
-    builtUpArea:     String(sumAreas(info.builtUpAreas)),
-    occupancyTotal:  String((parseFloat(info.occupancyFixed) || 0) + (parseFloat(info.occupancyFloating) || 0)),
+    occupancyTotal: String((parseFloat(info.occupancyFixed) || 0) + (parseFloat(info.occupancyFloating) || 0)),
   };
   localStorage.setItem('project_info', JSON.stringify(payload));
 }
@@ -351,24 +226,6 @@ export default function Home() {
                 />
               </div>
             </div>
-          </div>
-
-          <Separator />
-
-          {/* Area sections — two columns on large screens */}
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-            <AreaList
-              label="Total Site Area"
-              items={projectInfo.siteAreas}
-              namePlaceholder="e.g. Landscape area, Hard paved area…"
-              onChange={items => setField('siteAreas', items)}
-            />
-            <AreaList
-              label="Built-up Area"
-              items={projectInfo.builtUpAreas}
-              namePlaceholder="e.g. Ground floor, First floor…"
-              onChange={items => setField('builtUpAreas', items)}
-            />
           </div>
         </CardContent>
       </Card>

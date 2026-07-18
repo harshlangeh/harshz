@@ -1,3 +1,5 @@
+import { type AreaItem, sumAreas } from '@/components/AreaList';
+
 export interface BuildingTypologyCategory {
   category: string;
   /** Sub-typologies within this category. Absent for categories assessed by description instead (e.g. Mixed-use Development). */
@@ -59,11 +61,28 @@ export const OPERATION_SCHEDULE = {
   note: 'Projects that do not fall under these operating schedules may use their actual or owner-defined schedule. Base consumption calculations should be modified accordingly.',
 };
 
+export interface BuildingItem {
+  id: string;
+  name: string;
+  builtUpArea: string;
+}
+
+export function newBuildingId() {
+  return `bldg-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function sumBuiltUpAreas(buildings: BuildingItem[]): number {
+  return buildings.reduce((s, b) => s + (parseFloat(b.builtUpArea) || 0), 0);
+}
+
 export interface ProjectDetailsState {
   typologyCategory: string;
   typologyType: string;
   operationDaily: string;
   operationWeekly: string;
+  siteAreas: AreaItem[];
+  numberOfBuildings: string;
+  buildings: BuildingItem[];
 }
 
 const DEFAULT_STATE: ProjectDetailsState = {
@@ -71,6 +90,9 @@ const DEFAULT_STATE: ProjectDetailsState = {
   typologyType: '',
   operationDaily: '',
   operationWeekly: '',
+  siteAreas: [],
+  numberOfBuildings: '1',
+  buildings: [{ id: newBuildingId(), name: '', builtUpArea: '' }],
 };
 
 const STORAGE_KEY = 'project_typology';
@@ -87,5 +109,27 @@ export function getProjectDetails(): ProjectDetailsState {
 export function saveProjectDetails(patch: Partial<ProjectDetailsState>) {
   const next = { ...getProjectDetails(), ...patch };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  syncAreaTotalsToProjectInfo(next);
   return next;
+}
+
+/**
+ * Mirrors computed Site Area / Built-up Area totals into the `project_info` localStorage blob
+ * (merged, not overwritten) so the existing Word/PDF download code — which reads
+ * `projectInfo.siteArea` / `projectInfo.builtUpArea` — keeps working unchanged.
+ */
+function syncAreaTotalsToProjectInfo(state: ProjectDetailsState) {
+  if (typeof window === 'undefined') return;
+  let existing: Record<string, unknown> = {};
+  try {
+    existing = JSON.parse(localStorage.getItem('project_info') || '{}');
+  } catch {
+    existing = {};
+  }
+  const payload = {
+    ...existing,
+    siteArea: String(sumAreas(state.siteAreas)),
+    builtUpArea: String(sumBuiltUpAreas(state.buildings)),
+  };
+  localStorage.setItem('project_info', JSON.stringify(payload));
 }
