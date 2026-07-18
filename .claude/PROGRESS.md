@@ -47,6 +47,22 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-18 22:00 IST] Claude (claude-sonnet-5) — Mandatory "M" recolored: black in Max, green in Target
+
+**Files changed:**
+- Modified: `src/data/griha-v6-appraisals.ts`
+
+**What was done:**
+- [x] `appraisalMaxDisplay`'s Mandatory "M" badge changed from green to `text-foreground` (theme-adaptive black/white) so it reads as a neutral label rather than implying compliance status
+- [x] `appraisalTargetDisplay`'s Mandatory "M" stays green — that one *does* signal "mandatory requirement met"
+- [x] Build passed; committed to `claude/new-session-fqgdu4`
+
+**Blockers / next steps:**
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-18 21:45 IST] Claude (claude-sonnet-5) — PR #15 merged
 
 **What was done:**
