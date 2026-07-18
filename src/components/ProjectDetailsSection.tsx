@@ -13,6 +13,13 @@ interface Props {
   accentClass: string;
 }
 
+/**
+ * Sentinel for the leading "Select…" placeholder option. It must be enabled (not `disabled`) so
+ * Radix's open-on-no-value auto-focus lands on it instead of the first real option — otherwise the
+ * first real option gets a focus highlight that reads as a pre-selected default.
+ */
+const PLACEHOLDER = '__placeholder__';
+
 export function ProjectDetailsSection({ accentClass }: Props) {
   const [details, setDetails] = useState<ProjectDetailsState>({
     typologyCategory: '', typologyType: '', operationDaily: '', operationWeekly: '',
@@ -25,6 +32,8 @@ export function ProjectDetailsSection({ accentClass }: Props) {
   const update = (patch: Partial<ProjectDetailsState>) => {
     setDetails(saveProjectDetails(patch));
   };
+
+  const resolve = (v: string) => (v === PLACEHOLDER ? '' : v);
 
   const selectedCategory = BUILDING_TYPOLOGIES.find(c => c.category === details.typologyCategory);
 
@@ -43,12 +52,13 @@ export function ProjectDetailsSection({ accentClass }: Props) {
             <label className="text-sm font-medium">Building Typology</label>
             <Select
               value={details.typologyCategory}
-              onValueChange={v => update({ typologyCategory: v, typologyType: '' })}
+              onValueChange={v => update({ typologyCategory: resolve(v), typologyType: '' })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value={PLACEHOLDER} className="text-muted-foreground">Select a category</SelectItem>
                 {BUILDING_TYPOLOGIES.map(c => (
                   <SelectItem key={c.category} value={c.category}>{c.category}</SelectItem>
                 ))}
@@ -61,12 +71,13 @@ export function ProjectDetailsSection({ accentClass }: Props) {
             {selectedCategory?.types ? (
               <Select
                 value={details.typologyType}
-                onValueChange={v => update({ typologyType: v })}
+                onValueChange={v => update({ typologyType: resolve(v) })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a sub-type" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value={PLACEHOLDER} className="text-muted-foreground">Select a sub-type</SelectItem>
                   {selectedCategory.types.map(t => (
                     <SelectItem key={t} value={t}>{t}</SelectItem>
                   ))}
@@ -89,12 +100,13 @@ export function ProjectDetailsSection({ accentClass }: Props) {
             <label className="text-sm font-medium">Daily Operation Schedule</label>
             <Select
               value={details.operationDaily}
-              onValueChange={v => update({ operationDaily: v })}
+              onValueChange={v => update({ operationDaily: resolve(v) })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select daily hours" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value={PLACEHOLDER} className="text-muted-foreground">Select daily hours</SelectItem>
                 {OPERATION_SCHEDULE.dailyOptions.map(o => (
                   <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
                 ))}
@@ -106,12 +118,13 @@ export function ProjectDetailsSection({ accentClass }: Props) {
             <label className="text-sm font-medium">Weekly Operation Schedule</label>
             <Select
               value={details.operationWeekly}
-              onValueChange={v => update({ operationWeekly: v })}
+              onValueChange={v => update({ operationWeekly: resolve(v) })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select weekly days" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value={PLACEHOLDER} className="text-muted-foreground">Select weekly days</SelectItem>
                 {OPERATION_SCHEDULE.weeklyOptions.map(o => (
                   <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
                 ))}
