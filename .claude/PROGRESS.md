@@ -47,6 +47,20 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-18 21:45 IST] Claude (claude-sonnet-5) — PR #15 merged
+
+**What was done:**
+- [x] PR #15 (Project Approvals marked Mandatory) squash-merged into `main` (commit `507401e`)
+- [x] Hit a merge conflict on the first merge attempt: amending PR #14's squash-merge commit (per the stop-hook fix) had made the dev branch's history diverge from `main`'s actual commit SHA for that same content, so GitHub couldn't fast-forward/merge cleanly. Fixed by resetting the branch straight to `origin/main` and cherry-picking just the two new commits back on top, then force-pushing — merged cleanly after that
+- [x] Lesson: don't amend a commit that's already the tip of `main`; if a hook flags an already-merged commit's authorship, it's safe to leave as-is since it drops out of future PR diffs automatically once new commits build on top of the real `main` tip
+- [x] Dev branch restarted from the new `main`
+
+**Blockers / next steps:**
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-18 15:35 IST] Claude (claude-sonnet-5) — Project Approvals (1.1.1) marked Mandatory
 
 **Files changed:**
