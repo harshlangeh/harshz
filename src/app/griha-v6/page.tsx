@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { DownloadSection } from '@/components/DownloadSection';
 import { AttemptStatusRadio } from '@/components/AttemptStatusRadio';
+import { ProjectDetailsSection } from '@/components/ProjectDetailsSection';
 import {
   CRITERION_APPRAISALS, getAppraisalState, saveAppraisalState, appraisalContribution, appraisalTargetDisplay,
   appraisalMaxDisplay, criterionEffectiveMax,
@@ -358,6 +359,8 @@ export default function GrihaV6Page() {
           </div>
         </CardContent>
       </Card>
+
+      <ProjectDetailsSection accentClass="border-t-orange" />
 
       {/* Criteria table */}
       <Card className="mb-6 overflow-hidden">
