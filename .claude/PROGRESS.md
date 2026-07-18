@@ -47,6 +47,30 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-19 04:05 IST] Claude (claude-sonnet-5) — Project Details section (Building Typology + Operation Schedule) added to GRIHA checklist pages
+
+**Files changed:**
+- Added: `src/data/building-typology.ts`
+- Added: `src/components/ProjectDetailsSection.tsx`
+- Modified: `src/app/griha-v6/page.tsx`, `src/app/griha-v2019/page.tsx`, `src/app/griha-v2015/page.tsx`
+
+**What was done:**
+- [x] User's initial pasted Building Typology table was garbled from a PDF copy-paste (headers/items interleaved); I reconstructed my best-guess mapping and asked the user to confirm — they came back with a clean, authoritative JSON (7 categories + Sports + Mixed-use Development, plus an Operation Schedule block) which is now the source of truth in `building-typology.ts`
+- [x] New `ProjectDetailsSection` card renders before the checklist table on all three GRIHA pages (v6/v2019/v2015 — user asked for "All GRIHA Checklist page"), with brand-matched accent border (orange/green/rose-red)
+- [x] Building Typology: category dropdown + dependent sub-typology dropdown; "Mixed-use Development" has no sub-types, so the sub-dropdown is replaced with its description text instead
+- [x] Operation Schedule: Daily (8h/24h) and Weekly (5 days/7 days) dropdowns, plus the standard note about projects outside these schedules using an owner-defined one
+- [x] State stored under its own new `project_typology` localStorage key (not merged into `project_info`) — deliberately decoupled so the dashboard's `saveProjectInfo()` (which overwrites the whole `project_info` blob) can't silently wipe these fields
+- [x] Verified with Playwright: category → sub-type selection, Mixed-use Development's description fallback, cross-page brand coloring (v2019 green), and persistence across a page reload
+- [x] Build passed; committed to `claude/new-session-fqgdu4`
+
+**Blockers / next steps:**
+- Stop-hook flagged PR #17's squash-merge commit (`994d174`) as unverified — left as-is per the established lesson (amending already-merged commits caused a real conflict before)
+- New `project_typology` key not yet listed in AGENTS.md's state-keys table — worth adding next time that file is touched
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-19 03:35 IST] Claude (claude-sonnet-5) — "Open Appraisal" styled as a real button
 
 **Files changed:**
