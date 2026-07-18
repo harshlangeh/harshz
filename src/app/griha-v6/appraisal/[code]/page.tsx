@@ -2,13 +2,20 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Calculator, Upload } from 'lucide-react';
+import { ArrowLeft, Calculator, Upload, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { AttemptStatusRadio } from '@/components/AttemptStatusRadio';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import {
   getAppraisalMeta, getAppraisalState, saveAppraisalState, type AppraisalStatus,
 } from '@/data/griha-v6-appraisals';
+import { buildProjectApprovalsNarrative } from '@/lib/project-narrative';
+
+/** Appraisals whose narrative can be auto-generated from Project Information / Project Details. */
+const DYNAMIC_NARRATIVE_BUILDERS: Record<string, () => string> = {
+  '1.1.1': buildProjectApprovalsNarrative,
+};
 
 export default function AppraisalDetailPage() {
   const params = useParams<{ code: string }>();
@@ -18,10 +25,20 @@ export default function AppraisalDetailPage() {
   const [status, setStatus] = useState<AppraisalStatus | null>(null);
   const [narrative, setNarrative] = useState('');
 
+  const narrativeBuilder = DYNAMIC_NARRATIVE_BUILDERS[code];
+
   useEffect(() => {
     const state = getAppraisalState(code);
     setStatus(state.status);
-    setNarrative(state.narrativeHtml);
+    if (!state.narrativeHtml && narrativeBuilder) {
+      // First visit with no manual edits yet — seed it from Project Information / Project Details.
+      const generated = narrativeBuilder();
+      setNarrative(generated);
+      saveAppraisalState(code, { narrativeHtml: generated });
+    } else {
+      setNarrative(state.narrativeHtml);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
 
   const updateStatus = (s: AppraisalStatus) => {
@@ -32,6 +49,13 @@ export default function AppraisalDetailPage() {
   const updateNarrative = (html: string) => {
     setNarrative(html);
     saveAppraisalState(code, { narrativeHtml: html });
+  };
+
+  const regenerateNarrative = () => {
+    if (!narrativeBuilder) return;
+    const generated = narrativeBuilder();
+    setNarrative(generated);
+    saveAppraisalState(code, { narrativeHtml: generated });
   };
 
   if (!meta) {
@@ -91,8 +115,18 @@ export default function AppraisalDetailPage() {
       {/* Narrative */}
       <Card className="mb-6">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Narrative</CardTitle>
-          <CardDescription>Describe how this appraisal is being met</CardDescription>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <CardTitle className="text-base">Narrative</CardTitle>
+              <CardDescription>Describe how this appraisal is being met</CardDescription>
+            </div>
+            {narrativeBuilder && (
+              <Button variant="outline" size="sm" onClick={regenerateNarrative} className="gap-1.5 flex-shrink-0">
+                <RefreshCw className="h-3.5 w-3.5" />
+                Generate from Project Details
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <RichTextEditor
