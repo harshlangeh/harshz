@@ -47,6 +47,23 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-19 03:35 IST] Claude (claude-sonnet-5) — "Open Appraisal" styled as a real button
+
+**Files changed:**
+- Modified: `src/app/griha-v6/page.tsx`
+
+**What was done:**
+- [x] "Open Appraisal →", shown when an appraisal is marked Attempting, was plain underlined text — now uses the shared `Button` component (`asChild` + `Link`, `size="sm"`, orange brand fill) so it reads as a clickable action, not a text link
+- [x] Verified with Playwright: expanding Criterion 1 → `1.1.1` → selecting Attempting shows a solid orange "Open Appraisal →" button
+- [x] Build passed; committed to `claude/new-session-fqgdu4`
+
+**Blockers / next steps:**
+- Stop-hook flagged PR #16's squash-merge commit (`a244085`, committer `noreply@github.com`) as unverified — left it as-is this time per the lesson from the PR #14/#15 incident (amending it caused a real merge conflict); asked user whether they still want it force-fixed, awaiting reply
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-18 22:00 IST] Claude (claude-sonnet-5) — Mandatory "M" recolored: black in Max, green in Target
 
 **Files changed:**
