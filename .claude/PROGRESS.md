@@ -47,6 +47,37 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-18 15:20 IST] Claude (claude-sonnet-5) — Nested appraisal table header removed, columns aligned with criterion table
+
+**Files changed:**
+- Modified: `src/app/griha-v6/page.tsx`
+
+**What was done:**
+- [x] Removed the appraisal mini-table's own `<thead>` (No./Appraisal/Max/Target/Compliance) — redundant since it sits nested inside the already-headered outer criteria table
+- [x] Added a `<colgroup>` to the nested table with column widths matching the outer criteria table (`w-12`, auto, `w-20`, `w-24`, `w-40`) so the Max/Target/Compliance columns line up vertically with the outer table's columns
+- [x] Verified with Playwright: expanding Criterion 1 shows appraisals `1.1.1`/`1.1.2` with no duplicate header row, and Max/Target/Compliance columns visually align with the outer table's columns
+- [x] Build passed; committed to `claude/new-session-fqgdu4`
+
+**Blockers / next steps:**
+- User said more follow-up instructions are coming next
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
+### [2026-07-17 20:15 IST] Claude (claude-sonnet-5) — PR #13 merged; auto-merge enabled going forward
+
+**What was done:**
+- [x] Verified `npm run build` passes, marked PR #13 ready for review, squash-merged into `main` (commit `58ddb5d`)
+- [x] Dev branch restarted from the new `main`
+- [x] User instructed: from now on, merge PRs automatically after a successful build rather than waiting for manual review/merge approval each time
+
+**Blockers / next steps:**
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-17 08:20 IST] Claude (claude-sonnet-5) — Mandatory appraisals excluded from scoring
 
 **Files changed:**

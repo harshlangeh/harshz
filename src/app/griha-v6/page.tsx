@@ -242,15 +242,13 @@ export default function GrihaV6Page() {
             <td colSpan={5} className="px-4 py-4">
               <div className="pl-6 rounded-md overflow-hidden border border-border">
                 <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-orange/80 text-white">
-                      <th className="px-4 py-2 text-center font-semibold w-16">No.</th>
-                      <th className="px-4 py-2 text-left font-semibold">Appraisal</th>
-                      <th className="px-4 py-2 text-center font-semibold w-20">Max</th>
-                      <th className="px-4 py-2 text-center font-semibold w-20">Target</th>
-                      <th className="px-4 py-2 text-left font-semibold w-36">Compliance</th>
-                    </tr>
-                  </thead>
+                  <colgroup>
+                    <col className="w-12" />
+                    <col />
+                    <col className="w-20" />
+                    <col className="w-24" />
+                    <col className="w-40" />
+                  </colgroup>
                   <tbody>
                     {appraisals.map(a => {
                       const status = appraisalStatuses[a.code] ?? null;
