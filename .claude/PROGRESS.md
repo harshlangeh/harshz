@@ -47,6 +47,27 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-19 05:10 IST] Claude (claude-sonnet-5) — Site/Built-up Area moved to Project Details; Number of Buildings added
+
+**Files changed:**
+- Added: `src/components/AreaList.tsx` (extracted from `src/app/page.tsx`)
+- Modified: `src/app/page.tsx`, `src/components/ProjectDetailsSection.tsx`, `src/data/building-typology.ts`
+
+**What was done:**
+- [x] Extracted the dashboard's inline `AreaList`/`AreaItem`/`sumAreas`/`fmtSqm`/`newId` into a shared `src/components/AreaList.tsx` so both the dashboard and `ProjectDetailsSection` can use it
+- [x] Removed the "Total Site Area" and "Built-up Area" sections from the dashboard's Project Information card entirely, along with `siteAreas`/`builtUpAreas` from the `ProjectInfo` type, `DEFAULT_PROJECT`, and `migrateProjectInfo`
+- [x] `ProjectDetailsSection` now has: **Number of Buildings** (numeric input) → drives a **Buildings** list sized to match, each row with Name + Built-up Area (auto-grows/shrinks as the count changes, preserving existing entries); and **Total Site Area** (the same multi-line `AreaList` UX moved over from the dashboard, unchanged)
+- [x] `ProjectDetailsState` (in `building-typology.ts`) extended with `siteAreas`, `numberOfBuildings`, `buildings`; every `saveProjectDetails()` call now also mirrors computed `siteArea`/`builtUpArea` totals into the separate `project_info` blob (merged, not overwritten) so the existing Word/PDF download code — which reads `projectInfo.siteArea`/`builtUpArea` — keeps working unchanged
+- [x] Fixed a related correctness bug while here: the dashboard's `saveProjectInfo()` used to overwrite the *entire* `project_info` blob on every dashboard edit, which would have silently wiped the site/built-up area totals written from the checklist pages the next time someone touched, say, Climate Zone. It now merges onto whatever's already stored
+- [x] Verified with Playwright: dashboard no longer shows Site/Built-up Area; setting "Number of Buildings" to 2/3 grows the Buildings list and preserves already-typed names/areas; Site Area entries and Buildings' Built-up Area correctly sum into `project_info.siteArea`/`builtUpArea`; editing a dashboard-only field (Project Name) no longer clobbers those synced totals
+- [x] Build passed; committed to `claude/new-session-fqgdu4`
+
+**Blockers / next steps:**
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-19 04:45 IST] Claude (claude-sonnet-5) — Fixed "Healthcare Facility looks default" on the typology dropdowns
 
 **Files changed:**
