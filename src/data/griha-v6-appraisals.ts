@@ -100,9 +100,9 @@ export interface AppraisalDisplay {
   colorClass: string;
 }
 
-/** How to render an appraisal's own max-points badge — "M" for Mandatory (never scored), "Ex" in gold once exempted. */
+/** How to render an appraisal's own max-points badge — "M" for Mandatory (never scored, shown in black), "Ex" in gold once exempted. */
 export function appraisalMaxDisplay(a: AppraisalMeta, status: AppraisalStatus | null | undefined): AppraisalDisplay {
-  if (a.type === 'Mandatory') return { text: 'M', colorClass: 'text-green-600' };
+  if (a.type === 'Mandatory') return { text: 'M', colorClass: 'text-foreground' };
   if (status === 'exempted') return { text: 'Ex', colorClass: 'text-amber-500' };
   return { text: a.points !== undefined ? String(a.points) : '—', colorClass: '' };
 }
