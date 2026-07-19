@@ -47,6 +47,27 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-20 00:35 IST] Claude (claude-sonnet-5) — Appraisal page rebuilt as accordion rows matching the criterion table
+
+**Files changed:**
+- Added: `src/lib/griha-compliance.tsx`
+- Modified: `src/app/griha-v6/appraisal/[code]/page.tsx`, `src/app/griha-v6/page.tsx`
+
+**What was done:**
+- [x] The earlier "just add an orange top border to each card" pass (previous entry below) wasn't what the user meant — clarified via AskUserQuestion that they wanted the appraisal page's *row* styling to match the criterion table's clickable rows: compliance-tinted background, chevron, compact single-row layout — not stacked always-open Cards
+- [x] Extracted `complianceBadge()`/`rowClass()` out of `griha-v6/page.tsx` into a new shared `src/lib/griha-compliance.tsx` so both the checklist table and the appraisal page render compliance styling from one source (no drift risk)
+- [x] Rebuilt the appraisal detail page: Status/Narrative/Calculation/Data are now four accordion rows inside one bordered `Card`, each tinted via `rowClass(meta.type)` (e.g. `1.1.1`/`1.1.2` are Mandatory → rose tint, same as a Mandatory criterion row), with a chevron and single-section-expanded-at-a-time behavior — the same interaction pattern as the criterion table's row-click-to-expand
+- [x] The appraisal's own compliance badge (Mandatory/Optional) now shows next to the page title, mirroring how the criterion table shows it in the Compliance column
+- [x] The Narrative row's "Generate from Project Details" button now sits inline in the row header (stopPropagation so it doesn't toggle the row) instead of a Card-header corner
+- [x] Verified with Playwright: rows render with the rose "Mandatory" tint on `1.1.1`/`1.1.2`, clicking a row collapses the previous one and expands the clicked one, and the Tree Preservation calculator still renders correctly inside its row
+- [x] Build passed; committed to `claude/new-session-fqgdu4`
+
+**Blockers / next steps:**
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-20 00:10 IST] Claude (claude-sonnet-5) — Appraisal page card styling matched to criterion checklist page
 
 **Files changed:**
