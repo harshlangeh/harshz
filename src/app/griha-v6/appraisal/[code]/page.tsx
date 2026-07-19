@@ -113,7 +113,7 @@ export default function AppraisalDetailPage() {
       </div>
 
       {/* Status */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-t-4 border-t-orange">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Status</CardTitle>
           <CardDescription>Are you attempting this appraisal?</CardDescription>
@@ -140,7 +140,7 @@ export default function AppraisalDetailPage() {
       </Card>
 
       {/* Narrative */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-t-4 border-t-orange">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -165,7 +165,7 @@ export default function AppraisalDetailPage() {
       </Card>
 
       {/* Calculation */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-t-4 border-t-orange">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <Calculator className="h-4 w-4 text-muted-foreground" />
@@ -185,7 +185,7 @@ export default function AppraisalDetailPage() {
       </Card>
 
       {/* Data */}
-      <Card>
+      <Card className="border-t-4 border-t-orange">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <Upload className="h-4 w-4 text-muted-foreground" />
