@@ -41,9 +41,11 @@ export function getAppraisalMeta(code: string): AppraisalMeta | undefined {
 export interface AppraisalState {
   status: AppraisalStatus | null;
   narrativeHtml: string;
+  /** Free-form key/value store for an appraisal's calculator inputs, if it has one. */
+  calculator?: Record<string, string>;
 }
 
-const DEFAULT_STATE: AppraisalState = { status: null, narrativeHtml: '' };
+const DEFAULT_STATE: AppraisalState = { status: null, narrativeHtml: '', calculator: {} };
 const STORAGE_KEY = 'appraisals_v6';
 
 function readStore(): Record<string, AppraisalState> {
