@@ -2,12 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { getAppraisalState, saveAppraisalState } from '@/data/griha-v6-appraisals';
+import { getAppraisalState, saveAppraisalState, type AppraisalStatus } from '@/data/griha-v6-appraisals';
 import { getProjectDetails } from '@/data/building-typology';
 import { sumAreas } from '@/components/AreaList';
 
 interface Props {
   code: string;
+  status: AppraisalStatus | null;
 }
 
 const FIELDS = {
@@ -28,7 +29,7 @@ function num(v: string | undefined): number {
   return parseFloat(v || '') || 0;
 }
 
-export function TreePreservationCalculator({ code }: Props) {
+export function TreePreservationCalculator({ code, status }: Props) {
   const [values, setValues] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -48,6 +49,10 @@ export function TreePreservationCalculator({ code }: Props) {
     saveAppraisalState(code, { calculator: next });
   };
 
+  // No existing mature trees (either declared directly, or the whole appraisal marked Exempted)
+  // means the tree-count fields don't apply — the requirement collapses to zero either way.
+  const isExempted = status === 'exempted' || values[FIELDS.hasExistingTrees] === 'No';
+
   const existingTreesCut = num(values[FIELDS.existingTreesCut]);
   const existingTreesPreserved = num(values[FIELDS.existingTreesPreserved]);
   const treesTransplanted = num(values[FIELDS.treesTransplanted]);
@@ -55,8 +60,8 @@ export function TreePreservationCalculator({ code }: Props) {
 
   // F — new trees required to replant, per the 1:3 replacement ratio for cut mature trees.
   const treesPlanted = existingTreesCut * REPLANT_RATIO;
-  // H — GRIHA site-area-based tree requirement.
-  const requiredTrees = siteArea / SQM_PER_REQUIRED_TREE;
+  // H — GRIHA site-area-based tree requirement (0 once exempted).
+  const requiredTrees = isExempted ? 0 : siteArea / SQM_PER_REQUIRED_TREE;
   // I — total preserved via a combination of preservation, replanting and transplanting.
   const totalPreserved = existingTreesPreserved + treesPlanted + treesTransplanted;
   // J — mandatory threshold check.
@@ -107,24 +112,30 @@ export function TreePreservationCalculator({ code }: Props) {
             </SelectContent>
           </Select>,
         )}
-        {row('C', 'Number of existing mature trees on site prior to construction', numberInput(FIELDS.existingTreesPrior))}
-        {row('D', 'Number of existing mature trees preserved on site', numberInput(FIELDS.existingTreesPreserved))}
-        {row('E', 'Number of existing mature trees cut on site', numberInput(FIELDS.existingTreesCut))}
-        {row(
-          'F',
-          'Number of new trees planted of native/naturalized species (in the ratio of 1:3)',
-          computedCell(String(treesPlanted)),
+        {!isExempted && (
+          <>
+            {row('C', 'Number of existing mature trees on site prior to construction', numberInput(FIELDS.existingTreesPrior))}
+            {row('D', 'Number of existing mature trees preserved on site', numberInput(FIELDS.existingTreesPreserved))}
+            {row('E', 'Number of existing mature trees cut on site', numberInput(FIELDS.existingTreesCut))}
+            {row(
+              'F',
+              'Number of new trees planted of native/naturalized species (in the ratio of 1:3)',
+              computedCell(String(treesPlanted)),
+            )}
+            {row('G', 'Number of trees transplanted successfully on site', numberInput(FIELDS.treesTransplanted))}
+            {row('H', 'Number of trees as per GRIHA requirement', computedCell(requiredTrees ? requiredTrees.toFixed(0) : '—'))}
+            {row('I', 'Total number of trees preserved using a combination of strategies', computedCell(String(totalPreserved)))}
+          </>
         )}
-        {row('G', 'Number of trees transplanted successfully on site', numberInput(FIELDS.treesTransplanted))}
-        {row('H', 'Number of trees as per GRIHA requirement', computedCell(requiredTrees ? requiredTrees.toFixed(0) : '—'))}
-        {row('I', 'Total number of trees preserved using a combination of strategies', computedCell(String(totalPreserved)))}
         {row(
           'J',
           'Does the project meet the GRIHA tree preservation threshold (Mandatory)?',
-          computedCell(
-            requiredTrees ? (meetsThreshold ? 'YES' : 'NO') : '—',
-            requiredTrees ? (meetsThreshold ? 'text-green-600' : 'text-red-500') : '',
-          ),
+          isExempted
+            ? computedCell('EXEMPTED', 'text-amber-500')
+            : computedCell(
+                requiredTrees ? (meetsThreshold ? 'YES' : 'NO') : '—',
+                requiredTrees ? (meetsThreshold ? 'text-green-600' : 'text-red-500') : '',
+              ),
         )}
       </tbody>
     </table>

@@ -19,8 +19,13 @@ const DYNAMIC_NARRATIVE_BUILDERS: Record<string, () => string> = {
 };
 
 /** Appraisals with a configured calculator. */
-const CALCULATORS: Record<string, React.ComponentType<{ code: string }>> = {
+const CALCULATORS: Record<string, React.ComponentType<{ code: string; status: AppraisalStatus | null }>> = {
   '1.1.2': TreePreservationCalculator,
+};
+
+/** Default narrative set whenever an appraisal's status is switched to Exempted. */
+const EXEMPTED_NARRATIVES: Record<string, string> = {
+  '1.1.2': 'There is no existing trees on the site hence project is exempted from the appraisal.',
 };
 
 export default function AppraisalDetailPage() {
@@ -32,23 +37,37 @@ export default function AppraisalDetailPage() {
   const [narrative, setNarrative] = useState('');
 
   const narrativeBuilder = DYNAMIC_NARRATIVE_BUILDERS[code];
+  const exemptedNarrative = EXEMPTED_NARRATIVES[code];
 
   useEffect(() => {
     const state = getAppraisalState(code);
     setStatus(state.status);
-    if (!state.narrativeHtml && narrativeBuilder) {
-      // First visit with no manual edits yet — seed it from Project Information / Project Details.
-      const generated = narrativeBuilder();
-      setNarrative(generated);
-      saveAppraisalState(code, { narrativeHtml: generated });
-    } else {
-      setNarrative(state.narrativeHtml);
+    if (!state.narrativeHtml) {
+      // First visit with no manual edits yet — seed a default narrative.
+      let generated: string | undefined;
+      if (state.status === 'exempted' && exemptedNarrative) {
+        generated = `<p>${exemptedNarrative}</p>`;
+      } else if (narrativeBuilder) {
+        generated = narrativeBuilder();
+      }
+      if (generated) {
+        setNarrative(generated);
+        saveAppraisalState(code, { narrativeHtml: generated });
+        return;
+      }
     }
+    setNarrative(state.narrativeHtml);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
 
   const updateStatus = (s: AppraisalStatus) => {
     setStatus(s);
+    if (s === 'exempted' && exemptedNarrative) {
+      const html = `<p>${exemptedNarrative}</p>`;
+      setNarrative(html);
+      saveAppraisalState(code, { status: s, narrativeHtml: html });
+      return;
+    }
     saveAppraisalState(code, { status: s });
   };
 
@@ -156,7 +175,7 @@ export default function AppraisalDetailPage() {
         </CardHeader>
         <CardContent>
           {CalculatorComponent ? (
-            <CalculatorComponent code={code} />
+            <CalculatorComponent code={code} status={status} />
           ) : (
             <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
               The calculator for this appraisal hasn&rsquo;t been configured yet.
