@@ -11,10 +11,16 @@ import {
   getAppraisalMeta, getAppraisalState, saveAppraisalState, type AppraisalStatus,
 } from '@/data/griha-v6-appraisals';
 import { buildProjectApprovalsNarrative } from '@/lib/project-narrative';
+import { TreePreservationCalculator } from '@/components/calculators/TreePreservationCalculator';
 
 /** Appraisals whose narrative can be auto-generated from Project Information / Project Details. */
 const DYNAMIC_NARRATIVE_BUILDERS: Record<string, () => string> = {
   '1.1.1': buildProjectApprovalsNarrative,
+};
+
+/** Appraisals with a configured calculator. */
+const CALCULATORS: Record<string, React.ComponentType<{ code: string }>> = {
+  '1.1.2': TreePreservationCalculator,
 };
 
 export default function AppraisalDetailPage() {
@@ -57,6 +63,8 @@ export default function AppraisalDetailPage() {
     setNarrative(generated);
     saveAppraisalState(code, { narrativeHtml: generated });
   };
+
+  const CalculatorComponent = CALCULATORS[code];
 
   if (!meta) {
     return (
@@ -147,9 +155,13 @@ export default function AppraisalDetailPage() {
           <CardDescription>Prefilled from Project Information and rating-specific data</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-            The calculator for this appraisal hasn&rsquo;t been configured yet.
-          </div>
+          {CalculatorComponent ? (
+            <CalculatorComponent code={code} />
+          ) : (
+            <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+              The calculator for this appraisal hasn&rsquo;t been configured yet.
+            </div>
+          )}
         </CardContent>
       </Card>
 
