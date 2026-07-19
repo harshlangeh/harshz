@@ -47,6 +47,24 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-19 06:15 IST] Claude (claude-sonnet-5) — Tree Preservation: exempted-state narrative + calculator collapse
+
+**Files changed:**
+- Modified: `src/app/griha-v6/appraisal/[code]/page.tsx`, `src/components/calculators/TreePreservationCalculator.tsx`
+
+**What was done:**
+- [x] New `EXEMPTED_NARRATIVES` code→text map on the appraisal page; when `1.1.2`'s Status is switched to Exempted (or is already Exempted on load with no narrative yet), the narrative auto-fills to "There is no existing trees on the site hence project is exempted from the appraisal." (overwrites, same as the existing "Generate" pattern)
+- [x] `TreePreservationCalculator` now takes a `status` prop; `isExempted = status === 'exempted' || hasExistingTrees === 'No'` — either trigger collapses rows C–I (all the tree-count inputs), leaving only A (Site area), B (Yes/No), and J, which shows "EXEMPTED" in gold instead of the computed YES/NO. H (GRIHA requirement) is forced to 0 while exempted, per spec, even though its row is hidden
+- [x] Switching B back to "Yes" (with status not Exempted) restores all rows and live computation as before
+- [x] Verified with Playwright: B=No → 3 rows, J=EXEMPTED; switching Status to Exempted while B=Yes still collapses to 3 rows and sets the exact narrative text requested; switching B back to Yes restores all 10 rows
+- [x] Build passed; committed to `claude/new-session-fqgdu4`
+
+**Blockers / next steps:**
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-19 06:00 IST] Claude (claude-sonnet-5) — Tree Preservation (1.1.2) calculator
 
 **Files changed:**
