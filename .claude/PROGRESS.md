@@ -47,6 +47,22 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-20 00:10 IST] Claude (claude-sonnet-5) — Appraisal page card styling matched to criterion checklist page
+
+**Files changed:**
+- Modified: `src/app/griha-v6/appraisal/[code]/page.tsx`
+
+**What was done:**
+- [x] Added `border-t-4 border-t-orange` to all four cards on the appraisal detail page (Status, Narrative, Calculation, Data) — previously plain white cards with no accent, unlike the checklist page's Summary/Project Details cards which already carry that orange top-border branding
+- [x] Verified visually with Playwright on both `1.1.1` and `1.1.2` — cards now read as visually consistent with the criterion/checklist page
+- [x] Build passed; committed to `claude/new-session-fqgdu4`
+
+**Blockers / next steps:**
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-19 06:15 IST] Claude (claude-sonnet-5) — Tree Preservation: exempted-state narrative + calculator collapse
 
 **Files changed:**
