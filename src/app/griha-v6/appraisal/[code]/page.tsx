@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Calculator, Upload, RefreshCw } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ArrowLeft, ChevronDown, ClipboardList, FileText, Calculator, Upload, RefreshCw } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AttemptStatusRadio } from '@/components/AttemptStatusRadio';
 import { RichTextEditor } from '@/components/RichTextEditor';
@@ -12,6 +12,7 @@ import {
 } from '@/data/griha-v6-appraisals';
 import { buildProjectApprovalsNarrative } from '@/lib/project-narrative';
 import { TreePreservationCalculator } from '@/components/calculators/TreePreservationCalculator';
+import { complianceBadge, rowClass } from '@/lib/griha-compliance';
 
 /** Appraisals whose narrative can be auto-generated from Project Information / Project Details. */
 const DYNAMIC_NARRATIVE_BUILDERS: Record<string, () => string> = {
@@ -28,6 +29,8 @@ const EXEMPTED_NARRATIVES: Record<string, string> = {
   '1.1.2': 'There is no existing trees on the site hence project is exempted from the appraisal.',
 };
 
+type SectionKey = 'status' | 'narrative' | 'calculation' | 'data';
+
 export default function AppraisalDetailPage() {
   const params = useParams<{ code: string }>();
   const code = decodeURIComponent(params.code as string);
@@ -35,6 +38,7 @@ export default function AppraisalDetailPage() {
 
   const [status, setStatus] = useState<AppraisalStatus | null>(null);
   const [narrative, setNarrative] = useState('');
+  const [expandedSection, setExpandedSection] = useState<SectionKey | null>('status');
 
   const narrativeBuilder = DYNAMIC_NARRATIVE_BUILDERS[code];
   const exemptedNarrative = EXEMPTED_NARRATIVES[code];
@@ -96,29 +100,21 @@ export default function AppraisalDetailPage() {
     );
   }
 
-  return (
-    <div className="container">
-      <Link
-        href="/griha-v6"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" /> Back to GRIHA V6 Checklist
-      </Link>
-
-      <div className="mb-8">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">
-          Appraisal {meta.code}
-        </p>
-        <h1 className="text-2xl font-bold tracking-tight text-orange">{meta.title}</h1>
-      </div>
-
-      {/* Status */}
-      <Card className="mb-6 border-t-4 border-t-orange">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Status</CardTitle>
-          <CardDescription>Are you attempting this appraisal?</CardDescription>
-        </CardHeader>
-        <CardContent>
+  const SECTIONS: {
+    key: SectionKey;
+    icon: React.ComponentType<{ className?: string }>;
+    title: string;
+    subtitle: string;
+    right?: React.ReactNode;
+    content: React.ReactNode;
+  }[] = [
+    {
+      key: 'status',
+      icon: ClipboardList,
+      title: 'Status',
+      subtitle: 'Are you attempting this appraisal?',
+      content: (
+        <>
           <AttemptStatusRadio
             name="appraisal-status"
             value={status}
@@ -136,68 +132,105 @@ export default function AppraisalDetailPage() {
               Marked not applicable to this project — excluded from the criterion&rsquo;s max.
             </p>
           )}
-        </CardContent>
-      </Card>
+        </>
+      ),
+    },
+    {
+      key: 'narrative',
+      icon: FileText,
+      title: 'Narrative',
+      subtitle: 'Describe how this appraisal is being met',
+      right: narrativeBuilder && (
+        <Button variant="outline" size="sm" onClick={regenerateNarrative} className="gap-1.5 flex-shrink-0">
+          <RefreshCw className="h-3.5 w-3.5" />
+          Generate from Project Details
+        </Button>
+      ),
+      content: (
+        <RichTextEditor
+          value={narrative}
+          onChange={updateNarrative}
+          placeholder="Write the narrative for this appraisal…"
+        />
+      ),
+    },
+    {
+      key: 'calculation',
+      icon: Calculator,
+      title: 'Calculation',
+      subtitle: 'Prefilled from Project Information and rating-specific data',
+      content: CalculatorComponent ? (
+        <CalculatorComponent code={code} status={status} />
+      ) : (
+        <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+          The calculator for this appraisal hasn&rsquo;t been configured yet.
+        </div>
+      ),
+    },
+    {
+      key: 'data',
+      icon: Upload,
+      title: 'Data',
+      subtitle: 'Supporting documents for this appraisal',
+      content: (
+        <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+          Required data for this appraisal hasn&rsquo;t been defined yet.
+        </div>
+      ),
+    },
+  ];
 
-      {/* Narrative */}
-      <Card className="mb-6 border-t-4 border-t-orange">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <CardTitle className="text-base">Narrative</CardTitle>
-              <CardDescription>Describe how this appraisal is being met</CardDescription>
-            </div>
-            {narrativeBuilder && (
-              <Button variant="outline" size="sm" onClick={regenerateNarrative} className="gap-1.5 flex-shrink-0">
-                <RefreshCw className="h-3.5 w-3.5" />
-                Generate from Project Details
-              </Button>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          <RichTextEditor
-            value={narrative}
-            onChange={updateNarrative}
-            placeholder="Write the narrative for this appraisal…"
-          />
-        </CardContent>
-      </Card>
+  return (
+    <div className="container">
+      <Link
+        href="/griha-v6"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" /> Back to GRIHA V6 Checklist
+      </Link>
 
-      {/* Calculation */}
-      <Card className="mb-6 border-t-4 border-t-orange">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Calculator className="h-4 w-4 text-muted-foreground" />
-            <CardTitle className="text-base">Calculation</CardTitle>
-          </div>
-          <CardDescription>Prefilled from Project Information and rating-specific data</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {CalculatorComponent ? (
-            <CalculatorComponent code={code} status={status} />
-          ) : (
-            <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-              The calculator for this appraisal hasn&rsquo;t been configured yet.
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <div className="mb-6 flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">
+            Appraisal {meta.code}
+          </p>
+          <h1 className="text-2xl font-bold tracking-tight text-orange">{meta.title}</h1>
+        </div>
+        {complianceBadge(meta.type || 'Optional')}
+      </div>
 
-      {/* Data */}
-      <Card className="border-t-4 border-t-orange">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Upload className="h-4 w-4 text-muted-foreground" />
-            <CardTitle className="text-base">Data</CardTitle>
-          </div>
-          <CardDescription>Supporting documents for this appraisal</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-            Required data for this appraisal hasn&rsquo;t been defined yet.
-          </div>
-        </CardContent>
+      {/* Same accordion-row look as the criterion table on the checklist page: tinted by
+          compliance type, chevron + title on the left, single section expanded at a time. */}
+      <Card className="overflow-hidden">
+        {SECTIONS.map((section, i) => {
+          const expanded = expandedSection === section.key;
+          const Icon = section.icon;
+          return (
+            <React.Fragment key={section.key}>
+              <div
+                onClick={() => setExpandedSection(expanded ? null : section.key)}
+                className={`flex items-center justify-between gap-3 px-4 py-3 cursor-pointer hover:bg-muted/40 transition-colors ${i < SECTIONS.length - 1 || expanded ? 'border-b border-border' : ''} ${rowClass(meta.type || 'Optional')}`}
+              >
+                <span className="flex items-center gap-2 text-sm font-semibold flex-1 min-w-0">
+                  <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform flex-shrink-0 ${expanded ? '' : '-rotate-90'}`} />
+                  <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <span className="truncate">{section.title}</span>
+                  <span className="hidden sm:inline text-xs font-normal text-muted-foreground truncate">— {section.subtitle}</span>
+                </span>
+                {section.right && (
+                  <div onClick={e => e.stopPropagation()} className="flex-shrink-0">
+                    {section.right}
+                  </div>
+                )}
+              </div>
+              {expanded && (
+                <div className={`px-4 py-4 bg-muted/10 ${i < SECTIONS.length - 1 ? 'border-b border-border' : ''}`}>
+                  {section.content}
+                </div>
+              )}
+            </React.Fragment>
+          );
+        })}
       </Card>
     </div>
   );

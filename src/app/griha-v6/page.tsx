@@ -3,7 +3,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Star, ChevronDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -15,6 +14,7 @@ import {
   appraisalMaxDisplay, criterionEffectiveMax,
   type AppraisalStatus,
 } from '@/data/griha-v6-appraisals';
+import { complianceBadge, rowClass } from '@/lib/griha-compliance';
 
 const sections = [
   { id: 1, title: "Sustainable Site Planning", max: 12, criteria: [
@@ -70,18 +70,6 @@ const sections = [
     { id: 30, name: "Innovation", max: 5, type: "Optional" },
   ]},
 ];
-
-function complianceBadge(type: string) {
-  if (type === 'Mandatory')       return <Badge variant="mandatory">Mandatory</Badge>;
-  if (type === 'Partly Mandatory') return <Badge variant="partly-mandatory">Partly Mandatory</Badge>;
-  return <Badge variant="optional">Optional</Badge>;
-}
-
-function rowClass(type: string) {
-  if (type === 'Mandatory')        return 'row-mandatory';
-  if (type === 'Partly Mandatory') return 'row-partly';
-  return '';
-}
 
 const STAR_THRESHOLDS = [
   { range: '25 – 40',    min: 25,  max: 40,  stars: 1 },
