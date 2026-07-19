@@ -47,6 +47,30 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-19 06:00 IST] Claude (claude-sonnet-5) — Tree Preservation (1.1.2) calculator
+
+**Files changed:**
+- Added: `src/components/calculators/TreePreservationCalculator.tsx`
+- Modified: `src/data/griha-v6-appraisals.ts`, `src/app/griha-v6/appraisal/[code]/page.tsx`
+
+**What was done:**
+- [x] Added `calculator?: Record<string, string>` to `AppraisalState` — a generic per-appraisal key/value bag (mirrors how `narrativeHtml` is stored) so future appraisal calculators don't need bespoke storage
+- [x] Built the Tree Preservation calculator per user's sample (A–J), rendered as a table: A Site area, B Existing mature trees Y/N, C/D/E/G manual inputs (prior count / preserved / cut / transplanted), and computed read-only F/H/I/J:
+  - F = E × 3 (1:3 replanting ratio for cut trees)
+  - H = A ÷ 125 (GRIHA site-area-based tree requirement)
+  - I = D + F + G (total preserved via combined strategies)
+  - J = I ≥ H ? "YES" : "NO" (Mandatory threshold, green/red)
+- [x] Site area (A) auto-prefills from the Project Details section's Total Site Area when empty, matching the Calculation card's existing "Prefilled from Project Information" description
+- [x] Wired in via a `CALCULATORS` code→component map on the appraisal detail page, same pattern as the narrative-builder map — only `1.1.2` has one for now, other appraisals still show the "not configured yet" placeholder
+- [x] Verified with Playwright against the exact sample values (site area 5000, C=30, D=20, E=5, G=10) — F/H/I/J came out to 15/40/45/YES, matching the user-provided sample precisely
+- [x] Build passed; committed to `claude/new-session-fqgdu4`
+
+**Blockers / next steps:**
+- Still waiting on real appraisal names/points/compliance types for all placeholders except `1.1.1`/`1.1.2`
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-19 05:35 IST] Claude (claude-sonnet-5) — Dynamic Project Approvals narrative, tabular layout
 
 **Files changed:**
