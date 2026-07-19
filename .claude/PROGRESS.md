@@ -47,6 +47,24 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 
 ## Session Log (newest first)
 
+### [2026-07-20 00:50 IST] Claude (claude-sonnet-5) — Appraisals 1.1.3 and 1.1.4 added to Criterion 1
+
+**Files changed:**
+- Modified: `src/data/griha-v6-appraisals.ts`
+
+**What was done:**
+- [x] `1.1.3` "One Tree for Every 80 sqm" — 1 point, Optional
+- [x] `1.1.4` "Per Capita Gross Area Benchmark" — 1 point, Optional
+- [x] Criterion 1 (Green Infrastructure) now has 4 appraisals total; verified both render correctly in the checklist's nested table and on their own detail pages (untinted "Optional" row style, correct badge)
+- [x] Build passed; committed to `claude/new-session-fqgdu4`
+
+**Blockers / next steps:**
+- Criterion 1's stated max (5) still doesn't reconcile with its appraisals' point sum (1.1.1/1.1.2 mandatory = 0 pts, 1.1.3/1.1.4 = 1 pt each = 2 total) — pre-existing gap, not something to silently "fix" without confirming the real GRIHA point breakdown
+- Still waiting on real appraisal names/points/compliance types for placeholders on criteria 2–30
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-20 00:35 IST] Claude (claude-sonnet-5) — Appraisal page rebuilt as accordion rows matching the criterion table
 
 **Files changed:**

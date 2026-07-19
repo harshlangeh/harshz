@@ -19,6 +19,8 @@ export const CRITERION_APPRAISALS: Record<number, AppraisalMeta[]> = {
   1: [
     { code: '1.1.1', title: 'Project Approvals', criterionId: 1, type: 'Mandatory' },
     { code: '1.1.2', title: 'Tree Preservation', criterionId: 1, type: 'Mandatory', exemptable: true },
+    { code: '1.1.3', title: 'One Tree for Every 80 sqm', criterionId: 1, points: 1, type: 'Optional' },
+    { code: '1.1.4', title: 'Per Capita Gross Area Benchmark', criterionId: 1, points: 1, type: 'Optional' },
   ],
 };
 
