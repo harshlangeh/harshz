@@ -1,16 +1,19 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Palette } from 'lucide-react';
-
-const links = [
-  { href: '/',         label: 'Dashboard', Icon: LayoutDashboard },
-  { href: '/branding', label: 'Branding',  Icon: Palette },
-];
+import { usePathname, useParams } from 'next/navigation';
+import { LayoutDashboard, Building2, Palette } from 'lucide-react';
 
 export function Sidebar({ collapsed }: { collapsed: boolean }) {
   const pathname = usePathname();
+  const params = useParams<{ projectId?: string }>();
+  const projectId = params?.projectId as string | undefined;
+
+  const links = [
+    { href: '/', label: 'My Projects', Icon: LayoutDashboard },
+    ...(projectId ? [{ href: `/project/${projectId}`, label: 'Project Dashboard', Icon: Building2 }] : []),
+    { href: '/branding', label: 'Branding', Icon: Palette },
+  ];
 
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { Star, ChevronDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -15,6 +16,7 @@ import {
   type AppraisalStatus,
 } from '@/data/griha-v6-appraisals';
 import { complianceBadge, rowClass } from '@/lib/griha-compliance';
+import { scopedKey } from '@/lib/projects';
 
 const sections = [
   { id: 1, title: "Sustainable Site Planning", max: 12, criteria: [
@@ -80,9 +82,12 @@ const STAR_THRESHOLDS = [
 ];
 
 export default function GrihaV6Page() {
+  const params = useParams<{ projectId: string }>();
+  const projectId = decodeURIComponent(params.projectId as string);
+
   const [scores, setScores] = useState<number[]>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('scores_v6');
+      const saved = localStorage.getItem(scopedKey(projectId, 'scores_v6'));
       if (saved) return JSON.parse(saved);
     }
     return Array(35).fill(0);
@@ -90,9 +95,9 @@ export default function GrihaV6Page() {
 
   const [projectInfo, setProjectInfo] = useState<Record<string, string>>({});
   useEffect(() => {
-    const saved = localStorage.getItem('project_info');
+    const saved = localStorage.getItem(scopedKey(projectId, 'project_info'));
     if (saved) setProjectInfo(JSON.parse(saved));
-  }, []);
+  }, [projectId]);
 
   const [expandedCriterion, setExpandedCriterion] = useState<number | null>(null);
   const [expandedAppraisal, setExpandedAppraisal] = useState<string | null>(null);
@@ -101,14 +106,14 @@ export default function GrihaV6Page() {
   useEffect(() => {
     const all: Record<string, AppraisalStatus | null> = {};
     Object.values(CRITERION_APPRAISALS).flat().forEach(a => {
-      all[a.code] = getAppraisalState(a.code).status;
+      all[a.code] = getAppraisalState(projectId, a.code).status;
     });
     setAppraisalStatuses(all);
-  }, []);
+  }, [projectId]);
 
   const updateAppraisalStatus = (code: string, status: AppraisalStatus) => {
     setAppraisalStatuses(prev => ({ ...prev, [code]: status }));
-    saveAppraisalState(code, { status });
+    saveAppraisalState(projectId, code, { status });
   };
 
   const appraisalCriterionTotal = (criterionId: number) =>
@@ -153,9 +158,9 @@ export default function GrihaV6Page() {
   else if (grandTotal >= 25) stars = 1;
 
   useEffect(() => {
-    localStorage.setItem('scores_v6', JSON.stringify(scores));
-    localStorage.setItem('stats_v6', JSON.stringify({ points: grandTotal, stars }));
-  }, [scores, grandTotal, stars]);
+    localStorage.setItem(scopedKey(projectId, 'scores_v6'), JSON.stringify(scores));
+    localStorage.setItem(scopedKey(projectId, 'stats_v6'), JSON.stringify({ points: grandTotal, stars }));
+  }, [projectId, scores, grandTotal, stars]);
 
   const downloadData = useMemo(() => ({
     ratingName: 'GRIHA V6',
@@ -278,7 +283,7 @@ export default function GrihaV6Page() {
                                   />
                                   {status === 'attempting' && (
                                     <Button asChild size="sm" className="bg-orange text-white hover:bg-orange/90">
-                                      <Link href={`/griha-v6/appraisal/${a.code}`}>
+                                      <Link href={`/project/${projectId}/griha-v6/appraisal/${a.code}`}>
                                         Open Appraisal →
                                       </Link>
                                     </Button>
@@ -348,7 +353,7 @@ export default function GrihaV6Page() {
         </CardContent>
       </Card>
 
-      <ProjectDetailsSection accentClass="border-t-orange" />
+      <ProjectDetailsSection projectId={projectId} accentClass="border-t-orange" />
 
       {/* Criteria table */}
       <Card className="mb-6 overflow-hidden">

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
+import { useParams } from 'next/navigation';
 import { Award } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { DownloadSection } from '@/components/DownloadSection';
+import { scopedKey } from '@/lib/projects';
 
 const sections = [
   { id: 1, title: "Site Planning and Design", maxNew: 7, maxExisting: 7, criteria: [
@@ -68,16 +70,19 @@ const CERTIFICATION_LEVELS = [
 ];
 
 export default function IgbcSb2020Page() {
+  const params = useParams<{ projectId: string }>();
+  const projectId = decodeURIComponent(params.projectId as string);
+
   const [buildingType, setBuildingType] = useState<'New' | 'Existing'>('New');
   const [scores, setScores] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const proj = JSON.parse(localStorage.getItem('project_info') || 'null');
+    const proj = JSON.parse(localStorage.getItem(scopedKey(projectId, 'project_info')) || 'null');
     if (proj?.type === 'Existing') setBuildingType('Existing');
-    const saved = localStorage.getItem('scores_igbc');
+    const saved = localStorage.getItem(scopedKey(projectId, 'scores_igbc'));
     if (saved) setScores(JSON.parse(saved));
-  }, []);
+  }, [projectId]);
 
   const handleScore = (id: string, value: string, max: number) => {
     let n = parseInt(value);
@@ -115,9 +120,9 @@ export default function IgbcSb2020Page() {
   };
 
   useEffect(() => {
-    localStorage.setItem('scores_igbc', JSON.stringify(scores));
-    localStorage.setItem('stats_igbc', JSON.stringify({ points: grandTotal, level }));
-  }, [scores, grandTotal, level]);
+    localStorage.setItem(scopedKey(projectId, 'scores_igbc'), JSON.stringify(scores));
+    localStorage.setItem(scopedKey(projectId, 'stats_igbc'), JSON.stringify({ points: grandTotal, level }));
+  }, [projectId, scores, grandTotal, level]);
 
   const totalPossible = sections.reduce((sum, s) => {
     const m = buildingType === 'New' ? s.maxNew : s.maxExisting;
@@ -134,7 +139,7 @@ export default function IgbcSb2020Page() {
       level,
       projectInfo: (() => {
         try {
-          return JSON.parse(localStorage.getItem('project_info') || '{}');
+          return JSON.parse(localStorage.getItem(scopedKey(projectId, 'project_info')) || '{}');
         } catch { return {}; }
       })(),
       sections: sections.map(s => {

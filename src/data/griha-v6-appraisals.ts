@@ -1,3 +1,5 @@
+import { scopedKey } from '@/lib/projects';
+
 export type AppraisalStatus = 'attempting' | 'non-attempting' | 'later' | 'exempted';
 
 export type AppraisalComplianceType = 'Mandatory' | 'Optional';
@@ -50,27 +52,27 @@ export interface AppraisalState {
 const DEFAULT_STATE: AppraisalState = { status: null, narrativeHtml: '', calculator: {} };
 const STORAGE_KEY = 'appraisals_v6';
 
-function readStore(): Record<string, AppraisalState> {
+function readStore(projectId: string): Record<string, AppraisalState> {
   if (typeof window === 'undefined') return {};
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    return JSON.parse(localStorage.getItem(scopedKey(projectId, STORAGE_KEY)) || '{}');
   } catch {
     return {};
   }
 }
 
-function writeStore(store: Record<string, AppraisalState>) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+function writeStore(projectId: string, store: Record<string, AppraisalState>) {
+  localStorage.setItem(scopedKey(projectId, STORAGE_KEY), JSON.stringify(store));
 }
 
-export function getAppraisalState(code: string): AppraisalState {
-  return readStore()[code] || DEFAULT_STATE;
+export function getAppraisalState(projectId: string, code: string): AppraisalState {
+  return readStore(projectId)[code] || DEFAULT_STATE;
 }
 
-export function saveAppraisalState(code: string, patch: Partial<AppraisalState>) {
-  const store = readStore();
+export function saveAppraisalState(projectId: string, code: string, patch: Partial<AppraisalState>) {
+  const store = readStore(projectId);
   store[code] = { ...(store[code] || DEFAULT_STATE), ...patch };
-  writeStore(store);
+  writeStore(projectId, store);
 }
 
 /**

@@ -15,12 +15,12 @@ import { TreePreservationCalculator } from '@/components/calculators/TreePreserv
 import { complianceBadge, rowClass } from '@/lib/griha-compliance';
 
 /** Appraisals whose narrative can be auto-generated from Project Information / Project Details. */
-const DYNAMIC_NARRATIVE_BUILDERS: Record<string, () => string> = {
+const DYNAMIC_NARRATIVE_BUILDERS: Record<string, (projectId: string) => string> = {
   '1.1.1': buildProjectApprovalsNarrative,
 };
 
 /** Appraisals with a configured calculator. */
-const CALCULATORS: Record<string, React.ComponentType<{ code: string; status: AppraisalStatus | null }>> = {
+const CALCULATORS: Record<string, React.ComponentType<{ projectId: string; code: string; status: AppraisalStatus | null }>> = {
   '1.1.2': TreePreservationCalculator,
 };
 
@@ -32,7 +32,8 @@ const EXEMPTED_NARRATIVES: Record<string, string> = {
 type SectionKey = 'status' | 'narrative' | 'calculation' | 'data';
 
 export default function AppraisalDetailPage() {
-  const params = useParams<{ code: string }>();
+  const params = useParams<{ projectId: string; code: string }>();
+  const projectId = decodeURIComponent(params.projectId as string);
   const code = decodeURIComponent(params.code as string);
   const meta = getAppraisalMeta(code);
 
@@ -44,7 +45,7 @@ export default function AppraisalDetailPage() {
   const exemptedNarrative = EXEMPTED_NARRATIVES[code];
 
   useEffect(() => {
-    const state = getAppraisalState(code);
+    const state = getAppraisalState(projectId, code);
     setStatus(state.status);
     if (!state.narrativeHtml) {
       // First visit with no manual edits yet — seed a default narrative.
@@ -52,39 +53,39 @@ export default function AppraisalDetailPage() {
       if (state.status === 'exempted' && exemptedNarrative) {
         generated = `<p>${exemptedNarrative}</p>`;
       } else if (narrativeBuilder) {
-        generated = narrativeBuilder();
+        generated = narrativeBuilder(projectId);
       }
       if (generated) {
         setNarrative(generated);
-        saveAppraisalState(code, { narrativeHtml: generated });
+        saveAppraisalState(projectId, code, { narrativeHtml: generated });
         return;
       }
     }
     setNarrative(state.narrativeHtml);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code]);
+  }, [projectId, code]);
 
   const updateStatus = (s: AppraisalStatus) => {
     setStatus(s);
     if (s === 'exempted' && exemptedNarrative) {
       const html = `<p>${exemptedNarrative}</p>`;
       setNarrative(html);
-      saveAppraisalState(code, { status: s, narrativeHtml: html });
+      saveAppraisalState(projectId, code, { status: s, narrativeHtml: html });
       return;
     }
-    saveAppraisalState(code, { status: s });
+    saveAppraisalState(projectId, code, { status: s });
   };
 
   const updateNarrative = (html: string) => {
     setNarrative(html);
-    saveAppraisalState(code, { narrativeHtml: html });
+    saveAppraisalState(projectId, code, { narrativeHtml: html });
   };
 
   const regenerateNarrative = () => {
     if (!narrativeBuilder) return;
-    const generated = narrativeBuilder();
+    const generated = narrativeBuilder(projectId);
     setNarrative(generated);
-    saveAppraisalState(code, { narrativeHtml: generated });
+    saveAppraisalState(projectId, code, { narrativeHtml: generated });
   };
 
   const CalculatorComponent = CALCULATORS[code];
@@ -93,7 +94,7 @@ export default function AppraisalDetailPage() {
     return (
       <div className="container">
         <p className="text-sm text-muted-foreground mb-4">Appraisal &ldquo;{code}&rdquo; was not found.</p>
-        <Link href="/griha-v6" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
+        <Link href={`/project/${projectId}/griha-v6`} className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
           <ArrowLeft className="h-3.5 w-3.5" /> Back to GRIHA V6 Checklist
         </Link>
       </div>
@@ -160,7 +161,7 @@ export default function AppraisalDetailPage() {
       title: 'Calculation',
       subtitle: 'Prefilled from Project Information and rating-specific data',
       content: CalculatorComponent ? (
-        <CalculatorComponent code={code} status={status} />
+        <CalculatorComponent projectId={projectId} code={code} status={status} />
       ) : (
         <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
           The calculator for this appraisal hasn&rsquo;t been configured yet.
@@ -183,7 +184,7 @@ export default function AppraisalDetailPage() {
   return (
     <div className="container">
       <Link
-        href="/griha-v6"
+        href={`/project/${projectId}/griha-v6`}
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
       >
         <ArrowLeft className="h-3.5 w-3.5" /> Back to GRIHA V6 Checklist
