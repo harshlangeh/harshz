@@ -12,6 +12,7 @@ import {
 } from '@/data/building-typology';
 
 interface Props {
+  projectId: string;
   /** Brand accent class for the card's top border, e.g. "border-t-orange". */
   accentClass: string;
 }
@@ -28,15 +29,15 @@ const EMPTY_STATE: ProjectDetailsState = {
   siteAreas: [], numberOfBuildings: '1', buildings: [{ id: 'init', name: '', builtUpArea: '' }],
 };
 
-export function ProjectDetailsSection({ accentClass }: Props) {
+export function ProjectDetailsSection({ projectId, accentClass }: Props) {
   const [details, setDetails] = useState<ProjectDetailsState>(EMPTY_STATE);
 
   useEffect(() => {
-    setDetails(getProjectDetails());
-  }, []);
+    setDetails(getProjectDetails(projectId));
+  }, [projectId]);
 
   const update = (patch: Partial<ProjectDetailsState>) => {
-    setDetails(saveProjectDetails(patch));
+    setDetails(saveProjectDetails(projectId, patch));
   };
 
   const resolve = (v: string) => (v === PLACEHOLDER ? '' : v);

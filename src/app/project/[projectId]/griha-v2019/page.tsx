@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
+import { useParams } from 'next/navigation';
 import { Star } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { DownloadSection } from '@/components/DownloadSection';
 import { ProjectDetailsSection } from '@/components/ProjectDetailsSection';
+import { scopedKey } from '@/lib/projects';
 
 const sections = [
   { id: 1, title: "Sustainable Site Planning", max: 12, criteria: [
@@ -84,9 +86,12 @@ const STAR_THRESHOLDS = [
 ];
 
 export default function GrihaV2019Page() {
+  const params = useParams<{ projectId: string }>();
+  const projectId = decodeURIComponent(params.projectId as string);
+
   const [scores, setScores] = useState<number[]>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('scores_v2019');
+      const saved = localStorage.getItem(scopedKey(projectId, 'scores_v2019'));
       if (saved) return JSON.parse(saved);
     }
     return Array(35).fill(0);
@@ -94,9 +99,9 @@ export default function GrihaV2019Page() {
 
   const [projectInfo, setProjectInfo] = useState<Record<string, string>>({});
   useEffect(() => {
-    const saved = localStorage.getItem('project_info');
+    const saved = localStorage.getItem(scopedKey(projectId, 'project_info'));
     if (saved) setProjectInfo(JSON.parse(saved));
-  }, []);
+  }, [projectId]);
 
   const handleScore = (id: number, value: string, max: number) => {
     let n = parseInt(value);
@@ -120,9 +125,9 @@ export default function GrihaV2019Page() {
   else if (grandTotal >= 25) stars = 1;
 
   useEffect(() => {
-    localStorage.setItem('scores_v2019', JSON.stringify(scores));
-    localStorage.setItem('stats_v2019', JSON.stringify({ points: grandTotal, stars }));
-  }, [scores, grandTotal, stars]);
+    localStorage.setItem(scopedKey(projectId, 'scores_v2019'), JSON.stringify(scores));
+    localStorage.setItem(scopedKey(projectId, 'stats_v2019'), JSON.stringify({ points: grandTotal, stars }));
+  }, [projectId, scores, grandTotal, stars]);
 
   const downloadData = useMemo(() => ({
     ratingName: 'GRIHA V2019',
@@ -183,7 +188,7 @@ export default function GrihaV2019Page() {
         </CardContent>
       </Card>
 
-      <ProjectDetailsSection accentClass="border-t-green" />
+      <ProjectDetailsSection projectId={projectId} accentClass="border-t-green" />
 
       {/* Criteria table */}
       <Card className="mb-6 overflow-hidden">

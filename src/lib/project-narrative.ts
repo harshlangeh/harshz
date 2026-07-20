@@ -1,5 +1,6 @@
 import { getProjectDetails, BUILDING_TYPOLOGIES, OPERATION_SCHEDULE } from '@/data/building-typology';
 import { sumAreas, fmtSqm } from '@/components/AreaList';
+import { scopedKey } from '@/lib/projects';
 
 interface ProjectInfoLite {
   name?: string;
@@ -9,10 +10,10 @@ interface ProjectInfoLite {
   climateZone?: string;
 }
 
-function getProjectInfo(): ProjectInfoLite {
+function getProjectInfo(projectId: string): ProjectInfoLite {
   if (typeof window === 'undefined') return {};
   try {
-    return JSON.parse(localStorage.getItem('project_info') || '{}');
+    return JSON.parse(localStorage.getItem(scopedKey(projectId, 'project_info')) || '{}');
   } catch {
     return {};
   }
@@ -23,9 +24,9 @@ function getProjectInfo(): ProjectInfoLite {
  * an intro paragraph followed by a details table, regenerated on demand rather than kept live,
  * since the narrative is still freely editable rich text afterwards.
  */
-export function buildProjectApprovalsNarrative(): string {
-  const info = getProjectInfo();
-  const details = getProjectDetails();
+export function buildProjectApprovalsNarrative(projectId: string): string {
+  const info = getProjectInfo(projectId);
+  const details = getProjectDetails(projectId);
 
   const name = info.name?.trim() || '[Project Name]';
   const category = BUILDING_TYPOLOGIES.find(c => c.category === details.typologyCategory)?.category

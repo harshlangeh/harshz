@@ -24,8 +24,9 @@ Next.js 16.2 · React 19 · TypeScript · lucide-react · date-fns · App Router
 
 ## Key conventions
 
-- All rating pages (`/griha-v6`, `/griha-v2019`, `/griha-v2015`, `/igbc-sb-2020`) are `"use client"` with inline `sections` arrays — no separate data files.
-- State keys: `stats_v6`, `stats_v2019`, `stats_v2015`, `stats_igbc`, `project_info`, `app-theme`, `global-icon-override`.
+- Multi-project system: `/` is the Projects list; every rating page and dashboard lives under `/project/[projectId]/...` (e.g. `/project/[projectId]/griha-v6`). `src/lib/projects.ts` holds the `Project` CRUD (global `projects` key) and `scopedKey(projectId, key)`, which every per-project piece of state must be wrapped in before touching `localStorage`.
+- All rating pages (`griha-v6`, `griha-v2019`, `griha-v2015`, `igbc-sb-2020`, under `/project/[projectId]/`) are `"use client"` with inline `sections` arrays — no separate data files.
+- State keys (all wrapped in `scopedKey(projectId, ...)` except the two globals): `stats_v6`, `stats_v2019`, `stats_v2015`, `stats_igbc`, `scores_v6`, `scores_v2019`, `scores_v2015`, `scores_igbc`, `project_info`, `project_typology`, `appraisals_v6`. Globals (not project-scoped): `projects`, `app-theme`, `global-icon-override`.
 - Theme is 3-mode: light / dark / high-contrast — managed by `ThemeProvider.tsx`.
 - Glass morphism design tokens live in `globals.css`.
 - Root-level `.js` scripts (`make-igbc.js`, `add-stars.js`, etc.) are one-off codegen tools — do not run them unless explicitly asked.

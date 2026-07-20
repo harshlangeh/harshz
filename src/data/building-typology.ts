@@ -1,4 +1,5 @@
 import { type AreaItem, sumAreas } from '@/components/AreaList';
+import { scopedKey } from '@/lib/projects';
 
 export interface BuildingTypologyCategory {
   category: string;
@@ -97,19 +98,19 @@ const DEFAULT_STATE: ProjectDetailsState = {
 
 const STORAGE_KEY = 'project_typology';
 
-export function getProjectDetails(): ProjectDetailsState {
+export function getProjectDetails(projectId: string): ProjectDetailsState {
   if (typeof window === 'undefined') return DEFAULT_STATE;
   try {
-    return { ...DEFAULT_STATE, ...JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') };
+    return { ...DEFAULT_STATE, ...JSON.parse(localStorage.getItem(scopedKey(projectId, STORAGE_KEY)) || '{}') };
   } catch {
     return DEFAULT_STATE;
   }
 }
 
-export function saveProjectDetails(patch: Partial<ProjectDetailsState>) {
-  const next = { ...getProjectDetails(), ...patch };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  syncAreaTotalsToProjectInfo(next);
+export function saveProjectDetails(projectId: string, patch: Partial<ProjectDetailsState>) {
+  const next = { ...getProjectDetails(projectId), ...patch };
+  localStorage.setItem(scopedKey(projectId, STORAGE_KEY), JSON.stringify(next));
+  syncAreaTotalsToProjectInfo(projectId, next);
   return next;
 }
 
@@ -118,11 +119,12 @@ export function saveProjectDetails(patch: Partial<ProjectDetailsState>) {
  * (merged, not overwritten) so the existing Word/PDF download code — which reads
  * `projectInfo.siteArea` / `projectInfo.builtUpArea` — keeps working unchanged.
  */
-function syncAreaTotalsToProjectInfo(state: ProjectDetailsState) {
+function syncAreaTotalsToProjectInfo(projectId: string, state: ProjectDetailsState) {
   if (typeof window === 'undefined') return;
+  const key = scopedKey(projectId, 'project_info');
   let existing: Record<string, unknown> = {};
   try {
-    existing = JSON.parse(localStorage.getItem('project_info') || '{}');
+    existing = JSON.parse(localStorage.getItem(key) || '{}');
   } catch {
     existing = {};
   }
@@ -131,5 +133,5 @@ function syncAreaTotalsToProjectInfo(state: ProjectDetailsState) {
     siteArea: String(sumAreas(state.siteAreas)),
     builtUpArea: String(sumBuiltUpAreas(state.buildings)),
   };
-  localStorage.setItem('project_info', JSON.stringify(payload));
+  localStorage.setItem(key, JSON.stringify(payload));
 }

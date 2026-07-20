@@ -7,6 +7,7 @@ import { getProjectDetails } from '@/data/building-typology';
 import { sumAreas } from '@/components/AreaList';
 
 interface Props {
+  projectId: string;
   code: string;
   status: AppraisalStatus | null;
 }
@@ -29,24 +30,24 @@ function num(v: string | undefined): number {
   return parseFloat(v || '') || 0;
 }
 
-export function TreePreservationCalculator({ code, status }: Props) {
+export function TreePreservationCalculator({ projectId, code, status }: Props) {
   const [values, setValues] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const state = getAppraisalState(code);
+    const state = getAppraisalState(projectId, code);
     const calc = state.calculator || {};
     if (!calc[FIELDS.siteArea]) {
       // Prefill site area from Project Details, same convention as the rest of the app.
-      const siteAreaTotal = sumAreas(getProjectDetails().siteAreas);
+      const siteAreaTotal = sumAreas(getProjectDetails(projectId).siteAreas);
       if (siteAreaTotal > 0) calc[FIELDS.siteArea] = String(siteAreaTotal);
     }
     setValues(calc);
-  }, [code]);
+  }, [projectId, code]);
 
   const update = (field: string, value: string) => {
     const next = { ...values, [field]: value };
     setValues(next);
-    saveAppraisalState(code, { calculator: next });
+    saveAppraisalState(projectId, code, { calculator: next });
   };
 
   // No existing mature trees (either declared directly, or the whole appraisal marked Exempted)

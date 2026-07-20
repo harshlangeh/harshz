@@ -23,18 +23,19 @@ A web tool for green building certification consultants to track compliance and 
 
 | Rating System | Route | Brand Color | Rating Output |
 |---|---|---|---|
-| GRIHA V2015 | `/griha-v2015` | Rose-red | 1–5 stars |
-| GRIHA V2019 | `/griha-v2019` | Green | 1–5 stars |
-| GRIHA V6 | `/griha-v6` | Orange | 1–5 stars |
-| IGBC SB 2020 | `/igbc-sb-2020` | Blue | Certified / Silver / Gold / Platinum |
+| GRIHA V2015 | `/project/[projectId]/griha-v2015` | Rose-red | 1–5 stars |
+| GRIHA V2019 | `/project/[projectId]/griha-v2019` | Green | 1–5 stars |
+| GRIHA V6 | `/project/[projectId]/griha-v6` | Orange | 1–5 stars |
+| IGBC SB 2020 | `/project/[projectId]/igbc-sb-2020` | Blue | Certified / Silver / Gold / Platinum |
 
-The dashboard (`/`) shows project info (name, site area, occupancy, climate zone) and live point totals for all four systems.
+`/` is the **Projects list** (create/open/delete projects, shown as cards). Each project's dashboard (`/project/[projectId]`) shows its own project info (name, site area, occupancy, climate zone) and live point totals for all four systems — completely isolated from every other project.
 
 ---
 
 ## Architecture Decisions Made
 
-- **All state in `localStorage`** — keys: `stats_v6`, `stats_v2019`, `stats_v2015`, `stats_igbc`, `project_info`, `app-theme`, `global-icon-override`
+- **Multi-project system** — `src/lib/projects.ts` holds `Project` CRUD (`projects` localStorage key) and `scopedKey(projectId, key)`. Every per-project piece of state (`project_info`, `project_typology`, `appraisals_v6`, `scores_*`, `stats_*`) is namespaced as `${projectId}::${key}` — verified with Playwright that two projects never bleed state into each other. Deleting a project removes it from the `projects` list but does **not** clean up its scoped keys yet (orphaned data, harmless since nothing references the old id — worth a cleanup pass later if it matters)
+- **All state in `localStorage`** — see Key Conventions in AGENTS.md for the exact key list and global-vs-scoped split
 - **App Router** (Next.js) — all rating pages are `"use client"` components with inline section/criteria data arrays
 - **No API routes** — fully client-side; Supabase is provisioned but not yet integrated
 - **Glass morphism UI** — custom CSS tokens in `globals.css`: `glass-card`, `glass-panel`, `glass-input`
@@ -46,6 +47,34 @@ The dashboard (`/`) shows project info (name, site area, occupancy, climate zone
 ---
 
 ## Session Log (newest first)
+
+### [2026-07-20 08:00 IST] Claude (claude-sonnet-5) — Multi-project system
+
+**Files changed:**
+- Added: `src/lib/projects.ts`
+- Moved: `src/app/page.tsx` → `src/app/project/[projectId]/page.tsx` (dashboard); `src/app/griha-v6/**`, `griha-v2019/page.tsx`, `griha-v2015/page.tsx`, `igbc-sb-2020/page.tsx` → same paths under `src/app/project/[projectId]/`
+- Added: new `src/app/page.tsx` (Projects list)
+- Modified: `src/components/ProjectDetailsSection.tsx`, `src/components/calculators/TreePreservationCalculator.tsx`, `src/components/layout/Sidebar.tsx`, `src/data/building-typology.ts`, `src/data/griha-v6-appraisals.ts`, `src/lib/project-narrative.ts`
+
+**What was done:**
+- [x] User asked for a project system: create a project first, then everything (checklists, project info, etc.) lives inside it; multiple projects shown as cards
+- [x] `src/lib/projects.ts`: `Project { id, name, createdAt }` CRUD over a global `projects` key, plus `scopedKey(projectId, key)` — the namespacing helper every piece of per-project state now goes through
+- [x] New `/` — Projects list: cards with name/created date, "New Project" dialog, delete-with-confirm dialog, empty state
+- [x] All 4 rating pages + dashboard + the GRIHA V6 appraisal detail page moved under `/project/[projectId]/...`; every internal `Link` updated to include the project id
+- [x] Every localStorage read/write across these pages — `project_info`, `scores_v6/v2019/v2015/igbc`, `stats_v6/v2019/v2015/igbc` — now goes through `scopedKey(projectId, ...)`
+- [x] Threaded `projectId` as an explicit parameter through `getAppraisalState`/`saveAppraisalState` (was keyed only by appraisal code before), `getProjectDetails`/`saveProjectDetails`/its `project_info` sync, `buildProjectApprovalsNarrative`, `ProjectDetailsSection`, and `TreePreservationCalculator`
+- [x] Sidebar is now project-aware: always shows "My Projects" (`/`); adds a "Project Dashboard" link (`/project/[projectId]`) only when inside a project route; "Branding" stays global
+- [x] Cleared the stale `.next` type-validator cache (referenced the pre-move route paths) before the final typecheck
+- [x] Verified with Playwright: created two projects, set different occupancy/building-count/appraisal-status data in each, confirmed zero bleed-over in either direction, confirmed values persist correctly across navigation, confirmed the raw `localStorage` dump shows clean `proj-xxx::key` namespacing, confirmed delete-project and the global `/branding` route both still work
+- [x] Build + typecheck passed; committed to `claude/new-session-fqgdu4`
+
+**Blockers / next steps:**
+- Deleting a project doesn't yet garbage-collect its scoped localStorage keys (harmless orphaned data, not user-visible)
+- Criterion 1's stated max (5) still doesn't reconcile with its appraisals' point sum — pre-existing gap, see below
+- Still waiting on real appraisal names/points/compliance types for placeholders on criteria 2–30
+- Supabase still not wired (and now doubly relevant — projects only live in this browser's localStorage, so no cross-device sync); chatbot still stub; no auth
+
+---
 
 ### [2026-07-20 00:50 IST] Claude (claude-sonnet-5) — Appraisals 1.1.3 and 1.1.4 added to Criterion 1
 
