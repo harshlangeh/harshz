@@ -1,4 +1,4 @@
-import { getProjectDetails, BUILDING_TYPOLOGIES, OPERATION_SCHEDULE } from '@/data/building-typology';
+import { getProjectDetails, BUILDING_TYPOLOGIES, OPERATION_SCHEDULE, buildingBuiltUpArea } from '@/data/building-typology';
 import { sumAreas, fmtSqm } from '@/components/AreaList';
 import { scopedKey } from '@/lib/projects';
 
@@ -34,7 +34,7 @@ export function buildProjectApprovalsNarrative(projectId: string): string {
   const typologyText = details.typologyType ? `${details.typologyType} (${category})` : category;
 
   const siteAreaTotal = sumAreas(details.siteAreas);
-  const builtUpTotal = details.buildings.reduce((s, b) => s + (parseFloat(b.builtUpArea) || 0), 0);
+  const builtUpTotal = details.buildings.reduce((s, b) => s + buildingBuiltUpArea(b), 0);
   const numberOfBuildings = details.buildings.length;
 
   const dailyLabel = OPERATION_SCHEDULE.dailyOptions.find(o => o.value === details.operationDaily)?.label
@@ -49,9 +49,10 @@ export function buildProjectApprovalsNarrative(projectId: string): string {
 <table>
   <thead><tr><th>Building</th><th>Built-up Area</th></tr></thead>
   <tbody>
-    ${details.buildings.map((b, i) =>
-      `<tr><td>${b.name || `Building ${i + 1}`}</td><td>${b.builtUpArea ? `${b.builtUpArea} sqm` : '—'}</td></tr>`
-    ).join('\n    ')}
+    ${details.buildings.map((b, i) => {
+      const area = buildingBuiltUpArea(b);
+      return `<tr><td>${b.name || `Building ${i + 1}`}</td><td>${area > 0 ? `${fmtSqm(area)} sqm` : '—'}</td></tr>`;
+    }).join('\n    ')}
   </tbody>
 </table>`
     : '';

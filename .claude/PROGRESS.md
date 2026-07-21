@@ -48,6 +48,25 @@ A web tool for green building certification consultants to track compliance and 
 
 ## Session Log (newest first)
 
+### [2026-07-21 15:35 IST] Claude (claude-sonnet-4-6) — Bulk paste for Total Site Area
+
+**Files changed:**
+- Modified: `src/components/AreaList.tsx`
+
+**What was done:**
+- [x] Added "Paste from spreadsheet" button to `AreaList` component (used for Total Site Area in all checklist pages and Project Details section)
+- [x] Pasting multi-line content from Excel or Word immediately parses all rows and appends them — no manual row-by-row entry needed (like Vercel env vars UX)
+- [x] Supported formats: tab-separated (Excel copy), colon-separated, equals-separated, trailing-number (all Word/text variants)
+- [x] Thousand-separators (commas, spaces) and unit suffixes (sqm, m2, sq.m, sq ft) stripped automatically
+- [x] "Parse & Add" button for typed entry; Cancel collapses panel without changes
+- [x] Build passed; PR #29 merged
+
+**Blockers / next steps:**
+- Criteria 2–30 in GRIHA V6 still have placeholder appraisals — need real names/points/compliance types
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-20 08:00 IST] Claude (claude-sonnet-5) — Multi-project system
 
 **Files changed:**

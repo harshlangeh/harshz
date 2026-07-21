@@ -30,8 +30,10 @@ export function fmtSqm(n: number): string {
  *   Colon-separated:             "Landscape area: 500"
  *   Equals-separated:            "Landscape area = 500"
  *   Space-terminated number:     "Landscape area 500"
+ *
+ * Exported so callers (e.g. buildings paste panel) can reuse the same parsing logic.
  */
-function parsePasteText(text: string): AreaItem[] {
+export function parsePasteText(text: string): AreaItem[] {
   const unitSuffix = /\s*(sqm|sq\.m\.?|m2|sq\.ft\.?|ft2)\s*$/i;
 
   return text
