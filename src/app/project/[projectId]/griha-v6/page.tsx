@@ -102,13 +102,18 @@ export default function GrihaV6Page() {
   const [expandedCriterion, setExpandedCriterion] = useState<number | null>(null);
   const [expandedAppraisal, setExpandedAppraisal] = useState<string | null>(null);
   const [appraisalStatuses, setAppraisalStatuses] = useState<Record<string, AppraisalStatus | null>>({});
+  const [appraisalEarnedPoints, setAppraisalEarnedPoints] = useState<Record<string, number | undefined>>({});
 
   useEffect(() => {
-    const all: Record<string, AppraisalStatus | null> = {};
+    const allStatuses: Record<string, AppraisalStatus | null> = {};
+    const allEarned: Record<string, number | undefined> = {};
     Object.values(CRITERION_APPRAISALS).flat().forEach(a => {
-      all[a.code] = getAppraisalState(projectId, a.code).status;
+      const state = getAppraisalState(projectId, a.code);
+      allStatuses[a.code] = state.status;
+      allEarned[a.code] = state.earnedPoints;
     });
-    setAppraisalStatuses(all);
+    setAppraisalStatuses(allStatuses);
+    setAppraisalEarnedPoints(allEarned);
   }, [projectId]);
 
   const updateAppraisalStatus = (code: string, status: AppraisalStatus) => {
@@ -118,7 +123,7 @@ export default function GrihaV6Page() {
 
   const appraisalCriterionTotal = (criterionId: number) =>
     (CRITERION_APPRAISALS[criterionId] || []).reduce(
-      (sum, a) => sum + appraisalContribution(a, appraisalStatuses[a.code]), 0,
+      (sum, a) => sum + appraisalContribution(a, appraisalStatuses[a.code], appraisalEarnedPoints[a.code]), 0,
     );
 
   // Criteria broken into appraisals get their score computed from those appraisals instead of manual entry
@@ -134,7 +139,7 @@ export default function GrihaV6Page() {
       });
       return changed ? next : prev;
     });
-  }, [appraisalStatuses]);
+  }, [appraisalStatuses, appraisalEarnedPoints]);
 
   const handleScore = (id: number, value: string, max: number) => {
     let n = parseInt(value);

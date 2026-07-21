@@ -34,6 +34,11 @@ for (let id = 2; id <= 30; id++) {
   ];
 }
 
+// Override criterion 30 with the real Innovation appraisal (1 pt per strategy, max 5).
+CRITERION_APPRAISALS[30] = [
+  { code: '30.1.1', title: '5 Innovative Strategies', criterionId: 30, points: 5, type: 'Optional' },
+];
+
 export function getAppraisalMeta(code: string): AppraisalMeta | undefined {
   for (const list of Object.values(CRITERION_APPRAISALS)) {
     const found = list.find(a => a.code === code);
@@ -47,6 +52,10 @@ export interface AppraisalState {
   narrativeHtml: string;
   /** Free-form key/value store for an appraisal's calculator inputs, if it has one. */
   calculator?: Record<string, string>;
+  /** Selected strategy IDs for variable-scored appraisals (e.g. 30.1.1 Innovation). */
+  strategies?: string[];
+  /** Actual points earned for variable-scored appraisals; undefined means use meta.points. */
+  earnedPoints?: number;
 }
 
 const DEFAULT_STATE: AppraisalState = { status: null, narrativeHtml: '', calculator: {} };
@@ -81,9 +90,20 @@ export function saveAppraisalState(projectId: string, code: string, patch: Parti
  * Exempted appraisals contribute 0 — they're excluded from scoring entirely
  * (their points are instead removed from the criterion's max, see `criterionEffectiveMax`).
  */
-export function appraisalContribution(a: AppraisalMeta, status: AppraisalStatus | null | undefined): number {
+/**
+ * @param earnedPoints For variable-scored appraisals (e.g. 30.1.1), the actual points earned.
+ *   When provided, overrides the meta.points cap.
+ */
+export function appraisalContribution(
+  a: AppraisalMeta,
+  status: AppraisalStatus | null | undefined,
+  earnedPoints?: number,
+): number {
   if (a.type === 'Mandatory') return 0;
-  if (status === 'attempting' || status === 'later') return a.points ?? 0;
+  if (status === 'attempting' || status === 'later') {
+    if (earnedPoints !== undefined) return Math.min(earnedPoints, a.points ?? 0);
+    return a.points ?? 0;
+  }
   return 0;
 }
 
