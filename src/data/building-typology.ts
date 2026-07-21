@@ -1,4 +1,4 @@
-import { type AreaItem, sumAreas } from '@/components/AreaList';
+import { type AreaItem, newId, sumAreas } from '@/components/AreaList';
 import { scopedKey } from '@/lib/projects';
 
 export interface BuildingTypologyCategory {
@@ -65,15 +65,32 @@ export const OPERATION_SCHEDULE = {
 export interface BuildingItem {
   id: string;
   name: string;
-  builtUpArea: string;
+  /** Floor-by-floor breakdown. Built-up area = sum of floor values. */
+  floors: AreaItem[];
 }
 
 export function newBuildingId() {
   return `bldg-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
+export function buildingBuiltUpArea(b: BuildingItem): number {
+  return sumAreas(b.floors);
+}
+
 function sumBuiltUpAreas(buildings: BuildingItem[]): number {
-  return buildings.reduce((s, b) => s + (parseFloat(b.builtUpArea) || 0), 0);
+  return buildings.reduce((s, b) => s + buildingBuiltUpArea(b), 0);
+}
+
+type RawBuilding = { id: string; name: string; floors?: AreaItem[]; builtUpArea?: string };
+
+/** Migrates a raw stored building that may still have the old `builtUpArea: string` shape. */
+function migrateBuilding(raw: RawBuilding): BuildingItem {
+  if (raw.floors !== undefined) return { id: raw.id, name: raw.name, floors: raw.floors };
+  return {
+    id: raw.id,
+    name: raw.name,
+    floors: raw.builtUpArea ? [{ id: newId(), name: '', value: raw.builtUpArea }] : [],
+  };
 }
 
 export interface ProjectDetailsState {
@@ -93,7 +110,7 @@ const DEFAULT_STATE: ProjectDetailsState = {
   operationWeekly: '',
   siteAreas: [],
   numberOfBuildings: '1',
-  buildings: [{ id: newBuildingId(), name: '', builtUpArea: '' }],
+  buildings: [{ id: newBuildingId(), name: '', floors: [] }],
 };
 
 const STORAGE_KEY = 'project_typology';
@@ -101,7 +118,11 @@ const STORAGE_KEY = 'project_typology';
 export function getProjectDetails(projectId: string): ProjectDetailsState {
   if (typeof window === 'undefined') return DEFAULT_STATE;
   try {
-    return { ...DEFAULT_STATE, ...JSON.parse(localStorage.getItem(scopedKey(projectId, STORAGE_KEY)) || '{}') };
+    const raw = JSON.parse(localStorage.getItem(scopedKey(projectId, STORAGE_KEY)) || '{}');
+    if (Array.isArray(raw.buildings)) {
+      raw.buildings = raw.buildings.map(migrateBuilding);
+    }
+    return { ...DEFAULT_STATE, ...raw };
   } catch {
     return DEFAULT_STATE;
   }
