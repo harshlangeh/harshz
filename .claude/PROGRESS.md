@@ -48,6 +48,28 @@ A web tool for green building certification consultants to track compliance and 
 
 ## Session Log (newest first)
 
+### [2026-07-21 17:30 IST] Claude (claude-sonnet-4-6) — Floor-level built-up areas + buildings bulk paste
+
+**Files changed:**
+- Modified: `src/components/AreaList.tsx` — exported `parsePasteText`
+- Modified: `src/data/building-typology.ts` — `BuildingItem.floors: AreaItem[]`, `buildingBuiltUpArea()`, `migrateBuilding()`
+- Modified: `src/components/ProjectDetailsSection.tsx` — accordion buildings, floor AreaList, buildings paste panel
+- Modified: `src/lib/project-narrative.ts` — use `buildingBuiltUpArea()` instead of direct field
+
+**What was done:**
+- [x] `BuildingItem` changed from `builtUpArea: string` to `floors: AreaItem[]`; built-up area per building = sum of floor values
+- [x] Each building row is now an accordion (chevron expand); expanded body shows `AreaList` for floor areas (with bulk paste already built-in)
+- [x] Buildings section gets "Paste from spreadsheet" panel — paste `name\tarea` rows to create multiple buildings at once; pasted area becomes the first floor entry
+- [x] `parsePasteText` exported from `AreaList` so both paste panels (site areas + buildings) share the same parser
+- [x] Backward-compatible: existing stored `builtUpArea: string` silently migrates to a single floor on first load
+- [x] Build passed; PR #30 merged
+
+**Blockers / next steps:**
+- Criteria 2–30 in GRIHA V6 still have placeholder appraisals
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-21 15:35 IST] Claude (claude-sonnet-4-6) — Bulk paste for Total Site Area
 
 **Files changed:**
