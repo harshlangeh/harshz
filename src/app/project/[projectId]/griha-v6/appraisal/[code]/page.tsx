@@ -12,6 +12,8 @@ import {
 } from '@/data/griha-v6-appraisals';
 import { buildProjectApprovalsNarrative } from '@/lib/project-narrative';
 import { TreePreservationCalculator } from '@/components/calculators/TreePreservationCalculator';
+import { InnovationCalculator } from '@/components/calculators/InnovationCalculator';
+import { INNOVATION_STRATEGIES, buildInnovationNarrativeHtml } from '@/data/innovation-strategies';
 import { complianceBadge, rowClass } from '@/lib/griha-compliance';
 
 /** Appraisals whose narrative can be auto-generated from Project Information / Project Details. */
@@ -22,6 +24,7 @@ const DYNAMIC_NARRATIVE_BUILDERS: Record<string, (projectId: string) => string> 
 /** Appraisals with a configured calculator. */
 const CALCULATORS: Record<string, React.ComponentType<{ projectId: string; code: string; status: AppraisalStatus | null }>> = {
   '1.1.2': TreePreservationCalculator,
+  '30.1.1': InnovationCalculator,
 };
 
 /** Default narrative set whenever an appraisal's status is switched to Exempted. */
@@ -39,6 +42,7 @@ export default function AppraisalDetailPage() {
 
   const [status, setStatus] = useState<AppraisalStatus | null>(null);
   const [narrative, setNarrative] = useState('');
+  const [strategies, setStrategies] = useState<string[]>([]);
   const [expandedSection, setExpandedSection] = useState<SectionKey | null>('status');
 
   const narrativeBuilder = DYNAMIC_NARRATIVE_BUILDERS[code];
@@ -47,6 +51,7 @@ export default function AppraisalDetailPage() {
   useEffect(() => {
     const state = getAppraisalState(projectId, code);
     setStatus(state.status);
+    setStrategies(state.strategies || []);
     if (!state.narrativeHtml) {
       // First visit with no manual edits yet — seed a default narrative.
       let generated: string | undefined;
@@ -86,6 +91,15 @@ export default function AppraisalDetailPage() {
     const generated = narrativeBuilder(projectId);
     setNarrative(generated);
     saveAppraisalState(projectId, code, { narrativeHtml: generated });
+  };
+
+  const toggleStrategy = (id: string) => {
+    const next = strategies.includes(id) ? strategies.filter(s => s !== id) : [...strategies, id];
+    const earnedPoints = Math.min(next.length, 5);
+    const html = buildInnovationNarrativeHtml(next);
+    setStrategies(next);
+    setNarrative(html);
+    saveAppraisalState(projectId, code, { strategies: next, earnedPoints, narrativeHtml: html });
   };
 
   const CalculatorComponent = CALCULATORS[code];
@@ -148,11 +162,50 @@ export default function AppraisalDetailPage() {
         </Button>
       ),
       content: (
-        <RichTextEditor
-          value={narrative}
-          onChange={updateNarrative}
-          placeholder="Write the narrative for this appraisal…"
-        />
+        <div className="space-y-4">
+          {code === '30.1.1' && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold">Select Innovative Strategies</p>
+                <span className="text-xs text-muted-foreground">
+                  <span className={`font-bold ${Math.min(strategies.length, 5) === 5 ? 'text-green-600' : 'text-foreground'}`}>
+                    {Math.min(strategies.length, 5)}
+                  </span>
+                  {' / 5 points'}
+                  {strategies.length > 5 && (
+                    <span className="ml-1 text-amber-500">({strategies.length} selected, max 5 pts)</span>
+                  )}
+                </span>
+              </div>
+              <div className="rounded-md border border-border divide-y divide-border">
+                {INNOVATION_STRATEGIES.map(s => (
+                  <label
+                    key={s.id}
+                    className="flex items-start gap-3 px-3 py-2.5 cursor-pointer hover:bg-muted/30 transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={strategies.includes(s.id)}
+                      onChange={() => toggleStrategy(s.id)}
+                      className="mt-0.5 h-4 w-4 rounded border-input accent-primary flex-shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium leading-snug">{s.title}</p>
+                      {s.hasCalculator && (
+                        <p className="text-xs text-primary mt-0.5">Calculator available in Calculation section</p>
+                      )}
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+          <RichTextEditor
+            value={narrative}
+            onChange={updateNarrative}
+            placeholder="Write the narrative for this appraisal…"
+          />
+        </div>
       ),
     },
     {
