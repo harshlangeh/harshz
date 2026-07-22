@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { Award } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,58 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { DownloadSection } from '@/components/DownloadSection';
 import { scopedKey } from '@/lib/projects';
-
-const sections = [
-  { id: 1, title: "Site Planning and Design", maxNew: 7, maxExisting: 7, criteria: [
-    { id: "SPD MR 1",    name: "Local Building Regulations",           maxNew: "Mandatory", maxExisting: "Mandatory" },
-    { id: "SPD Credit 1", name: "Erosion and Sedimentation Control",   maxNew: 1, maxExisting: 1 },
-    { id: "SPD Credit 2", name: "Sustainable Landscape",               maxNew: 3, maxExisting: 3 },
-    { id: "SPD Credit 3", name: "Heat Island Reduction, Non-roof and Roof", maxNew: 2, maxExisting: 2 },
-    { id: "SPD Credit 4", name: "Green Education",                     maxNew: 1, maxExisting: 1 },
-  ]},
-  { id: 2, title: "Water Conservation", maxNew: 8, maxExisting: 7, criteria: [
-    { id: "WC MR 1",    name: "Rainwater Harvesting, Roof",            maxNew: "Mandatory", maxExisting: "Mandatory" },
-    { id: "WC MR 2",    name: "Water Efficient Plumbing Fixtures",     maxNew: "Mandatory", maxExisting: "Mandatory" },
-    { id: "WC Credit 1", name: "Rainwater Harvesting, Roof",           maxNew: 4, maxExisting: 3 },
-    { id: "WC Credit 2", name: "Water Efficient Plumbing Fixtures",    maxNew: 3, maxExisting: 3 },
-    { id: "WC Credit 3", name: "Water Metering",                       maxNew: 1, maxExisting: 1 },
-  ]},
-  { id: 3, title: "Energy Efficiency", maxNew: 20, maxExisting: 20, criteria: [
-    { id: "EE MR 1",    name: "Minimum Energy Efficiency",             maxNew: "Mandatory", maxExisting: "Mandatory" },
-    { id: "EE Credit 1", name: "Passive Architecture",                 maxNew: 3, maxExisting: 3 },
-    { id: "EE Credit 2", name: "Enhanced Energy Efficiency",           maxNew: 10, maxExisting: 10 },
-    { id: "EE Credit 3", name: "On-site Renewable Energy",             maxNew: 5, maxExisting: 5 },
-    { id: "EE Credit 4", name: "Energy Saving Appliances",             maxNew: 1, maxExisting: 1 },
-    { id: "EE Credit 5", name: "Energy Metering",                      maxNew: 1, maxExisting: 1 },
-  ]},
-  { id: 4, title: "Building Materials and Resources", maxNew: 8, maxExisting: 1, criteria: [
-    { id: "BMR MR 1",   name: "Segregation of Waste, Post-occupancy", maxNew: "Mandatory", maxExisting: "Mandatory" },
-    { id: "BMR Credit 1", name: "Green Procurement Policy",           maxNew: "NA", maxExisting: 1 },
-    { id: "BMR Credit 2", name: "Use of Eco-labelled Building Materials, Products & Equipment", maxNew: 3, maxExisting: "NA" },
-    { id: "BMR Credit 3", name: "Alternative Construction Technologies & Materials", maxNew: 3, maxExisting: "NA" },
-    { id: "BMR Credit 4", name: "Alternate Wood-based Materials",     maxNew: 1, maxExisting: "NA" },
-    { id: "BMR Credit 5", name: "Handling of Waste Materials, During Construction", maxNew: 1, maxExisting: "NA" },
-  ]},
-  { id: 5, title: "Health and Well-being", maxNew: 7, maxExisting: 5, criteria: [
-    { id: "HWB MR 1",   name: "Minimum Fresh Air Ventilation",        maxNew: "Mandatory", maxExisting: "Mandatory" },
-    { id: "HWB MR 2",   name: "No Smoking Premises",                  maxNew: "Mandatory", maxExisting: "Mandatory" },
-    { id: "HWB Credit 1", name: "Daylighting",                        maxNew: 2, maxExisting: 2 },
-    { id: "HWB Credit 2", name: "Low-emitting Materials",             maxNew: 1, maxExisting: "NA" },
-    { id: "HWB Credit 3", name: "Eco-friendly Housekeeping Chemicals", maxNew: 1, maxExisting: 1 },
-    { id: "HWB Credit 4", name: "Access to Quality Drinking Water",   maxNew: 1, maxExisting: 1 },
-    { id: "HWB Credit 5", name: "Eco-friendly Refrigerants",          maxNew: 1, maxExisting: "NA" },
-    { id: "HWB Credit 6", name: "Universal Design",                   maxNew: 1, maxExisting: 1 },
-  ]},
-  { id: 6, title: "Green Measures Beyond the Fence", maxNew: 4, maxExisting: 4, criteria: [
-    { id: "GM Credit 1", name: "Green Measures Beyond the Fence",     maxNew: 4, maxExisting: 4 },
-  ]},
-  { id: 7, title: "Innovation and Performance", maxNew: 6, maxExisting: 6, criteria: [
-    { id: "IP Credit 1", name: "Innovation in Design Process",        maxNew: 4, maxExisting: 4 },
-    { id: "IP Credit 2", name: "Water and Energy Performance",        maxNew: "NA", maxExisting: 1 },
-    { id: "IP Credit 3", name: "Green Measures Cost Analysis",        maxNew: 1, maxExisting: "NA" },
-    { id: "IP Credit 4", name: "IGBC Accredited Professional",        maxNew: 1, maxExisting: 1 },
-  ]},
-];
+import { igbcSections as sections } from '@/data/igbc-sb-2020-sections';
 
 const CERTIFICATION_LEVELS = [
   { label: "Certified", colorClass: "text-igbc-certified", min: { New: 30, Existing: 25 }, max: { New: 35, Existing: 29 } },
@@ -238,7 +188,12 @@ export default function IgbcSb2020Page() {
                       return (
                         <tr key={c.id} className={`border-b border-border ${isMandatory ? 'row-mandatory' : ''} ${isNA ? 'opacity-50' : ''}`}>
                           <td className="px-4 py-2.5 text-xs text-muted-foreground font-mono">{c.id}</td>
-                          <td className="px-4 py-2.5">{c.name}</td>
+                          <td className="px-4 py-2.5">
+                            <Link href={`/project/${projectId}/igbc-sb-2020/criterion/${encodeURIComponent(c.id)}`}
+                              className="hover:text-igbc-blue hover:underline transition-colors">
+                              {c.name}
+                            </Link>
+                          </td>
                           <td className="px-4 py-2.5 text-center">
                             {isMandatory ? <Badge variant="mandatory" className="text-xs">Mandatory</Badge>
                              : isNA       ? <span className="text-muted-foreground text-xs">N/A</span>

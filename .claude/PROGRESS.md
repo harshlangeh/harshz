@@ -48,6 +48,96 @@ A web tool for green building certification consultants to track compliance and 
 
 ## Session Log (newest first)
 
+### [2026-07-22 14:30 IST] Claude (claude-sonnet-4-6) — Calculator card grid, modal, sidebar Calculators tab
+
+**Files changed:**
+- Added: `src/lib/calculator-registry.ts` — `CalcRegistration` interface, `CALCULATOR_REGISTRY` (Tree Preservation + Innovation Strategies), `getCalculatorsForCriterion()` helper
+- Added: `src/components/calculators/CalculatorCard.tsx` — card with CheckCircle2/XCircle/MinusCircle status icon, result, points, compliance, criterionLabel/ratingLabel
+- Added: `src/components/CalculatorGrid.tsx` — 4-col grid + inline modal (backdrop close, X button, sticky header); accepts explicit `calcs` prop or `rating`+`criterionCode` filter
+- Added: `src/app/project/[projectId]/calculators/page.tsx` — all-calculators page grouped by `ratingLabel`; each group rendered via `CalculatorGrid`
+- Modified: `src/components/calculators/TreePreservationCalculator.tsx` — `status` made optional (`status?: AppraisalStatus | null`)
+- Modified: `src/components/calculators/InnovationCalculator.tsx` — `status` made optional
+- Modified: `src/components/layout/Sidebar.tsx` — added `Calculator` icon import; added Calculators link (`/project/[projectId]/calculators`) when inside a project route
+- Modified: `src/app/project/[projectId]/griha-v6/appraisal/[code]/page.tsx` — replaced `CALCULATORS` record + direct component render with `<CalculatorGrid rating="griha-v6" criterionCode={code} status={status} />`; removed unused TreePreservationCalculator/InnovationCalculator imports
+- Modified: `src/app/project/[projectId]/griha-v2019/criterion/[id]/page.tsx` — replaced placeholder with `<CalculatorGrid rating="griha-v2019" criterionCode={String(criterionId)} />`
+- Modified: `src/app/project/[projectId]/griha-v2015/criterion/[id]/page.tsx` — replaced placeholder with `<CalculatorGrid rating="griha-v2015" criterionCode={String(criterionId)} />`
+- Modified: `src/app/project/[projectId]/igbc-sb-2020/criterion/[id]/page.tsx` — replaced placeholder with `<CalculatorGrid rating="igbc-sb-2020" criterionCode={criterionId} />`
+
+**What was done:**
+- [x] Calculator registry pattern: each `CalcRegistration` has metadata (`id`, `title`, `description`, `rating`, `criterionCode`, `criterionLabel`, `ratingLabel`), a `getSummary(projectId): CalcSummary` for live card data (reads localStorage), and a `Component` for the full calculator in the modal
+- [x] `CalculatorCard` shows: status icon (green tick / red cross / gray dash), result text with matching color, points (e.g. "2 / 5") if applicable, compliance text if applicable, criterion + rating labels at bottom
+- [x] `CalculatorGrid` shows cards in a 4-column responsive grid; clicking a card opens a fixed-overlay modal rendering the full calculator; modal close refreshes all card summaries from localStorage
+- [x] `/project/[projectId]/calculators` sidebar link shows all calculators across all rating systems grouped by rating; same card+modal UX
+- [x] All four criterion/appraisal detail pages now use `CalculatorGrid` in the Calculation section — V6 appraisals with a configured calculator show a card; all others show a "no calculators configured" placeholder
+- [x] Build passes clean — 21 routes
+
+**Decisions made:**
+- Registry uses `"use client"` since `getSummary` reads localStorage and `Component` is a client component
+- `CalculatorGrid` accepts either `calcs?: CalcRegistration[]` (explicit list for the all-calculators page grouping by rating) OR `rating` + `criterionCode` to filter the registry — avoids duplication while supporting both use cases
+- New calculators only need to be added to `CALCULATOR_REGISTRY` — all pages pick them up automatically
+
+**Blockers / next steps:**
+- Add more calculators to `CALCULATOR_REGISTRY` as appraisals are filled in (currently only griha-v6 appraisals 1.1.2 and 30.1.1 are configured)
+- Supabase Storage wiring still deferred (manual steps required — see previous session entry)
+
+---
+
+### [2026-07-22 12:00 IST] Claude (claude-sonnet-4-6) — Supabase Auth, DataTab, per-criterion detail pages for all rating systems
+
+**Files changed:**
+- Added: `src/lib/supabase/client.ts` — browser Supabase client factory (returns null if not configured)
+- Added: `src/lib/file-store.ts` — localStorage file metadata + base64 image store (bridge until Supabase Storage)
+- Added: `src/lib/criterion-state.ts` — localStorage state (status + narrative) for V2019/V2015/IGBC criteria
+- Added: `src/components/AuthProvider.tsx` — Supabase Auth React context (user, signIn, signUp, signOut, configured)
+- Added: `src/components/DataTab.tsx` — full Documents/Photographs/Products tab component with add/delete/view
+- Added: `src/proxy.ts` — renamed from middleware.ts; function renamed to `proxy` per Next.js 16.2 convention
+- Removed: `src/middleware.ts` — deprecated in Next.js 16.2
+- Added: `src/app/(auth)/login/page.tsx` — login page with Suspense wrapper for useSearchParams
+- Added: `src/app/(auth)/signup/page.tsx` — signup page
+- Added: `src/data/griha-v2019-sections.ts` — v2019Sections exported; checklist page imports from here
+- Added: `src/data/griha-v2015-sections.ts` — v2015Sections exported; checklist page imports from here
+- Added: `src/data/igbc-sb-2020-sections.ts` — igbcSections exported; checklist page imports from here
+- Added: `src/app/project/[projectId]/griha-v2019/criterion/[id]/page.tsx` — V2019 criterion detail page
+- Added: `src/app/project/[projectId]/griha-v2015/criterion/[id]/page.tsx` — V2015 criterion detail page
+- Added: `src/app/project/[projectId]/igbc-sb-2020/criterion/[id]/page.tsx` — IGBC criterion detail page
+- Added: `supabase/migrations/001_initial_schema.sql` — DB schema for manual application
+- Added: `.env.local` — Supabase env vars (anon key placeholder until project is restored)
+- Modified: `src/app/layout.tsx` — wraps ClientLayout with AuthProvider
+- Modified: `src/components/layout/ClientLayout.tsx` — skips sidebar/header/footer for /login and /signup
+- Modified: `src/components/layout/Sidebar.tsx` — shows user email + sign-out (or sign-in link) when Supabase configured
+- Modified: `src/app/project/[projectId]/griha-v6/appraisal/[code]/page.tsx` — DataTab wired into Data section
+- Modified: `src/app/project/[projectId]/griha-v2019/page.tsx` — imports sections from data file; criterion names link to detail pages
+- Modified: `src/app/project/[projectId]/griha-v2015/page.tsx` — imports sections from data file; criterion names link to detail pages
+- Modified: `src/app/project/[projectId]/igbc-sb-2020/page.tsx` — imports sections from data file; criterion names link to detail pages (URL-encoded IDs)
+
+**What was done:**
+- [x] Supabase Auth: `AuthProvider` wraps the app; `createSupabaseClient()` gracefully returns null if key is placeholder; login and signup pages with clean full-page layout (no sidebar)
+- [x] Route protection: `src/proxy.ts` redirects unauthenticated users from `/project/*` to `/login?next=...`; skips entirely when Supabase not configured
+- [x] DataTab component: All/Documents/Photographs/Products tabs with counts; add document (any file), add photo (image, multiple), add product (image + name + specifications + document/photograph links); localStorage file store with base64 thumbnails; note to user that Supabase Storage will replace this
+- [x] V2019 criterion detail page: same 4-section accordion as V6 appraisal page (Status/Narrative/Calculation/Data); compliance badge; links from checklist
+- [x] V2015 criterion detail page: same 4-section accordion; no compliance type
+- [x] IGBC criterion detail page: string criterion IDs (URL-encoded); New/Existing max points shown; same accordion
+- [x] Extracted inline sections arrays from all three checklist pages to `src/data/` files — shared between checklist and criterion detail pages
+- [x] Fixed middleware → proxy rename for Next.js 16.2 (was emitting deprecation warning)
+- [x] Fixed login page: `useSearchParams()` moved into a Suspense-wrapped child component to satisfy Next.js static prerender requirement
+- [x] Build passes clean — all 20 routes (dynamic + static) generated
+
+**Decisions made:**
+- localStorage used as file store bridge — real Supabase Storage wiring deferred until the Supabase project is restored and anon key is available
+- `createSupabaseClient()` factory returns null when not configured; all auth code checks for null and degrades gracefully — the app remains fully functional without Supabase
+- IGBC criterion IDs (e.g. "SPD Credit 1") are URL-encoded in links and decoded in the detail page
+
+**Blockers / next steps:**
+- **Manual Supabase steps required**:
+  1. Restore the Supabase project at https://supabase.com/dashboard/project/imrgjnvvylrdjzsxthzg
+  2. Get anon key from Project Settings → API → replace `your-anon-key-here` in `.env.local` and add to Vercel env vars
+  3. Apply `supabase/migrations/001_initial_schema.sql` via Supabase SQL Editor
+  4. Create storage bucket `harshz-files` (private) in Supabase Storage dashboard
+- Wire Supabase Storage into `DataTab` once anon key is live (replace localStorage file store)
+- V2015/V2019/IGBC criterion detail pages currently show placeholder Calculation sections — no calculators configured
+
+---
+
 ### [2026-07-21 17:30 IST] Claude (claude-sonnet-4-6) — Floor-level built-up areas + buildings bulk paste
 
 **Files changed:**

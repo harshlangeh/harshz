@@ -5,7 +5,7 @@ import { getAppraisalState, saveAppraisalState, type AppraisalStatus } from '@/d
 interface Props {
   projectId: string;
   code: string;
-  status: AppraisalStatus | null;
+  status?: AppraisalStatus | null;
 }
 
 const LIVEABILITY_OCCUPANCY = 'li_occupancy';

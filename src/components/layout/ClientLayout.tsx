@@ -2,11 +2,15 @@
 
 import React, { useState, useLayoutEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { Chatbot } from './Chatbot';
 
+const AUTH_PATHS = ['/login', '/signup'];
+
 export function ClientLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   // Start collapsed on both server and client to avoid a hydration mismatch, then
   // expand on desktop widths via a layout effect (runs before paint, so no visible flash).
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
@@ -15,6 +19,11 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   useLayoutEffect(() => {
     if (window.innerWidth >= 768) setSidebarCollapsed(false);
   }, []);
+
+  // Auth pages get a clean full-page layout — no sidebar, header, or chatbot
+  if (AUTH_PATHS.includes(pathname)) {
+    return <>{children}</>;
+  }
 
   return (
     <div className="app-container">

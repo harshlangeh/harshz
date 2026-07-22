@@ -11,20 +11,14 @@ import {
   getAppraisalMeta, getAppraisalState, saveAppraisalState, type AppraisalStatus,
 } from '@/data/griha-v6-appraisals';
 import { buildProjectApprovalsNarrative } from '@/lib/project-narrative';
-import { TreePreservationCalculator } from '@/components/calculators/TreePreservationCalculator';
-import { InnovationCalculator } from '@/components/calculators/InnovationCalculator';
 import { INNOVATION_STRATEGIES, buildInnovationNarrativeHtml } from '@/data/innovation-strategies';
+import { CalculatorGrid } from '@/components/CalculatorGrid';
 import { complianceBadge, rowClass } from '@/lib/griha-compliance';
+import { DataTab } from '@/components/DataTab';
 
 /** Appraisals whose narrative can be auto-generated from Project Information / Project Details. */
 const DYNAMIC_NARRATIVE_BUILDERS: Record<string, (projectId: string) => string> = {
   '1.1.1': buildProjectApprovalsNarrative,
-};
-
-/** Appraisals with a configured calculator. */
-const CALCULATORS: Record<string, React.ComponentType<{ projectId: string; code: string; status: AppraisalStatus | null }>> = {
-  '1.1.2': TreePreservationCalculator,
-  '30.1.1': InnovationCalculator,
 };
 
 /** Default narrative set whenever an appraisal's status is switched to Exempted. */
@@ -101,8 +95,6 @@ export default function AppraisalDetailPage() {
     setNarrative(html);
     saveAppraisalState(projectId, code, { strategies: next, earnedPoints, narrativeHtml: html });
   };
-
-  const CalculatorComponent = CALCULATORS[code];
 
   if (!meta) {
     return (
@@ -213,23 +205,21 @@ export default function AppraisalDetailPage() {
       icon: Calculator,
       title: 'Calculation',
       subtitle: 'Prefilled from Project Information and rating-specific data',
-      content: CalculatorComponent ? (
-        <CalculatorComponent projectId={projectId} code={code} status={status} />
-      ) : (
-        <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-          The calculator for this appraisal hasn&rsquo;t been configured yet.
-        </div>
+      content: (
+        <CalculatorGrid projectId={projectId} rating="griha-v6" criterionCode={code} status={status} />
       ),
     },
     {
       key: 'data',
       icon: Upload,
       title: 'Data',
-      subtitle: 'Supporting documents for this appraisal',
+      subtitle: 'Supporting documents, photographs and products',
       content: (
-        <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-          Required data for this appraisal hasn&rsquo;t been defined yet.
-        </div>
+        <DataTab
+          projectId={projectId}
+          rating="griha-v6"
+          criterionCode={code}
+        />
       ),
     },
   ];
