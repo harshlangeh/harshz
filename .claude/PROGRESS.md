@@ -48,6 +48,30 @@ A web tool for green building certification consultants to track compliance and 
 
 ## Session Log (newest first)
 
+### [2026-07-22 13:45 IST] Claude (claude-sonnet-4-6) — Innovation strategies fix, Water Factor calculator, Liveability auto-fill from global params
+
+**PR merged:** #34 (squash, commit `468ac9f`)
+
+**Files changed:**
+- Modified: `src/data/innovation-strategies.ts` — replaced old strategy list with correct 13 strategies (Heritage Conservation, Gender-Neutral Toilets, SOS Buttons, Air Quality Monitoring, Resilient Communities, Zero Concrete Wastage, EPD Products, Net Positive Performance, GRIHA CP, HFC-Free, Liveability Index, Water Factor Limit, Other Innovative Strategy); `liveability-index` and `water-factor-limit` have `hasCalculator: true`; strategy ID `washing-equipment` renamed to `water-factor-limit` — breaks any old localStorage state with that strategy selected (acceptable, user explicitly replaced the list)
+- Modified: `src/components/calculators/InnovationCalculator.tsx` — rewritten to liveability-only; checks `strategies.includes('liveability-index')`; auto-prefills Fixed Occupancy from `project_info.occupancyFixed` and Shrub Bed Area from `project_info.shrubBedArea` on load (same pattern as TreePreservationCalculator for site area); labels updated to note "from Project Dashboard"
+- Added: `src/components/calculators/WaterFactorCalculator.tsx` — new calculator for Water Factor Limit strategy; shows dishwasher (< 24.6 L/cycle) and clothes washer (< 35.96 L/cycle/cu.ft) compliance table; checks `strategies.includes('water-factor-limit')`
+- Modified: `src/lib/calculator-registry.ts` — removed `innovation-strategies` entry; added `liveability-index` (using `InnovationCalculator`) and `water-factor-limit` (using `WaterFactorCalculator`) entries; `getSummary` for each reads the correct localStorage fields
+- Modified: `src/app/project/[projectId]/page.tsx` — added `treeCanopyArea: string` and `shrubBedArea: string` to `ProjectInfo` interface, `DEFAULT_PROJECT`, and `migrateProjectInfo`; added "Green Areas" section to Project Information card with two inputs (Tree Canopy Area m², Shrub Bed Area m²) and note "Used automatically in the Liveability Index calculator (Criterion 30)"
+
+**What was done:**
+- [x] Innovation strategies replaced with correct 13-item list matching GRIHA requirements
+- [x] Liveability Index calculator separated from Water Factor — each is now its own registry entry with correct title, description, and component
+- [x] Water Factor Limit calculator created as a standalone component
+- [x] Fixed Occupancy (row A) and Shrub Bed Area (row C) in Liveability Index auto-fill from global `project_info` on load
+- [x] Tree Canopy Area and Shrub Bed Area added as global parameters to the Project Dashboard
+- [x] Build passes clean — 21 routes
+
+**Decisions made:**
+- Only prefill if the field is currently blank (don't overwrite data the user has manually entered in the calculator)
+- Tree canopy area (row B) stays as manual input — user didn't request it as a global param
+- Both `treeCanopyArea` and `shrubBedArea` stored in `project_info` (same key as occupancy) so they survive the existing merge-on-save logic in `saveProjectInfo`
+
 ### [2026-07-22 14:30 IST] Claude (claude-sonnet-4-6) — Calculator card grid, modal, sidebar Calculators tab
 
 **Files changed:**
