@@ -48,6 +48,40 @@ A web tool for green building certification consultants to track compliance and 
 
 ## Session Log (newest first)
 
+### [2026-07-22 14:30 IST] Claude (claude-sonnet-4-6) — Calculator card grid, modal, sidebar Calculators tab
+
+**Files changed:**
+- Added: `src/lib/calculator-registry.ts` — `CalcRegistration` interface, `CALCULATOR_REGISTRY` (Tree Preservation + Innovation Strategies), `getCalculatorsForCriterion()` helper
+- Added: `src/components/calculators/CalculatorCard.tsx` — card with CheckCircle2/XCircle/MinusCircle status icon, result, points, compliance, criterionLabel/ratingLabel
+- Added: `src/components/CalculatorGrid.tsx` — 4-col grid + inline modal (backdrop close, X button, sticky header); accepts explicit `calcs` prop or `rating`+`criterionCode` filter
+- Added: `src/app/project/[projectId]/calculators/page.tsx` — all-calculators page grouped by `ratingLabel`; each group rendered via `CalculatorGrid`
+- Modified: `src/components/calculators/TreePreservationCalculator.tsx` — `status` made optional (`status?: AppraisalStatus | null`)
+- Modified: `src/components/calculators/InnovationCalculator.tsx` — `status` made optional
+- Modified: `src/components/layout/Sidebar.tsx` — added `Calculator` icon import; added Calculators link (`/project/[projectId]/calculators`) when inside a project route
+- Modified: `src/app/project/[projectId]/griha-v6/appraisal/[code]/page.tsx` — replaced `CALCULATORS` record + direct component render with `<CalculatorGrid rating="griha-v6" criterionCode={code} status={status} />`; removed unused TreePreservationCalculator/InnovationCalculator imports
+- Modified: `src/app/project/[projectId]/griha-v2019/criterion/[id]/page.tsx` — replaced placeholder with `<CalculatorGrid rating="griha-v2019" criterionCode={String(criterionId)} />`
+- Modified: `src/app/project/[projectId]/griha-v2015/criterion/[id]/page.tsx` — replaced placeholder with `<CalculatorGrid rating="griha-v2015" criterionCode={String(criterionId)} />`
+- Modified: `src/app/project/[projectId]/igbc-sb-2020/criterion/[id]/page.tsx` — replaced placeholder with `<CalculatorGrid rating="igbc-sb-2020" criterionCode={criterionId} />`
+
+**What was done:**
+- [x] Calculator registry pattern: each `CalcRegistration` has metadata (`id`, `title`, `description`, `rating`, `criterionCode`, `criterionLabel`, `ratingLabel`), a `getSummary(projectId): CalcSummary` for live card data (reads localStorage), and a `Component` for the full calculator in the modal
+- [x] `CalculatorCard` shows: status icon (green tick / red cross / gray dash), result text with matching color, points (e.g. "2 / 5") if applicable, compliance text if applicable, criterion + rating labels at bottom
+- [x] `CalculatorGrid` shows cards in a 4-column responsive grid; clicking a card opens a fixed-overlay modal rendering the full calculator; modal close refreshes all card summaries from localStorage
+- [x] `/project/[projectId]/calculators` sidebar link shows all calculators across all rating systems grouped by rating; same card+modal UX
+- [x] All four criterion/appraisal detail pages now use `CalculatorGrid` in the Calculation section — V6 appraisals with a configured calculator show a card; all others show a "no calculators configured" placeholder
+- [x] Build passes clean — 21 routes
+
+**Decisions made:**
+- Registry uses `"use client"` since `getSummary` reads localStorage and `Component` is a client component
+- `CalculatorGrid` accepts either `calcs?: CalcRegistration[]` (explicit list for the all-calculators page grouping by rating) OR `rating` + `criterionCode` to filter the registry — avoids duplication while supporting both use cases
+- New calculators only need to be added to `CALCULATOR_REGISTRY` — all pages pick them up automatically
+
+**Blockers / next steps:**
+- Add more calculators to `CALCULATOR_REGISTRY` as appraisals are filled in (currently only griha-v6 appraisals 1.1.2 and 30.1.1 are configured)
+- Supabase Storage wiring still deferred (manual steps required — see previous session entry)
+
+---
+
 ### [2026-07-22 12:00 IST] Claude (claude-sonnet-4-6) — Supabase Auth, DataTab, per-criterion detail pages for all rating systems
 
 **Files changed:**

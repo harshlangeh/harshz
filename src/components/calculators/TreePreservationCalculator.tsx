@@ -9,7 +9,7 @@ import { sumAreas } from '@/components/AreaList';
 interface Props {
   projectId: string;
   code: string;
-  status: AppraisalStatus | null;
+  status?: AppraisalStatus | null;
 }
 
 const FIELDS = {

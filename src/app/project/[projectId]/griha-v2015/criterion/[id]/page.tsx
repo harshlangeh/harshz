@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { AttemptStatusRadio } from '@/components/AttemptStatusRadio';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { DataTab } from '@/components/DataTab';
+import { CalculatorGrid } from '@/components/CalculatorGrid';
 import { findV2015Criterion } from '@/data/griha-v2015-sections';
 import { getCriterionState, saveCriterionState, type CriterionStatus } from '@/lib/criterion-state';
 import type { AppraisalStatus } from '@/data/griha-v6-appraisals';
@@ -105,9 +106,7 @@ export default function V2015CriterionPage() {
       title: 'Calculation',
       subtitle: 'Prefilled from Project Information and rating-specific data',
       content: (
-        <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-          The calculator for this criterion hasn&rsquo;t been configured yet.
-        </div>
+        <CalculatorGrid projectId={projectId} rating="griha-v2015" criterionCode={String(criterionId)} />
       ),
     },
     {

@@ -2,7 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useParams } from 'next/navigation';
-import { LayoutDashboard, Building2, Palette, LogIn, LogOut } from 'lucide-react';
+import { LayoutDashboard, Building2, Palette, Calculator, LogIn, LogOut } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
 
 export function Sidebar({ collapsed }: { collapsed: boolean }) {
@@ -14,6 +14,7 @@ export function Sidebar({ collapsed }: { collapsed: boolean }) {
   const links = [
     { href: '/', label: 'My Projects', Icon: LayoutDashboard },
     ...(projectId ? [{ href: `/project/${projectId}`, label: 'Project Dashboard', Icon: Building2 }] : []),
+    ...(projectId ? [{ href: `/project/${projectId}/calculators`, label: 'Calculators', Icon: Calculator }] : []),
     { href: '/branding', label: 'Branding', Icon: Palette },
   ];
 

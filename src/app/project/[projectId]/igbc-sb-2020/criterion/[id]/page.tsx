@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { AttemptStatusRadio } from '@/components/AttemptStatusRadio';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { DataTab } from '@/components/DataTab';
+import { CalculatorGrid } from '@/components/CalculatorGrid';
 import { findIgbcCriterion } from '@/data/igbc-sb-2020-sections';
 import { getCriterionState, saveCriterionState, type CriterionStatus } from '@/lib/criterion-state';
 import type { AppraisalStatus } from '@/data/griha-v6-appraisals';
@@ -119,9 +120,7 @@ export default function IgbcCriterionPage() {
       title: 'Calculation',
       subtitle: 'Prefilled from Project Information and rating-specific data',
       content: (
-        <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-          The calculator for this criterion hasn&rsquo;t been configured yet.
-        </div>
+        <CalculatorGrid projectId={projectId} rating="igbc-sb-2020" criterionCode={criterionId} />
       ),
     },
     {
