@@ -98,7 +98,10 @@ export interface ProjectDetailsState {
   typologyType: string;
   operationDaily: string;
   operationWeekly: string;
-  siteAreas: AreaItem[];
+  /** Ground-floor footprint items per building — auto-computed in UI from buildings.floors[0] */
+  siteAreaHardpaved: AreaItem[];  // Road, Parking, Paved
+  siteAreaLandscape: AreaItem[];  // Lawn, Shrub Bed
+  siteAreaOther: AreaItem[];      // Other
   numberOfBuildings: string;
   buildings: BuildingItem[];
 }
@@ -108,10 +111,27 @@ const DEFAULT_STATE: ProjectDetailsState = {
   typologyType: '',
   operationDaily: '',
   operationWeekly: '',
-  siteAreas: [],
+  siteAreaHardpaved: [],
+  siteAreaLandscape: [],
+  siteAreaOther: [],
   numberOfBuildings: '1',
   buildings: [{ id: newBuildingId(), name: '', floors: [] }],
 };
+
+/** Sum of the first floor area of each building (= building footprint on ground). */
+export function buildingFootprintTotal(buildings: BuildingItem[]): number {
+  return buildings.reduce((s, b) => s + (parseFloat(b.floors[0]?.value || '') || 0), 0);
+}
+
+/** Total site area = footprint + hardpaved + landscape + other. */
+export function sumSiteAreaTotal(state: ProjectDetailsState): number {
+  return (
+    buildingFootprintTotal(state.buildings) +
+    sumAreas(state.siteAreaHardpaved) +
+    sumAreas(state.siteAreaLandscape) +
+    sumAreas(state.siteAreaOther)
+  );
+}
 
 const STORAGE_KEY = 'project_typology';
 
@@ -122,7 +142,15 @@ export function getProjectDetails(projectId: string): ProjectDetailsState {
     if (Array.isArray(raw.buildings)) {
       raw.buildings = raw.buildings.map(migrateBuilding);
     }
-    return { ...DEFAULT_STATE, ...raw };
+    const state: ProjectDetailsState = { ...DEFAULT_STATE, ...raw };
+    // Migrate old flat siteAreas → siteAreaOther on first load with new schema
+    if (
+      Array.isArray(raw.siteAreas) && raw.siteAreas.length > 0 &&
+      !raw.siteAreaHardpaved && !raw.siteAreaLandscape && !raw.siteAreaOther
+    ) {
+      state.siteAreaOther = raw.siteAreas;
+    }
+    return state;
   } catch {
     return DEFAULT_STATE;
   }
@@ -151,7 +179,7 @@ function syncAreaTotalsToProjectInfo(projectId: string, state: ProjectDetailsSta
   }
   const payload = {
     ...existing,
-    siteArea: String(sumAreas(state.siteAreas)),
+    siteArea: String(sumSiteAreaTotal(state)),
     builtUpArea: String(sumBuiltUpAreas(state.buildings)),
   };
   localStorage.setItem(key, JSON.stringify(payload));
