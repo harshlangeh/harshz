@@ -15,6 +15,7 @@ import { TreePreservationCalculator } from '@/components/calculators/TreePreserv
 import { InnovationCalculator } from '@/components/calculators/InnovationCalculator';
 import { INNOVATION_STRATEGIES, buildInnovationNarrativeHtml } from '@/data/innovation-strategies';
 import { complianceBadge, rowClass } from '@/lib/griha-compliance';
+import { DataTab } from '@/components/DataTab';
 
 /** Appraisals whose narrative can be auto-generated from Project Information / Project Details. */
 const DYNAMIC_NARRATIVE_BUILDERS: Record<string, (projectId: string) => string> = {
@@ -225,11 +226,13 @@ export default function AppraisalDetailPage() {
       key: 'data',
       icon: Upload,
       title: 'Data',
-      subtitle: 'Supporting documents for this appraisal',
+      subtitle: 'Supporting documents, photographs and products',
       content: (
-        <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-          Required data for this appraisal hasn&rsquo;t been defined yet.
-        </div>
+        <DataTab
+          projectId={projectId}
+          rating="griha-v6"
+          criterionCode={code}
+        />
       ),
     },
   ];

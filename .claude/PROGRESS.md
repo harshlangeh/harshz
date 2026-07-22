@@ -48,6 +48,62 @@ A web tool for green building certification consultants to track compliance and 
 
 ## Session Log (newest first)
 
+### [2026-07-22 12:00 IST] Claude (claude-sonnet-4-6) — Supabase Auth, DataTab, per-criterion detail pages for all rating systems
+
+**Files changed:**
+- Added: `src/lib/supabase/client.ts` — browser Supabase client factory (returns null if not configured)
+- Added: `src/lib/file-store.ts` — localStorage file metadata + base64 image store (bridge until Supabase Storage)
+- Added: `src/lib/criterion-state.ts` — localStorage state (status + narrative) for V2019/V2015/IGBC criteria
+- Added: `src/components/AuthProvider.tsx` — Supabase Auth React context (user, signIn, signUp, signOut, configured)
+- Added: `src/components/DataTab.tsx` — full Documents/Photographs/Products tab component with add/delete/view
+- Added: `src/proxy.ts` — renamed from middleware.ts; function renamed to `proxy` per Next.js 16.2 convention
+- Removed: `src/middleware.ts` — deprecated in Next.js 16.2
+- Added: `src/app/(auth)/login/page.tsx` — login page with Suspense wrapper for useSearchParams
+- Added: `src/app/(auth)/signup/page.tsx` — signup page
+- Added: `src/data/griha-v2019-sections.ts` — v2019Sections exported; checklist page imports from here
+- Added: `src/data/griha-v2015-sections.ts` — v2015Sections exported; checklist page imports from here
+- Added: `src/data/igbc-sb-2020-sections.ts` — igbcSections exported; checklist page imports from here
+- Added: `src/app/project/[projectId]/griha-v2019/criterion/[id]/page.tsx` — V2019 criterion detail page
+- Added: `src/app/project/[projectId]/griha-v2015/criterion/[id]/page.tsx` — V2015 criterion detail page
+- Added: `src/app/project/[projectId]/igbc-sb-2020/criterion/[id]/page.tsx` — IGBC criterion detail page
+- Added: `supabase/migrations/001_initial_schema.sql` — DB schema for manual application
+- Added: `.env.local` — Supabase env vars (anon key placeholder until project is restored)
+- Modified: `src/app/layout.tsx` — wraps ClientLayout with AuthProvider
+- Modified: `src/components/layout/ClientLayout.tsx` — skips sidebar/header/footer for /login and /signup
+- Modified: `src/components/layout/Sidebar.tsx` — shows user email + sign-out (or sign-in link) when Supabase configured
+- Modified: `src/app/project/[projectId]/griha-v6/appraisal/[code]/page.tsx` — DataTab wired into Data section
+- Modified: `src/app/project/[projectId]/griha-v2019/page.tsx` — imports sections from data file; criterion names link to detail pages
+- Modified: `src/app/project/[projectId]/griha-v2015/page.tsx` — imports sections from data file; criterion names link to detail pages
+- Modified: `src/app/project/[projectId]/igbc-sb-2020/page.tsx` — imports sections from data file; criterion names link to detail pages (URL-encoded IDs)
+
+**What was done:**
+- [x] Supabase Auth: `AuthProvider` wraps the app; `createSupabaseClient()` gracefully returns null if key is placeholder; login and signup pages with clean full-page layout (no sidebar)
+- [x] Route protection: `src/proxy.ts` redirects unauthenticated users from `/project/*` to `/login?next=...`; skips entirely when Supabase not configured
+- [x] DataTab component: All/Documents/Photographs/Products tabs with counts; add document (any file), add photo (image, multiple), add product (image + name + specifications + document/photograph links); localStorage file store with base64 thumbnails; note to user that Supabase Storage will replace this
+- [x] V2019 criterion detail page: same 4-section accordion as V6 appraisal page (Status/Narrative/Calculation/Data); compliance badge; links from checklist
+- [x] V2015 criterion detail page: same 4-section accordion; no compliance type
+- [x] IGBC criterion detail page: string criterion IDs (URL-encoded); New/Existing max points shown; same accordion
+- [x] Extracted inline sections arrays from all three checklist pages to `src/data/` files — shared between checklist and criterion detail pages
+- [x] Fixed middleware → proxy rename for Next.js 16.2 (was emitting deprecation warning)
+- [x] Fixed login page: `useSearchParams()` moved into a Suspense-wrapped child component to satisfy Next.js static prerender requirement
+- [x] Build passes clean — all 20 routes (dynamic + static) generated
+
+**Decisions made:**
+- localStorage used as file store bridge — real Supabase Storage wiring deferred until the Supabase project is restored and anon key is available
+- `createSupabaseClient()` factory returns null when not configured; all auth code checks for null and degrades gracefully — the app remains fully functional without Supabase
+- IGBC criterion IDs (e.g. "SPD Credit 1") are URL-encoded in links and decoded in the detail page
+
+**Blockers / next steps:**
+- **Manual Supabase steps required**:
+  1. Restore the Supabase project at https://supabase.com/dashboard/project/imrgjnvvylrdjzsxthzg
+  2. Get anon key from Project Settings → API → replace `your-anon-key-here` in `.env.local` and add to Vercel env vars
+  3. Apply `supabase/migrations/001_initial_schema.sql` via Supabase SQL Editor
+  4. Create storage bucket `harshz-files` (private) in Supabase Storage dashboard
+- Wire Supabase Storage into `DataTab` once anon key is live (replace localStorage file store)
+- V2015/V2019/IGBC criterion detail pages currently show placeholder Calculation sections — no calculators configured
+
+---
+
 ### [2026-07-21 17:30 IST] Claude (claude-sonnet-4-6) — Floor-level built-up areas + buildings bulk paste
 
 **Files changed:**
