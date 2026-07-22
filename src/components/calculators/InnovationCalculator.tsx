@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { getAppraisalState, saveAppraisalState, type AppraisalStatus } from '@/data/griha-v6-appraisals';
+import { scopedKey } from '@/lib/projects';
 
 interface Props {
   projectId: string;
@@ -25,7 +26,22 @@ export function InnovationCalculator({ projectId, code }: Props) {
   useEffect(() => {
     const state = getAppraisalState(projectId, code);
     setStrategies(state.strategies || []);
-    setValues(state.calculator || {});
+    const calc = { ...state.calculator };
+
+    // Prefill occupancy and shrub bed area from global project_info if not already set
+    try {
+      const info = JSON.parse(localStorage.getItem(scopedKey(projectId, 'project_info')) || '{}');
+      if (!calc[LIVEABILITY_OCCUPANCY] && info.occupancyFixed) {
+        calc[LIVEABILITY_OCCUPANCY] = info.occupancyFixed;
+      }
+      if (!calc[LIVEABILITY_SHRUB_AREA] && info.shrubBedArea) {
+        calc[LIVEABILITY_SHRUB_AREA] = info.shrubBedArea;
+      }
+    } catch {
+      // ignore localStorage errors
+    }
+
+    setValues(calc);
   }, [projectId, code]);
 
   const update = (field: string, value: string) => {
@@ -83,9 +99,9 @@ export function InnovationCalculator({ projectId, code }: Props) {
       <p className="text-sm font-semibold mb-3">Liveability Index Calculator</p>
       <table className="w-full text-sm">
         <tbody className="[&>tr>td]:py-2 [&>tr>td]:px-2 [&>tr]:border-b [&>tr]:border-border last:[&>tr]:border-0">
-          {row('A', 'Fixed occupancy of the building (persons)', numberInput(LIVEABILITY_OCCUPANCY))}
+          {row('A', 'Fixed occupancy of the building (persons) — from Project Dashboard', numberInput(LIVEABILITY_OCCUPANCY))}
           {row('B', 'Tree canopy area on site (m²)', numberInput(LIVEABILITY_TREE_AREA))}
-          {row('C', 'Shrub bed area on site (m²)', numberInput(LIVEABILITY_SHRUB_AREA))}
+          {row('C', 'Shrub bed area on site (m²) — from Project Dashboard', numberInput(LIVEABILITY_SHRUB_AREA))}
           {row(
             'D',
             'Total green area (B + C) (m²)',
