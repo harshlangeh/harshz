@@ -22,6 +22,8 @@ interface ProjectInfo {
   country: string;
   state: string;
   city: string;
+  treeCanopyArea: string;
+  shrubBedArea: string;
 }
 
 const DEFAULT_PROJECT: ProjectInfo = {
@@ -32,6 +34,8 @@ const DEFAULT_PROJECT: ProjectInfo = {
   country: 'India',
   state: '',
   city: '',
+  treeCanopyArea: '',
+  shrubBedArea: '',
 };
 
 function migrateProjectInfo(raw: any): ProjectInfo {
@@ -43,6 +47,8 @@ function migrateProjectInfo(raw: any): ProjectInfo {
     country:           raw.country           || 'India',
     state:             raw.state             || '',
     city:              raw.city              || '',
+    treeCanopyArea:    raw.treeCanopyArea    || '',
+    shrubBedArea:      raw.shrubBedArea      || '',
   };
 }
 
@@ -250,6 +256,38 @@ export default function ProjectDashboard() {
                   placeholder="e.g. Mumbai"
                   value={projectInfo.city}
                   onChange={e => setField('city', e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Green Areas — used by Liveability Index calculator */}
+          <div className="space-y-2.5">
+            <div>
+              <span className="text-sm font-semibold">Green Areas</span>
+              <p className="text-xs text-muted-foreground mt-0.5">Used automatically in the Liveability Index calculator (Criterion 30)</p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Tree Canopy Area on Site (m²)</label>
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="e.g. 500"
+                  value={projectInfo.treeCanopyArea}
+                  onChange={e => setField('treeCanopyArea', e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Shrub Bed Area on Site (m²)</label>
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="e.g. 200"
+                  value={projectInfo.shrubBedArea}
+                  onChange={e => setField('shrubBedArea', e.target.value)}
                 />
               </div>
             </div>
