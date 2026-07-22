@@ -48,6 +48,29 @@ A web tool for green building certification consultants to track compliance and 
 
 ## Session Log (newest first)
 
+### [2026-07-22 05:25 IST] Claude (claude-sonnet-4-6) — Innovation Appraisal 30.1.1 — 5 Innovative Strategies
+
+**Files changed:**
+- Added: `src/data/innovation-strategies.ts` — 13 strategy definitions + `buildInnovationNarrativeHtml()`
+- Modified: `src/data/griha-v6-appraisals.ts` — `AppraisalState` gains `strategies?`/`earnedPoints?`; `appraisalContribution` gains optional `earnedPoints` param; `CRITERION_APPRAISALS[30]` overridden with real title/points/type
+- Added: `src/components/calculators/InnovationCalculator.tsx` — Liveability Index + Washing Equipment calculators
+- Modified: `src/app/project/[projectId]/griha-v6/appraisal/[code]/page.tsx` — strategy checkboxes in Narrative section, `toggleStrategy`, `InnovationCalculator` wired
+- Modified: `src/app/project/[projectId]/griha-v6/page.tsx` — loads `earnedPoints` per appraisal, passes to `appraisalContribution`
+
+**What was done:**
+- [x] Criterion 30 appraisal renamed to "5 Innovative Strategies" (5 pts, Optional); loop placeholder overridden
+- [x] 13 strategies defined: Liveability Index, Organic Architecture, Naturally Ventilated Design, Innovative Wastewater Treatment, Smart Transportation, Waste to Art/Design, Net Zero Water, Net Zero Energy, EV Charging, Biodegradable Products, Pre-fab/Modular Construction, Washing Equipment Conservation, High Performance Facade
+- [x] Strategy checkboxes shown in Narrative section before RichTextEditor; selecting any auto-generates a numbered narrative: title + description paragraph + required docs
+- [x] 1 pt per selected strategy, capped at 5; `earnedPoints` saved to state and propagated to checklist score
+- [x] `InnovationCalculator`: Liveability Index panel (occupancy + areas → index vs ≥9 m²/person benchmark) and Washing Equipment compliance table (dishwasher < 24.6 L/cycle, clothes washer < 35.96 L/cycle/cu.ft) — panels only shown when relevant strategy is checked
+- [x] TypeScript clean; build passed; PR #31 merged
+
+**Blockers / next steps:**
+- Criteria 2–29 in GRIHA V6 still have placeholder appraisals ("Appraisal 1 (name pending)")
+- Supabase still not wired; chatbot still stub; no auth
+
+---
+
 ### [2026-07-21 17:30 IST] Claude (claude-sonnet-4-6) — Floor-level built-up areas + buildings bulk paste
 
 **Files changed:**
