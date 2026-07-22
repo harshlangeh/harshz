@@ -1,16 +1,10 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { getAppraisalState, saveAppraisalState, type AppraisalStatus } from '@/data/griha-v6-appraisals';
+import { getAppraisalState, saveAppraisalState } from '@/data/griha-v6-appraisals';
 import { getProjectDetails } from '@/data/building-typology';
 import { sumAreas } from '@/components/AreaList';
-
-interface Props {
-  projectId: string;
-  code: string;
-  status: AppraisalStatus | null;
-}
+import type { CalculatorProps, CalculatorSummary } from '@/types/calculator';
 
 const FIELDS = {
   siteArea: 'siteArea',
@@ -21,23 +15,47 @@ const FIELDS = {
   treesTransplanted: 'treesTransplanted',
 } as const;
 
-/** GRIHA norm used for the site-area-based tree requirement: 1 tree per 125 sq.m of site area. */
+const APPRAISAL_CODE = '1.1.2';
 const SQM_PER_REQUIRED_TREE = 125;
-/** Replacement ratio for every mature tree cut: 1 cut → 3 new native/naturalized trees planted. */
 const REPLANT_RATIO = 3;
 
 function num(v: string | undefined): number {
   return parseFloat(v || '') || 0;
 }
 
-export function TreePreservationCalculator({ projectId, code, status }: Props) {
+export function getTreePreservationSummary(projectId: string): CalculatorSummary {
+  if (typeof window === 'undefined') return { status: 'pending', headline: 'Loading…' };
+  const state = getAppraisalState(projectId, APPRAISAL_CODE);
+  const calc = state.calculator || {};
+
+  if (state.status === 'exempted' || calc[FIELDS.hasExistingTrees] === 'No') {
+    return { status: 'exempted', headline: 'Exempted', subtext: 'No existing trees on site' };
+  }
+  const siteArea = num(calc[FIELDS.siteArea]);
+  if (siteArea === 0) {
+    return { status: 'pending', headline: 'Enter site area', subtext: 'Awaiting inputs' };
+  }
+  const cut = num(calc[FIELDS.existingTreesCut]);
+  const preserved = num(calc[FIELDS.existingTreesPreserved]);
+  const transplanted = num(calc[FIELDS.treesTransplanted]);
+  const planted = cut * REPLANT_RATIO;
+  const required = siteArea / SQM_PER_REQUIRED_TREE;
+  const total = preserved + planted + transplanted;
+  const met = required > 0 && total >= required;
+  return {
+    status: met ? 'compliant' : 'non-compliant',
+    headline: `${total.toFixed(0)} / ${required.toFixed(0)} trees`,
+    subtext: met ? 'Threshold met (Mandatory)' : 'Threshold not met',
+  };
+}
+
+export function TreePreservationCalculator({ projectId, code, status, onValueChange }: CalculatorProps) {
   const [values, setValues] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const state = getAppraisalState(projectId, code);
     const calc = state.calculator || {};
     if (!calc[FIELDS.siteArea]) {
-      // Prefill site area from Project Details, same convention as the rest of the app.
       const siteAreaTotal = sumAreas(getProjectDetails(projectId).siteAreas);
       if (siteAreaTotal > 0) calc[FIELDS.siteArea] = String(siteAreaTotal);
     }
@@ -48,54 +66,41 @@ export function TreePreservationCalculator({ projectId, code, status }: Props) {
     const next = { ...values, [field]: value };
     setValues(next);
     saveAppraisalState(projectId, code, { calculator: next });
+    onValueChange?.();
   };
 
-  // No existing mature trees (either declared directly, or the whole appraisal marked Exempted)
-  // means the tree-count fields don't apply — the requirement collapses to zero either way.
   const isExempted = status === 'exempted' || values[FIELDS.hasExistingTrees] === 'No';
 
-  const existingTreesCut = num(values[FIELDS.existingTreesCut]);
-  const existingTreesPreserved = num(values[FIELDS.existingTreesPreserved]);
-  const treesTransplanted = num(values[FIELDS.treesTransplanted]);
+  const cut = num(values[FIELDS.existingTreesCut]);
+  const preserved = num(values[FIELDS.existingTreesPreserved]);
+  const transplanted = num(values[FIELDS.treesTransplanted]);
   const siteArea = num(values[FIELDS.siteArea]);
-
-  // F — new trees required to replant, per the 1:3 replacement ratio for cut mature trees.
-  const treesPlanted = existingTreesCut * REPLANT_RATIO;
-  // H — GRIHA site-area-based tree requirement (0 once exempted).
-  const requiredTrees = isExempted ? 0 : siteArea / SQM_PER_REQUIRED_TREE;
-  // I — total preserved via a combination of preservation, replanting and transplanting.
-  const totalPreserved = existingTreesPreserved + treesPlanted + treesTransplanted;
-  // J — mandatory threshold check.
-  const meetsThreshold = requiredTrees > 0 && totalPreserved >= requiredTrees;
-
-  const row = (
-    letter: string,
-    label: string,
-    control: React.ReactNode,
-  ) => (
-    <tr>
-      <td className="w-8 text-center font-semibold text-muted-foreground">{letter}</td>
-      <td>{label}</td>
-      <td className="w-44">{control}</td>
-    </tr>
-  );
+  const planted = cut * REPLANT_RATIO;
+  const required = isExempted ? 0 : siteArea / SQM_PER_REQUIRED_TREE;
+  const total = preserved + planted + transplanted;
+  const met = required > 0 && total >= required;
 
   const numberInput = (field: string, placeholder = '0') => (
     <input
-      type="number"
-      min={0}
-      step="any"
-      placeholder={placeholder}
+      type="number" min={0} step="any" placeholder={placeholder}
       value={values[field] || ''}
       onChange={e => update(field, e.target.value)}
       className="w-full h-8 px-2 text-sm text-right rounded-md border border-input bg-background outline-none focus:ring-1 focus:ring-ring"
     />
   );
 
-  const computedCell = (text: string, colorClass = '') => (
+  const computed = (text: string, colorClass = '') => (
     <div className={`flex h-8 items-center justify-end rounded-md border border-input bg-muted/50 px-2 text-sm font-semibold ${colorClass}`}>
       {text}
     </div>
+  );
+
+  const row = (letter: string, label: string, ctrl: React.ReactNode) => (
+    <tr key={letter}>
+      <td className="w-8 text-center font-semibold text-muted-foreground">{letter}</td>
+      <td>{label}</td>
+      <td className="w-44">{ctrl}</td>
+    </tr>
   );
 
   return (
@@ -115,27 +120,23 @@ export function TreePreservationCalculator({ projectId, code, status }: Props) {
         )}
         {!isExempted && (
           <>
-            {row('C', 'Number of existing mature trees on site prior to construction', numberInput(FIELDS.existingTreesPrior))}
-            {row('D', 'Number of existing mature trees preserved on site', numberInput(FIELDS.existingTreesPreserved))}
-            {row('E', 'Number of existing mature trees cut on site', numberInput(FIELDS.existingTreesCut))}
-            {row(
-              'F',
-              'Number of new trees planted of native/naturalized species (in the ratio of 1:3)',
-              computedCell(String(treesPlanted)),
-            )}
-            {row('G', 'Number of trees transplanted successfully on site', numberInput(FIELDS.treesTransplanted))}
-            {row('H', 'Number of trees as per GRIHA requirement', computedCell(requiredTrees ? requiredTrees.toFixed(0) : '—'))}
-            {row('I', 'Total number of trees preserved using a combination of strategies', computedCell(String(totalPreserved)))}
+            {row('C', 'Existing mature trees on site prior to construction', numberInput(FIELDS.existingTreesPrior))}
+            {row('D', 'Existing mature trees preserved on site', numberInput(FIELDS.existingTreesPreserved))}
+            {row('E', 'Existing mature trees cut on site', numberInput(FIELDS.existingTreesCut))}
+            {row('F', 'New trees planted of native/naturalized species (1:3 ratio)', computed(String(planted)))}
+            {row('G', 'Trees transplanted successfully on site', numberInput(FIELDS.treesTransplanted))}
+            {row('H', 'Trees required per GRIHA norm', computed(required ? required.toFixed(0) : '—'))}
+            {row('I', 'Total trees preserved (D + F + G)', computed(String(total)))}
           </>
         )}
         {row(
           'J',
-          'Does the project meet the GRIHA tree preservation threshold (Mandatory)?',
+          'Meets GRIHA tree preservation threshold (Mandatory)?',
           isExempted
-            ? computedCell('EXEMPTED', 'text-amber-500')
-            : computedCell(
-                requiredTrees ? (meetsThreshold ? 'YES' : 'NO') : '—',
-                requiredTrees ? (meetsThreshold ? 'text-green-600' : 'text-red-500') : '',
+            ? computed('EXEMPTED', 'text-amber-500')
+            : computed(
+                required ? (met ? 'YES' : 'NO') : '—',
+                required ? (met ? 'text-green-600' : 'text-red-500') : '',
               ),
         )}
       </tbody>

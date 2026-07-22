@@ -11,23 +11,15 @@ import {
   getAppraisalMeta, getAppraisalState, saveAppraisalState, type AppraisalStatus,
 } from '@/data/griha-v6-appraisals';
 import { buildProjectApprovalsNarrative } from '@/lib/project-narrative';
-import { TreePreservationCalculator } from '@/components/calculators/TreePreservationCalculator';
-import { InnovationCalculator } from '@/components/calculators/InnovationCalculator';
+import { CalculatorCard } from '@/components/calculators/CalculatorCard';
+import { getCalculatorsForAppraisal } from '@/data/calculator-registry';
 import { INNOVATION_STRATEGIES, buildInnovationNarrativeHtml } from '@/data/innovation-strategies';
 import { complianceBadge, rowClass } from '@/lib/griha-compliance';
 
-/** Appraisals whose narrative can be auto-generated from Project Information / Project Details. */
 const DYNAMIC_NARRATIVE_BUILDERS: Record<string, (projectId: string) => string> = {
   '1.1.1': buildProjectApprovalsNarrative,
 };
 
-/** Appraisals with a configured calculator. */
-const CALCULATORS: Record<string, React.ComponentType<{ projectId: string; code: string; status: AppraisalStatus | null }>> = {
-  '1.1.2': TreePreservationCalculator,
-  '30.1.1': InnovationCalculator,
-};
-
-/** Default narrative set whenever an appraisal's status is switched to Exempted. */
 const EXEMPTED_NARRATIVES: Record<string, string> = {
   '1.1.2': 'There is no existing trees on the site hence project is exempted from the appraisal.',
 };
@@ -53,7 +45,6 @@ export default function AppraisalDetailPage() {
     setStatus(state.status);
     setStrategies(state.strategies || []);
     if (!state.narrativeHtml) {
-      // First visit with no manual edits yet — seed a default narrative.
       let generated: string | undefined;
       if (state.status === 'exempted' && exemptedNarrative) {
         generated = `<p>${exemptedNarrative}</p>`;
@@ -102,7 +93,7 @@ export default function AppraisalDetailPage() {
     saveAppraisalState(projectId, code, { strategies: next, earnedPoints, narrativeHtml: html });
   };
 
-  const CalculatorComponent = CALCULATORS[code];
+  const calculators = getCalculatorsForAppraisal(code);
 
   if (!meta) {
     return (
@@ -213,11 +204,24 @@ export default function AppraisalDetailPage() {
       icon: Calculator,
       title: 'Calculation',
       subtitle: 'Prefilled from Project Information and rating-specific data',
-      content: CalculatorComponent ? (
-        <CalculatorComponent projectId={projectId} code={code} status={status} />
+      content: calculators.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {calculators.map(calc => (
+            <CalculatorCard
+              key={calc.id}
+              title={calc.title}
+              description={calc.description}
+              projectId={projectId}
+              code={code}
+              appraisalStatus={status}
+              getSummary={calc.getSummary}
+              Calculator={calc.component}
+            />
+          ))}
+        </div>
       ) : (
         <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-          The calculator for this appraisal hasn&rsquo;t been configured yet.
+          No calculator has been configured for this appraisal yet.
         </div>
       ),
     },
@@ -253,8 +257,6 @@ export default function AppraisalDetailPage() {
         {complianceBadge(meta.type || 'Optional')}
       </div>
 
-      {/* Same accordion-row look as the criterion table on the checklist page: tinted by
-          compliance type, chevron + title on the left, single section expanded at a time. */}
       <Card className="overflow-hidden">
         {SECTIONS.map((section, i) => {
           const expanded = expandedSection === section.key;
