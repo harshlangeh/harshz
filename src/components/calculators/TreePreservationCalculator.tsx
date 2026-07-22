@@ -3,8 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { getAppraisalState, saveAppraisalState, type AppraisalStatus } from '@/data/griha-v6-appraisals';
-import { getProjectDetails } from '@/data/building-typology';
-import { sumAreas } from '@/components/AreaList';
+import { getProjectDetails, sumSiteAreaTotal } from '@/data/building-typology';
 
 interface Props {
   projectId: string;
@@ -37,8 +36,7 @@ export function TreePreservationCalculator({ projectId, code, status }: Props) {
     const state = getAppraisalState(projectId, code);
     const calc = state.calculator || {};
     if (!calc[FIELDS.siteArea]) {
-      // Prefill site area from Project Details, same convention as the rest of the app.
-      const siteAreaTotal = sumAreas(getProjectDetails(projectId).siteAreas);
+      const siteAreaTotal = sumSiteAreaTotal(getProjectDetails(projectId));
       if (siteAreaTotal > 0) calc[FIELDS.siteArea] = String(siteAreaTotal);
     }
     setValues(calc);

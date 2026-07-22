@@ -1,5 +1,5 @@
-import { getProjectDetails, BUILDING_TYPOLOGIES, OPERATION_SCHEDULE, buildingBuiltUpArea } from '@/data/building-typology';
-import { sumAreas, fmtSqm } from '@/components/AreaList';
+import { getProjectDetails, BUILDING_TYPOLOGIES, OPERATION_SCHEDULE, buildingBuiltUpArea, sumSiteAreaTotal } from '@/data/building-typology';
+import { fmtSqm } from '@/components/AreaList';
 import { scopedKey } from '@/lib/projects';
 
 interface ProjectInfoLite {
@@ -33,7 +33,7 @@ export function buildProjectApprovalsNarrative(projectId: string): string {
     || '[Building Typology]';
   const typologyText = details.typologyType ? `${details.typologyType} (${category})` : category;
 
-  const siteAreaTotal = sumAreas(details.siteAreas);
+  const siteAreaTotal = sumSiteAreaTotal(details);
   const builtUpTotal = details.buildings.reduce((s, b) => s + buildingBuiltUpArea(b), 0);
   const numberOfBuildings = details.buildings.length;
 

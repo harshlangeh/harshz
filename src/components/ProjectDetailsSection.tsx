@@ -8,7 +8,8 @@ import { Separator } from '@/components/ui/separator';
 import { AreaList, fmtSqm, newId, parsePasteText } from '@/components/AreaList';
 import {
   BUILDING_TYPOLOGIES, OPERATION_SCHEDULE, getProjectDetails, saveProjectDetails,
-  newBuildingId, buildingBuiltUpArea, type ProjectDetailsState, type BuildingItem,
+  newBuildingId, buildingBuiltUpArea, buildingFootprintTotal, sumSiteAreaTotal,
+  type ProjectDetailsState, type BuildingItem,
 } from '@/data/building-typology';
 
 interface Props {
@@ -20,7 +21,8 @@ const PLACEHOLDER = '__placeholder__';
 
 const EMPTY_STATE: ProjectDetailsState = {
   typologyCategory: '', typologyType: '', operationDaily: '', operationWeekly: '',
-  siteAreas: [], numberOfBuildings: '1', buildings: [{ id: 'init', name: '', floors: [] }],
+  siteAreaHardpaved: [], siteAreaLandscape: [], siteAreaOther: [],
+  numberOfBuildings: '1', buildings: [{ id: 'init', name: '', floors: [] }],
 };
 
 export function ProjectDetailsSection({ projectId, accentClass }: Props) {
@@ -42,6 +44,8 @@ export function ProjectDetailsSection({ projectId, accentClass }: Props) {
   const selectedCategory = BUILDING_TYPOLOGIES.find(c => c.category === details.typologyCategory);
 
   const totalBuiltUpArea = details.buildings.reduce((s, b) => s + buildingBuiltUpArea(b), 0);
+  const buildingFootprint = buildingFootprintTotal(details.buildings);
+  const totalSiteArea = sumSiteAreaTotal(details);
 
   // ── Number-of-buildings input ──────────────────────────────────────────────
   const updateBuildingCount = (raw: string) => {
@@ -304,13 +308,69 @@ export function ProjectDetailsSection({ projectId, accentClass }: Props) {
 
         <Separator />
 
-        {/* ── Total Site Area ── */}
-        <AreaList
-          label="Total Site Area"
-          items={details.siteAreas}
-          namePlaceholder="e.g. Landscape area, Hard paved area…"
-          onChange={items => update({ siteAreas: items })}
-        />
+        {/* ── Site Area Breakdown ── */}
+        <div className="space-y-5">
+          {/* Section heading + grand total */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold">Total Site Area</span>
+            <span className="text-sm text-muted-foreground">
+              Grand total:{' '}
+              <span className="font-bold text-foreground">{fmtSqm(totalSiteArea)} sqm</span>
+            </span>
+          </div>
+
+          {/* Building Footprint — read-only, auto from each building's first floor */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Building Footprint</span>
+              <span className="text-xs text-muted-foreground italic">
+                Auto — ground floor area of each building
+              </span>
+            </div>
+            <div className="rounded-md border border-input bg-muted/40 divide-y divide-border">
+              {details.buildings.map((b, i) => {
+                const fp = parseFloat(b.floors[0]?.value || '') || 0;
+                return (
+                  <div key={b.id} className="flex items-center justify-between px-3 py-1.5 text-sm">
+                    <span className="text-muted-foreground">{b.name || `Building ${i + 1}`}</span>
+                    <span className="font-medium">{fmtSqm(fp)} sqm</span>
+                  </div>
+                );
+              })}
+              <div className="flex items-center justify-between px-3 py-1.5 text-sm font-semibold bg-muted/30">
+                <span>Total Footprint</span>
+                <span>{fmtSqm(buildingFootprint)} sqm</span>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Set via the first floor entry of each building above. Add a &ldquo;Ground floor&rdquo; row to each building to populate this.
+            </p>
+          </div>
+
+          {/* Hardpaved Areas */}
+          <AreaList
+            label="Total Hardpaved Area"
+            items={details.siteAreaHardpaved}
+            namePlaceholder="e.g. Road Area, Parking Area, Paved Area…"
+            onChange={items => update({ siteAreaHardpaved: items })}
+          />
+
+          {/* Landscape Areas */}
+          <AreaList
+            label="Total Landscape Area"
+            items={details.siteAreaLandscape}
+            namePlaceholder="e.g. Lawn Area, Shrub Bed…"
+            onChange={items => update({ siteAreaLandscape: items })}
+          />
+
+          {/* Other Areas */}
+          <AreaList
+            label="Other Areas"
+            items={details.siteAreaOther}
+            namePlaceholder="e.g. Water Body, Open Court…"
+            onChange={items => update({ siteAreaOther: items })}
+          />
+        </div>
 
         <Separator />
 

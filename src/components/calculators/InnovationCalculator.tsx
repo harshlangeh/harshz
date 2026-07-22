@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { getAppraisalState, saveAppraisalState, type AppraisalStatus } from '@/data/griha-v6-appraisals';
 import { scopedKey } from '@/lib/projects';
+import { getProjectDetails } from '@/data/building-typology';
+import { sumAreas } from '@/components/AreaList';
 
 interface Props {
   projectId: string;
@@ -28,17 +30,20 @@ export function InnovationCalculator({ projectId, code }: Props) {
     setStrategies(state.strategies || []);
     const calc = { ...state.calculator };
 
-    // Prefill occupancy and shrub bed area from global project_info if not already set
+    // Prefill occupancy from project_info and shrub bed area from landscape breakdown
     try {
       const info = JSON.parse(localStorage.getItem(scopedKey(projectId, 'project_info')) || '{}');
       if (!calc[LIVEABILITY_OCCUPANCY] && info.occupancyFixed) {
         calc[LIVEABILITY_OCCUPANCY] = info.occupancyFixed;
       }
-      if (!calc[LIVEABILITY_SHRUB_AREA] && info.shrubBedArea) {
-        calc[LIVEABILITY_SHRUB_AREA] = info.shrubBedArea;
-      }
     } catch {
       // ignore localStorage errors
+    }
+    if (!calc[LIVEABILITY_SHRUB_AREA]) {
+      const projectDetails = getProjectDetails(projectId);
+      const shrubItems = projectDetails.siteAreaLandscape.filter(i => /shrub/i.test(i.name));
+      const shrubTotal = sumAreas(shrubItems);
+      if (shrubTotal > 0) calc[LIVEABILITY_SHRUB_AREA] = String(shrubTotal);
     }
 
     setValues(calc);
@@ -101,7 +106,7 @@ export function InnovationCalculator({ projectId, code }: Props) {
         <tbody className="[&>tr>td]:py-2 [&>tr>td]:px-2 [&>tr]:border-b [&>tr]:border-border last:[&>tr]:border-0">
           {row('A', 'Fixed occupancy of the building (persons) — from Project Dashboard', numberInput(LIVEABILITY_OCCUPANCY))}
           {row('B', 'Tree canopy area on site (m²)', numberInput(LIVEABILITY_TREE_AREA))}
-          {row('C', 'Shrub bed area on site (m²) — from Project Dashboard', numberInput(LIVEABILITY_SHRUB_AREA))}
+          {row('C', 'Shrub bed area on site (m²) — from Landscape Area breakdown', numberInput(LIVEABILITY_SHRUB_AREA))}
           {row(
             'D',
             'Total green area (B + C) (m²)',
