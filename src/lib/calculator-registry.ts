@@ -3,6 +3,7 @@ import type { AppraisalStatus } from '@/data/griha-v6-appraisals';
 import { getAppraisalState } from '@/data/griha-v6-appraisals';
 import { TreePreservationCalculator } from '@/components/calculators/TreePreservationCalculator';
 import { InnovationCalculator } from '@/components/calculators/InnovationCalculator';
+import { WaterFactorCalculator } from '@/components/calculators/WaterFactorCalculator';
 import type React from 'react';
 
 export type CalcStatus = 'pass' | 'fail' | 'pending';
@@ -60,9 +61,9 @@ export const CALCULATOR_REGISTRY: CalcRegistration[] = [
     },
   },
   {
-    id: 'innovation-strategies',
-    title: 'Innovation Strategies',
-    description: '1 point per innovative strategy selected in Narrative, capped at 5 points',
+    id: 'liveability-index',
+    title: 'Liveability Index',
+    description: 'Minimum 9 m² of green space (tree canopy + shrub bed) per capita — active when this strategy is selected in Narrative',
     rating: 'griha-v6',
     ratingLabel: 'GRIHA V6',
     criterionCode: '30.1.1',
@@ -71,12 +72,47 @@ export const CALCULATOR_REGISTRY: CalcRegistration[] = [
     Component: InnovationCalculator,
     getSummary: (projectId) => {
       const state = getAppraisalState(projectId, '30.1.1');
-      const count = Math.min((state.strategies || []).length, 5);
+      const isSelected = (state.strategies || []).includes('liveability-index');
+      if (!isSelected) return { result: '—', status: 'pending' };
+      const calc = state.calculator || {};
+      const occupancy = parseFloat(calc['li_occupancy'] || '') || 0;
+      const treeArea = parseFloat(calc['li_tree_area'] || '') || 0;
+      const shrubArea = parseFloat(calc['li_shrub_area'] || '') || 0;
+      if (!occupancy) return { result: '—', status: 'pending' };
+      const index = (treeArea + shrubArea) / occupancy;
+      const pass = index >= 9;
       return {
-        result: `${count} / 5 pts`,
-        status: count > 0 ? 'pass' : 'pending',
-        points: count,
-        maxPoints: 5,
+        result: pass ? 'COMPLIANT' : `${index.toFixed(1)} m²/pp`,
+        status: pass ? 'pass' : 'fail',
+        compliance: pass ? 'Compliant (≥ 9 m²/pp)' : 'Non-Compliant (< 9 m²/pp)',
+      };
+    },
+  },
+  {
+    id: 'water-factor-limit',
+    title: 'Water Factor Limit',
+    description: 'Dishwasher < 24.6 L/cycle · Clothes washer < 35.96 L/cycle/cu.ft — active when this strategy is selected in Narrative',
+    rating: 'griha-v6',
+    ratingLabel: 'GRIHA V6',
+    criterionCode: '30.1.1',
+    criterionLabel: 'Criterion 30 · Innovation',
+    criterionPath: (p) => `/project/${p}/griha-v6/appraisal/30.1.1`,
+    Component: WaterFactorCalculator,
+    getSummary: (projectId) => {
+      const state = getAppraisalState(projectId, '30.1.1');
+      const isSelected = (state.strategies || []).includes('water-factor-limit');
+      if (!isSelected) return { result: '—', status: 'pending' };
+      const calc = state.calculator || {};
+      const dishwasherVol = parseFloat(calc['wash_dishwasher_vol'] || '') || 0;
+      const clothesVol = parseFloat(calc['wash_clothes_vol'] || '') || 0;
+      if (!dishwasherVol && !clothesVol) return { result: '—', status: 'pending' };
+      const dishwasherOk = !dishwasherVol || dishwasherVol < 24.6;
+      const clothesOk = !clothesVol || clothesVol < 35.96;
+      const pass = dishwasherOk && clothesOk;
+      return {
+        result: pass ? 'COMPLIANT' : 'NON-COMPLIANT',
+        status: pass ? 'pass' : 'fail',
+        compliance: pass ? 'Compliant' : 'Non-Compliant',
       };
     },
   },
