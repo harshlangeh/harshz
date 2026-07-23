@@ -12,13 +12,34 @@ import {
 } from '@/data/griha-v6-appraisals';
 import { buildProjectApprovalsNarrative } from '@/lib/project-narrative';
 import { INNOVATION_STRATEGIES, buildInnovationNarrativeHtml } from '@/data/innovation-strategies';
+import { getProjectDetails } from '@/data/building-typology';
+import { sumAreas } from '@/components/AreaList';
+import { scopedKey } from '@/lib/projects';
 import { CalculatorGrid } from '@/components/CalculatorGrid';
 import { complianceBadge, rowClass } from '@/lib/griha-compliance';
 import { DataTab } from '@/components/DataTab';
 
+function buildOwcNarrative(projectId: string): string {
+  let capacity = 0;
+  try {
+    const info = JSON.parse(localStorage.getItem(scopedKey(projectId, 'project_info')) || '{}');
+    const fixed = parseFloat(info.occupancyFixed || '') || 0;
+    const floating = parseFloat(info.occupancyFloating || '') || 0;
+    const occupancy = fixed + floating;
+    const landscape = sumAreas(getProjectDetails(projectId).siteAreaLandscape);
+    const buildingOrganic = occupancy * 0.2 * 0.4;
+    const landscapeDay = (landscape * 0.067) / 365;
+    capacity = buildingOrganic + landscapeDay;
+  } catch {}
+  const capacityText = capacity > 0 ? `${capacity.toFixed(2)} Kg/day` : '[to be calculated]';
+  return `<p>The project team will install an Organic Waste Converter (OWC) with a capacity of <strong>${capacityText}</strong> to manage the organic waste generated within the project premises. The OWC is designed to process biodegradable waste from building occupants as well as landscape leaf litter in an environmentally responsible manner, ensuring compliance with the GRIHA V6 requirements for on-site organic waste management.</p>
+<p>The OWC capacity has been determined based on the total building occupancy and landscape area of the project, applying a waste generation rate of 0.2 Kg/capita/day (NBC norm) and an organic fraction of 40%, along with a leaf litter rate of 67 gms/m²/year for the landscaped areas. The processed organic waste will be converted into compost/manure for use within the project site, thereby reducing the load on municipal solid waste collection systems and contributing to a circular waste management approach.</p>`;
+}
+
 /** Appraisals whose narrative can be auto-generated from Project Information / Project Details. */
 const DYNAMIC_NARRATIVE_BUILDERS: Record<string, (projectId: string) => string> = {
   '1.1.1': buildProjectApprovalsNarrative,
+  '18.1.1': buildOwcNarrative,
   '24.1.1': () =>
     `<p>The project has followed all the guidelines of Universal Accessibility to ensure that the building is fully accessible to differently abled (DA) individuals. The following DA facilities have been incorporated in the design and construction of the project:</p>
 <ul>
