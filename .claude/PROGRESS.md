@@ -48,6 +48,49 @@ A web tool for green building certification consultants to track compliance and 
 
 ## Session Log (newest first)
 
+### [2026-07-23 22:00 IST] Claude (claude-sonnet-4-6) — Criterion 29 O&M Protocol appraisals
+
+**PR merged:** #36 (squash, commit `fb1983f`)
+
+**Files changed:**
+- Modified: `src/data/griha-v6-appraisals.ts` — added `CRITERION_APPRAISALS[29]` override with three real Mandatory appraisals: `29.1.1 O&M Service Group Formation`, `29.1.2 Contract Document`, `29.1.3 O&M Manuals`; all type `'Mandatory'`, no points
+- Modified: `src/app/project/[projectId]/griha-v6/appraisal/[code]/page.tsx` — added default narratives for all three 29.x codes to `DYNAMIC_NARRATIVE_BUILDERS`; seeded on first visit when `narrativeHtml` is empty
+
+**What was done:**
+- [x] Criterion 29 now has 3 real appraisals instead of the placeholder "Appraisal 1 (name pending)"
+- [x] All three are Mandatory (no points, show "M" badge, NC/M in target column)
+- [x] Default narrative seeded on first visit: 29.1.1 "The project team has formed a dedicated O&M service group…", 29.1.2 "…prepared a comprehensive contract document…", 29.1.3 "…prepared detailed O&M manuals covering HVAC, electrical, plumbing, fire safety…"
+
+**Decisions made:**
+- Same `DYNAMIC_NARRATIVE_BUILDERS` pattern used for 29.x codes as for 1.1.1 — auto-seeds on first visit, freely editable afterwards
+
+---
+
+### [2026-07-23 21:30 IST] Claude (claude-sonnet-4-6) — Structured site area breakdown; Green Areas removed from project dashboard
+
+**PR merged:** #35 (squash)
+
+**Files changed:**
+- Modified: `src/data/building-typology.ts` — replaced flat `siteAreas: AreaItem[]` with three typed sub-arrays: `siteAreaHardpaved`, `siteAreaLandscape`, `siteAreaOther`; added `buildingFootprintTotal(buildings)` (sum of `floors[0]?.value` per building = ground floor footprint) and `sumSiteAreaTotal(state)` (footprint + hardpaved + landscape + other); migration: old `siteAreas` → `siteAreaOther` on first load
+- Modified: `src/components/ProjectDetailsSection.tsx` — replaced single `AreaList "Total Site Area"` with 4-section structured UI: Building Footprint (read-only, auto-calculated from `floors[0]` per building with breakdown table), Total Hardpaved Area (`siteAreaHardpaved`), Total Landscape Area (`siteAreaLandscape`), Other Areas (`siteAreaOther`); grand total shown in section heading; updated `EMPTY_STATE`
+- Modified: `src/app/project/[projectId]/page.tsx` — removed `treeCanopyArea` and `shrubBedArea` from `ProjectInfo`, `DEFAULT_PROJECT`, `migrateProjectInfo`; removed "Green Areas" section from Project Information card
+- Modified: `src/components/calculators/InnovationCalculator.tsx` — shrub area auto-fill now scans `siteAreaLandscape` items matching `/shrub/i` instead of reading a global `shrubBedArea` field; row C label updated to "— from Landscape Area breakdown"
+- Modified: `src/components/calculators/TreePreservationCalculator.tsx` — site area prefill now uses `sumSiteAreaTotal(getProjectDetails(projectId))` instead of `sumAreas(details.siteAreas)`
+- Modified: `src/lib/project-narrative.ts` — `siteAreaTotal` now uses `sumSiteAreaTotal(details)`; removed unused `sumAreas` import
+
+**What was done:**
+- [x] Green Areas (Tree Canopy Area, Shrub Bed Area) global fields removed from Project Dashboard — these were added earlier but replaced by the more complete site area breakdown
+- [x] Site area now broken into 4 logical sub-sections: Building Footprint (auto-calculated, read-only), Total Hardpaved Area, Total Landscape Area, Other Areas
+- [x] Building Footprint auto-calculated from first floor entry of each building (ground floor = `floors[0]`) — shown as a per-building breakdown table
+- [x] Shrub area auto-fill in Liveability Index calculator scans Landscape Area entries for any item with "shrub" in the name
+- [x] Backward compatibility: old flat `siteAreas` migrates to `siteAreaOther` on first load
+
+**Decisions made:**
+- `floors[0]` = ground floor convention: user-defined floor entries are naturally entered ground-up, so the first entry is always the ground floor footprint
+- Shrub detection uses `/shrub/i` regex scan on `siteAreaLandscape` rather than a dedicated global field — avoids data duplication
+
+---
+
 ### [2026-07-22 13:45 IST] Claude (claude-sonnet-4-6) — Innovation strategies fix, Water Factor calculator, Liveability auto-fill from global params
 
 **PR merged:** #34 (squash, commit `468ac9f`)
