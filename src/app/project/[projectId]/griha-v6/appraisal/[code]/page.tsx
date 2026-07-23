@@ -19,6 +19,12 @@ import { DataTab } from '@/components/DataTab';
 /** Appraisals whose narrative can be auto-generated from Project Information / Project Details. */
 const DYNAMIC_NARRATIVE_BUILDERS: Record<string, (projectId: string) => string> = {
   '1.1.1': buildProjectApprovalsNarrative,
+  '29.1.1': () =>
+    `<p>The project team has formed a dedicated Operation and Maintenance (O&amp;M) service group responsible for the ongoing maintenance, management, and performance monitoring of the building's systems and infrastructure. The group comprises trained professionals with defined roles and responsibilities to ensure the building operates efficiently and sustainably in accordance with GRIHA requirements.</p>`,
+  '29.1.2': () =>
+    `<p>The project team has prepared a comprehensive contract document for Operation and Maintenance (O&amp;M) services, outlining the scope of work, service level agreements, performance metrics, and responsibilities of all parties involved in the maintenance of the building. The contract document ensures accountability and continuity of O&amp;M services throughout the building's operational life.</p>`,
+  '29.1.3': () =>
+    `<p>The project team has prepared detailed Operation and Maintenance (O&amp;M) manuals covering all major building systems, including HVAC, electrical, plumbing, fire safety, and other installed equipment. The manuals provide clear instructions for operation, routine maintenance, troubleshooting, and emergency procedures to ensure optimal building performance and longevity.</p>`,
 };
 
 /** Default narrative set whenever an appraisal's status is switched to Exempted. */
