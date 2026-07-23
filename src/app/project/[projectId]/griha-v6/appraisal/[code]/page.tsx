@@ -19,6 +19,10 @@ import { DataTab } from '@/components/DataTab';
 /** Appraisals whose narrative can be auto-generated from Project Information / Project Details. */
 const DYNAMIC_NARRATIVE_BUILDERS: Record<string, (projectId: string) => string> = {
   '1.1.1': buildProjectApprovalsNarrative,
+  '27.1.1': () =>
+    `<p>All HVAC, lighting, and electrical systems of the project have been commissioned to ensure proper working and performance in accordance with the design specifications and GRIHA requirements. The commissioning process involved systematic testing, balancing, and verification of each system to confirm that they operate as intended, delivering the required levels of thermal comfort, illumination, and energy efficiency throughout the building.</p>`,
+  '27.1.2': () =>
+    `<p>All water supply, plumbing, and waste management systems of the project have been commissioned to ensure proper working and performance in accordance with the design specifications and GRIHA requirements. The commissioning process involved systematic testing and verification of water distribution, drainage, and waste disposal systems to confirm that they operate efficiently, safely, and in compliance with applicable standards and sustainability goals.</p>`,
   '29.1.1': () =>
     `<p>The project team has formed a dedicated Operation and Maintenance (O&amp;M) service group responsible for the ongoing maintenance, management, and performance monitoring of the building's systems and infrastructure. The group comprises trained professionals with defined roles and responsibilities to ensure the building operates efficiently and sustainably in accordance with GRIHA requirements.</p>`,
   '29.1.2': () =>

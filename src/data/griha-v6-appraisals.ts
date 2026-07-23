@@ -34,6 +34,12 @@ for (let id = 2; id <= 30; id++) {
   ];
 }
 
+// Override criterion 27 with the real Commissioning appraisals.
+CRITERION_APPRAISALS[27] = [
+  { code: '27.1.1', title: 'HVAC, Lighting and Electrical Systems', criterionId: 27, points: 2, type: 'Optional' },
+  { code: '27.1.2', title: 'Water and Waste Systems', criterionId: 27, points: 2, type: 'Optional' },
+];
+
 // Override criterion 29 with the real O&M Protocol appraisals (all Mandatory — no points).
 CRITERION_APPRAISALS[29] = [
   { code: '29.1.1', title: 'O&M Service Group Formation', criterionId: 29, type: 'Mandatory' },
