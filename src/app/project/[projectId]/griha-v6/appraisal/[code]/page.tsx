@@ -19,6 +19,19 @@ import { DataTab } from '@/components/DataTab';
 /** Appraisals whose narrative can be auto-generated from Project Information / Project Details. */
 const DYNAMIC_NARRATIVE_BUILDERS: Record<string, (projectId: string) => string> = {
   '1.1.1': buildProjectApprovalsNarrative,
+  '24.1.1': () =>
+    `<p>The project has followed all the guidelines of Universal Accessibility to ensure that the building is fully accessible to differently abled (DA) individuals. The following DA facilities have been incorporated in the design and construction of the project:</p>
+<ul>
+  <li>Dual ramps with anti-skid surface and handrails on both sides at all level changes and entrances</li>
+  <li>Lifts/elevators equipped with Braille-marked buttons, audio announcements, and tactile flooring at landings</li>
+  <li>Accessible parking bays located near the main entrance, clearly marked and of adequate dimensions</li>
+  <li>Accessible toilets on each floor with grab bars, wider doorways, and turning space for wheelchairs</li>
+  <li>Tactile guiding paths and warning strips at hazardous locations throughout the building</li>
+  <li>Lever-type door handles and push-plate fittings at all accessible routes</li>
+  <li>Signage in Braille and large-print format at key locations including entrance, lifts, and toilets</li>
+  <li>Lowered reception counters and service windows to wheelchair height</li>
+</ul>
+<p>These provisions are in compliance with the National Building Code (NBC) 2016 Part 3 guidelines and GRIHA Universal Accessibility requirements, ensuring dignified and independent access for all building users.</p>`,
   '27.1.1': () =>
     `<p>All HVAC, lighting, and electrical systems of the project have been commissioned to ensure proper working and performance in accordance with the design specifications and GRIHA requirements. The commissioning process involved systematic testing, balancing, and verification of each system to confirm that they operate as intended, delivering the required levels of thermal comfort, illumination, and energy efficiency throughout the building.</p>`,
   '27.1.2': () =>

@@ -34,6 +34,11 @@ for (let id = 2; id <= 30; id++) {
   ];
 }
 
+// Override criterion 24 with the real Differently Abled (DA) Facilities appraisal.
+CRITERION_APPRAISALS[24] = [
+  { code: '24.1.1', title: 'DA Facilities', criterionId: 24, points: 2, type: 'Optional' },
+];
+
 // Override criterion 27 with the real Commissioning appraisals.
 CRITERION_APPRAISALS[27] = [
   { code: '27.1.1', title: 'HVAC, Lighting and Electrical Systems', criterionId: 27, points: 2, type: 'Optional' },
