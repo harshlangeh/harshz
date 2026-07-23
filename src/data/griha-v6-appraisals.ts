@@ -34,6 +34,13 @@ for (let id = 2; id <= 30; id++) {
   ];
 }
 
+// Override criterion 29 with the real O&M Protocol appraisals (all Mandatory — no points).
+CRITERION_APPRAISALS[29] = [
+  { code: '29.1.1', title: 'O&M Service Group Formation', criterionId: 29, type: 'Mandatory' },
+  { code: '29.1.2', title: 'Contract Document', criterionId: 29, type: 'Mandatory' },
+  { code: '29.1.3', title: 'O&M Manuals', criterionId: 29, type: 'Mandatory' },
+];
+
 // Override criterion 30 with the real Innovation appraisal (1 pt per strategy, max 5).
 CRITERION_APPRAISALS[30] = [
   { code: '30.1.1', title: '5 Innovative Strategies', criterionId: 30, points: 5, type: 'Optional' },
