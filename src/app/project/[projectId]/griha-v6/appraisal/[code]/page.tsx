@@ -70,6 +70,21 @@ const EXEMPTED_NARRATIVES: Record<string, string> = {
   '1.1.2': 'There is no existing trees on the site hence project is exempted from the appraisal.',
 };
 
+/** Dynamic exempted narratives — like EXEMPTED_NARRATIVES but computed from project data. */
+const DYNAMIC_EXEMPTED_NARRATIVE_BUILDERS: Record<string, (projectId: string) => string> = {
+  '18.1.1': (projectId) => {
+    let totalOwc = 0;
+    try {
+      const info = JSON.parse(localStorage.getItem(scopedKey(projectId, 'project_info')) || '{}');
+      const occupancy = (parseFloat(info.occupancyFixed || '') || 0) + (parseFloat(info.occupancyFloating || '') || 0);
+      const landscape = sumAreas(getProjectDetails(projectId).siteAreaLandscape);
+      totalOwc = occupancy * 0.2 * 0.4 + (landscape * 0.067) / 365;
+    } catch {}
+    const totalText = totalOwc > 0 ? `${totalOwc.toFixed(2)} Kg/day` : 'less than 50 Kg/day';
+    return `<p>The total organic waste generated from the project — comprising kitchen/food waste from building occupants and landscape leaf litter — is <strong>${totalText}</strong>, which is below the GRIHA V6 applicability threshold of 50 Kg per day. As per the applicability check, Appraisal 18.1.1 (Organic Waste Converter Capacity) is therefore not applicable to this project.</p>`;
+  },
+};
+
 type SectionKey = 'status' | 'narrative' | 'calculation' | 'data';
 
 export default function AppraisalDetailPage() {
@@ -85,6 +100,13 @@ export default function AppraisalDetailPage() {
 
   const narrativeBuilder = DYNAMIC_NARRATIVE_BUILDERS[code];
   const exemptedNarrative = EXEMPTED_NARRATIVES[code];
+  const exemptedNarrativeBuilder = DYNAMIC_EXEMPTED_NARRATIVE_BUILDERS[code];
+
+  const buildExemptedNarrative = (): string | undefined => {
+    if (exemptedNarrativeBuilder) return exemptedNarrativeBuilder(projectId);
+    if (exemptedNarrative) return `<p>${exemptedNarrative}</p>`;
+    return undefined;
+  };
 
   useEffect(() => {
     const state = getAppraisalState(projectId, code);
@@ -93,8 +115,8 @@ export default function AppraisalDetailPage() {
     if (!state.narrativeHtml) {
       // First visit with no manual edits yet — seed a default narrative.
       let generated: string | undefined;
-      if (state.status === 'exempted' && exemptedNarrative) {
-        generated = `<p>${exemptedNarrative}</p>`;
+      if (state.status === 'exempted') {
+        generated = buildExemptedNarrative();
       } else if (narrativeBuilder) {
         generated = narrativeBuilder(projectId);
       }
@@ -110,11 +132,13 @@ export default function AppraisalDetailPage() {
 
   const updateStatus = (s: AppraisalStatus) => {
     setStatus(s);
-    if (s === 'exempted' && exemptedNarrative) {
-      const html = `<p>${exemptedNarrative}</p>`;
-      setNarrative(html);
-      saveAppraisalState(projectId, code, { status: s, narrativeHtml: html });
-      return;
+    if (s === 'exempted') {
+      const html = buildExemptedNarrative();
+      if (html) {
+        setNarrative(html);
+        saveAppraisalState(projectId, code, { status: s, narrativeHtml: html });
+        return;
+      }
     }
     saveAppraisalState(projectId, code, { status: s });
   };

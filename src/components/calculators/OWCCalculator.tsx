@@ -71,6 +71,8 @@ export function OWCCalculator({ projectId, code, status: _status }: Props) {
   const landscapeWasteDay = landscapeWasteYear / 365;
   // I: Total OWC load capacity (Kg/day)
   const totalOwcCapacity = buildingOrganicWaste + landscapeWasteDay;
+  // J: Applicability check — exempt if total < 50 Kg/day
+  const isApplicable = totalOwcCapacity >= 50;
 
   const row = (letter: string, label: string, control: React.ReactNode) => (
     <tr>
@@ -112,6 +114,13 @@ export function OWCCalculator({ projectId, code, status: _status }: Props) {
         {row('G', 'Landscape Waste per Year = B × D/1000 (Kg/year)', computed(fmt(landscapeWasteYear)))}
         {row('H', 'Landscape Waste per Day = G ÷ 365 (Kg/day)', computed(fmt(landscapeWasteDay)))}
         {row('I', 'Required OWC Capacity = F + H (Kg/day)', computed(fmt(totalOwcCapacity), true))}
+        {totalOwcCapacity > 0 && row(
+          'J',
+          'Applicability check — is total organic waste ≥ 50 Kg/day?',
+          <div className={`flex h-8 items-center justify-end rounded-md border border-input bg-muted/50 px-2 text-sm font-semibold ${isApplicable ? 'text-green-600' : 'text-amber-500'}`}>
+            {isApplicable ? 'APPLICABLE' : 'EXEMPT (< 50 Kg/day)'}
+          </div>,
+        )}
       </tbody>
     </table>
   );

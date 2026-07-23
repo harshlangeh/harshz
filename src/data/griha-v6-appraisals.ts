@@ -36,7 +36,7 @@ for (let id = 2; id <= 30; id++) {
 
 // Override criterion 18 with the real Organic Waste Converter appraisal.
 CRITERION_APPRAISALS[18] = [
-  { code: '18.1.1', title: 'Organic Waste Converter Capacity', criterionId: 18, points: 2, type: 'Optional' },
+  { code: '18.1.1', title: 'Organic Waste Converter Capacity', criterionId: 18, points: 2, type: 'Optional', exemptable: true },
 ];
 
 // Override criterion 24 with the real Differently Abled (DA) Facilities appraisal.
