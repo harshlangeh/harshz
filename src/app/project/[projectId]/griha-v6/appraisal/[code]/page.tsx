@@ -90,6 +90,12 @@ const DYNAMIC_NARRATIVE_BUILDERS: Record<string, (projectId: string) => string> 
   <li>Lowered reception counters and service windows to wheelchair height</li>
 </ul>
 <p>These provisions are in compliance with the National Building Code (NBC) 2016 Part 3 guidelines and GRIHA Universal Accessibility requirements, ensuring dignified and independent access for all building users.</p>`,
+  '9.1.1': () =>
+    `<p>The project team has used CFC (Chlorofluorocarbon) and HCFC (Hydrochlorofluorocarbon) free insulation materials in all HVAC systems of the building, in compliance with the GRIHA V6 mandatory requirement. The selected insulation products do not contain ozone-depleting substances, thereby contributing to environmental protection and global efforts to phase out harmful refrigerants and blowing agents as per the Montreal Protocol.</p>`,
+  '9.1.2': () =>
+    `<p>The project team has used CFC (Chlorofluorocarbon) and HCFC (Hydrochlorofluorocarbon) free refrigerants in all HVAC systems of the building, in compliance with the GRIHA V6 mandatory requirement. The selected refrigerants do not deplete the ozone layer and have a lower global warming potential, contributing to environmental sustainability and compliance with the Montreal Protocol and applicable Indian regulations.</p>`,
+  '9.1.3': () =>
+    `<p>The project team has installed Halon-free fire extinguishing systems and equipment throughout the building, in compliance with the GRIHA V6 mandatory requirement. All fire extinguishers and suppression systems use environmentally friendly alternatives that do not contain Halon or other ozone-depleting substances, ensuring the safety of occupants while protecting the environment in line with the Montreal Protocol requirements.</p>`,
   '27.1.1': () =>
     `<p>All HVAC, lighting, and electrical systems of the project have been commissioned to ensure proper working and performance in accordance with the design specifications and GRIHA requirements. The commissioning process involved systematic testing, balancing, and verification of each system to confirm that they operate as intended, delivering the required levels of thermal comfort, illumination, and energy efficiency throughout the building.</p>`,
   '27.1.2': () =>
