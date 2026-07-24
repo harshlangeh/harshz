@@ -48,6 +48,21 @@ A web tool for green building certification consultants to track compliance and 
 
 ## Session Log (newest first)
 
+### [2026-07-25 01:00 IST] Claude (claude-sonnet-4-6) — Criterion 9 appraisals (CFC/HCFC/Halon-free, all Mandatory)
+
+**PR merged:** #40 (squash)
+
+**Files changed:**
+- Modified: `src/data/griha-v6-appraisals.ts` — added `CRITERION_APPRAISALS[9]` override with three real Mandatory appraisals: `9.1.1 CFC and HCFC Free HVAC Insulation`, `9.1.2 CFC and HCFC Free HVAC Refrigerant`, `9.1.3 Halon Free Fire Extinguishers`; all type `'Mandatory'`, no points
+- Modified: `src/app/project/[projectId]/griha-v6/appraisal/[code]/page.tsx` — added `DYNAMIC_NARRATIVE_BUILDERS` entries for `9.1.1` (CFC/HCFC free insulation, Montreal Protocol reference), `9.1.2` (CFC/HCFC free refrigerant, lower GWP), `9.1.3` (Halon-free fire extinguishers, ozone-safe alternatives)
+
+**What was done:**
+- [x] Criterion 9 now has 3 real Mandatory appraisals instead of placeholder
+- [x] All three are Mandatory (no points, show "M" badge)
+- [x] Default narratives auto-seed on first visit for all three appraisal pages
+
+---
+
 ### [2026-07-25 00:10 IST] Claude (claude-sonnet-4-6) — Criteria 1.1.3 and 1.1.4 calculators + auto-narratives
 
 **PR merged:** #38 (squash)
