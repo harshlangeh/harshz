@@ -34,6 +34,13 @@ for (let id = 2; id <= 30; id++) {
   ];
 }
 
+// Override criterion 9 with the real CFC/HCFC/Halon-free appraisals (all Mandatory — no points).
+CRITERION_APPRAISALS[9] = [
+  { code: '9.1.1', title: 'CFC and HCFC Free HVAC Insulation', criterionId: 9, type: 'Mandatory' },
+  { code: '9.1.2', title: 'CFC and HCFC Free HVAC Refrigerant', criterionId: 9, type: 'Mandatory' },
+  { code: '9.1.3', title: 'Halon Free Fire Extinguishers', criterionId: 9, type: 'Mandatory' },
+];
+
 // Override criterion 18 with the real Organic Waste Converter appraisal.
 CRITERION_APPRAISALS[18] = [
   { code: '18.1.1', title: 'Organic Waste Converter Capacity', criterionId: 18, points: 2, type: 'Optional', exemptable: true },
