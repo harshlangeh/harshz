@@ -4,6 +4,7 @@ import { getAppraisalState } from '@/data/griha-v6-appraisals';
 import { TreePreservationCalculator } from '@/components/calculators/TreePreservationCalculator';
 import { InnovationCalculator } from '@/components/calculators/InnovationCalculator';
 import { WaterFactorCalculator } from '@/components/calculators/WaterFactorCalculator';
+import { OWCCalculator } from '@/components/calculators/OWCCalculator';
 import type React from 'react';
 
 export type CalcStatus = 'pass' | 'fail' | 'pending';
@@ -113,6 +114,34 @@ export const CALCULATOR_REGISTRY: CalcRegistration[] = [
         result: pass ? 'COMPLIANT' : 'NON-COMPLIANT',
         status: pass ? 'pass' : 'fail',
         compliance: pass ? 'Compliant' : 'Non-Compliant',
+      };
+    },
+  },
+  {
+    id: 'owc-capacity',
+    title: 'OWC Capacity',
+    description: 'Required Organic Waste Converter capacity = building organic waste (40% of total) + landscape leaf-litter waste',
+    rating: 'griha-v6',
+    ratingLabel: 'GRIHA V6',
+    criterionCode: '18.1.1',
+    criterionLabel: 'Criterion 18 · Organic Waste Management',
+    criterionPath: (p) => `/project/${p}/griha-v6/appraisal/18.1.1`,
+    Component: OWCCalculator,
+    getSummary: (projectId) => {
+      const state = getAppraisalState(projectId, '18.1.1');
+      const calc = state.calculator || {};
+      const occupancy = parseFloat(calc['owc_occupancy'] || '') || 0;
+      const landscape = parseFloat(calc['owc_landscape'] || '') || 0;
+      const wasteRate = parseFloat(calc['owc_waste_rate'] || '0.2') || 0.2;
+      const leafLitterGms = parseFloat(calc['owc_leaf_litter'] || '67') || 67;
+      if (!occupancy && !landscape) return { result: '—', status: 'pending' };
+      const buildingOrganic = occupancy * wasteRate * 0.4;
+      const landscapeDay = (landscape * leafLitterGms / 1000) / 365;
+      const total = buildingOrganic + landscapeDay;
+      return {
+        result: `${total.toFixed(2)} Kg/day`,
+        status: 'pass',
+        compliance: `OWC Capacity: ${total.toFixed(2)} Kg/day`,
       };
     },
   },

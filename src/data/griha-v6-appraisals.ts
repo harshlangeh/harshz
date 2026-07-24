@@ -34,6 +34,22 @@ for (let id = 2; id <= 30; id++) {
   ];
 }
 
+// Override criterion 18 with the real Organic Waste Converter appraisal.
+CRITERION_APPRAISALS[18] = [
+  { code: '18.1.1', title: 'Organic Waste Converter Capacity', criterionId: 18, points: 2, type: 'Optional', exemptable: true },
+];
+
+// Override criterion 24 with the real Differently Abled (DA) Facilities appraisal.
+CRITERION_APPRAISALS[24] = [
+  { code: '24.1.1', title: 'DA Facilities', criterionId: 24, points: 2, type: 'Optional' },
+];
+
+// Override criterion 27 with the real Commissioning appraisals.
+CRITERION_APPRAISALS[27] = [
+  { code: '27.1.1', title: 'HVAC, Lighting and Electrical Systems', criterionId: 27, points: 2, type: 'Optional' },
+  { code: '27.1.2', title: 'Water and Waste Systems', criterionId: 27, points: 2, type: 'Optional' },
+];
+
 // Override criterion 29 with the real O&M Protocol appraisals (all Mandatory — no points).
 CRITERION_APPRAISALS[29] = [
   { code: '29.1.1', title: 'O&M Service Group Formation', criterionId: 29, type: 'Mandatory' },

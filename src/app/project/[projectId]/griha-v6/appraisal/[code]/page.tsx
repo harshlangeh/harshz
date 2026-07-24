@@ -12,13 +12,51 @@ import {
 } from '@/data/griha-v6-appraisals';
 import { buildProjectApprovalsNarrative } from '@/lib/project-narrative';
 import { INNOVATION_STRATEGIES, buildInnovationNarrativeHtml } from '@/data/innovation-strategies';
+import { getProjectDetails } from '@/data/building-typology';
+import { sumAreas } from '@/components/AreaList';
+import { scopedKey } from '@/lib/projects';
 import { CalculatorGrid } from '@/components/CalculatorGrid';
 import { complianceBadge, rowClass } from '@/lib/griha-compliance';
 import { DataTab } from '@/components/DataTab';
 
+function buildOwcNarrative(projectId: string): string {
+  let capacity = 0;
+  try {
+    const info = JSON.parse(localStorage.getItem(scopedKey(projectId, 'project_info')) || '{}');
+    const fixed = parseFloat(info.occupancyFixed || '') || 0;
+    const floating = parseFloat(info.occupancyFloating || '') || 0;
+    const occupancy = fixed + floating;
+    const landscape = sumAreas(getProjectDetails(projectId).siteAreaLandscape);
+    const buildingOrganic = occupancy * 0.2 * 0.4;
+    const landscapeDay = (landscape * 0.067) / 365;
+    capacity = buildingOrganic + landscapeDay;
+  } catch {}
+  const capacityText = capacity > 0 ? `${capacity.toFixed(2)} Kg/day` : '[to be calculated]';
+  return `<p>The project team will install an Organic Waste Converter (OWC) with a capacity of <strong>${capacityText}</strong> to manage the organic waste generated within the project premises. The OWC is designed to process biodegradable waste from building occupants as well as landscape leaf litter in an environmentally responsible manner, ensuring compliance with the GRIHA V6 requirements for on-site organic waste management.</p>
+<p>The OWC capacity has been determined based on the total building occupancy and landscape area of the project, applying a waste generation rate of 0.2 Kg/capita/day (NBC norm) and an organic fraction of 40%, along with a leaf litter rate of 67 gms/m²/year for the landscaped areas. The processed organic waste will be converted into compost/manure for use within the project site, thereby reducing the load on municipal solid waste collection systems and contributing to a circular waste management approach.</p>`;
+}
+
 /** Appraisals whose narrative can be auto-generated from Project Information / Project Details. */
 const DYNAMIC_NARRATIVE_BUILDERS: Record<string, (projectId: string) => string> = {
   '1.1.1': buildProjectApprovalsNarrative,
+  '18.1.1': buildOwcNarrative,
+  '24.1.1': () =>
+    `<p>The project has followed all the guidelines of Universal Accessibility to ensure that the building is fully accessible to differently abled (DA) individuals. The following DA facilities have been incorporated in the design and construction of the project:</p>
+<ul>
+  <li>Dual ramps with anti-skid surface and handrails on both sides at all level changes and entrances</li>
+  <li>Lifts/elevators equipped with Braille-marked buttons, audio announcements, and tactile flooring at landings</li>
+  <li>Accessible parking bays located near the main entrance, clearly marked and of adequate dimensions</li>
+  <li>Accessible toilets on each floor with grab bars, wider doorways, and turning space for wheelchairs</li>
+  <li>Tactile guiding paths and warning strips at hazardous locations throughout the building</li>
+  <li>Lever-type door handles and push-plate fittings at all accessible routes</li>
+  <li>Signage in Braille and large-print format at key locations including entrance, lifts, and toilets</li>
+  <li>Lowered reception counters and service windows to wheelchair height</li>
+</ul>
+<p>These provisions are in compliance with the National Building Code (NBC) 2016 Part 3 guidelines and GRIHA Universal Accessibility requirements, ensuring dignified and independent access for all building users.</p>`,
+  '27.1.1': () =>
+    `<p>All HVAC, lighting, and electrical systems of the project have been commissioned to ensure proper working and performance in accordance with the design specifications and GRIHA requirements. The commissioning process involved systematic testing, balancing, and verification of each system to confirm that they operate as intended, delivering the required levels of thermal comfort, illumination, and energy efficiency throughout the building.</p>`,
+  '27.1.2': () =>
+    `<p>All water supply, plumbing, and waste management systems of the project have been commissioned to ensure proper working and performance in accordance with the design specifications and GRIHA requirements. The commissioning process involved systematic testing and verification of water distribution, drainage, and waste disposal systems to confirm that they operate efficiently, safely, and in compliance with applicable standards and sustainability goals.</p>`,
   '29.1.1': () =>
     `<p>The project team has formed a dedicated Operation and Maintenance (O&amp;M) service group responsible for the ongoing maintenance, management, and performance monitoring of the building's systems and infrastructure. The group comprises trained professionals with defined roles and responsibilities to ensure the building operates efficiently and sustainably in accordance with GRIHA requirements.</p>`,
   '29.1.2': () =>
@@ -30,6 +68,21 @@ const DYNAMIC_NARRATIVE_BUILDERS: Record<string, (projectId: string) => string> 
 /** Default narrative set whenever an appraisal's status is switched to Exempted. */
 const EXEMPTED_NARRATIVES: Record<string, string> = {
   '1.1.2': 'There is no existing trees on the site hence project is exempted from the appraisal.',
+};
+
+/** Dynamic exempted narratives — like EXEMPTED_NARRATIVES but computed from project data. */
+const DYNAMIC_EXEMPTED_NARRATIVE_BUILDERS: Record<string, (projectId: string) => string> = {
+  '18.1.1': (projectId) => {
+    let totalOwc = 0;
+    try {
+      const info = JSON.parse(localStorage.getItem(scopedKey(projectId, 'project_info')) || '{}');
+      const occupancy = (parseFloat(info.occupancyFixed || '') || 0) + (parseFloat(info.occupancyFloating || '') || 0);
+      const landscape = sumAreas(getProjectDetails(projectId).siteAreaLandscape);
+      totalOwc = occupancy * 0.2 * 0.4 + (landscape * 0.067) / 365;
+    } catch {}
+    const totalText = totalOwc > 0 ? `${totalOwc.toFixed(2)} Kg/day` : 'less than 50 Kg/day';
+    return `<p>The total organic waste generated from the project — comprising kitchen/food waste from building occupants and landscape leaf litter — is <strong>${totalText}</strong>, which is below the GRIHA V6 applicability threshold of 50 Kg per day. As per the applicability check, Appraisal 18.1.1 (Organic Waste Converter Capacity) is therefore not applicable to this project.</p>`;
+  },
 };
 
 type SectionKey = 'status' | 'narrative' | 'calculation' | 'data';
@@ -47,6 +100,13 @@ export default function AppraisalDetailPage() {
 
   const narrativeBuilder = DYNAMIC_NARRATIVE_BUILDERS[code];
   const exemptedNarrative = EXEMPTED_NARRATIVES[code];
+  const exemptedNarrativeBuilder = DYNAMIC_EXEMPTED_NARRATIVE_BUILDERS[code];
+
+  const buildExemptedNarrative = (): string | undefined => {
+    if (exemptedNarrativeBuilder) return exemptedNarrativeBuilder(projectId);
+    if (exemptedNarrative) return `<p>${exemptedNarrative}</p>`;
+    return undefined;
+  };
 
   useEffect(() => {
     const state = getAppraisalState(projectId, code);
@@ -55,8 +115,8 @@ export default function AppraisalDetailPage() {
     if (!state.narrativeHtml) {
       // First visit with no manual edits yet — seed a default narrative.
       let generated: string | undefined;
-      if (state.status === 'exempted' && exemptedNarrative) {
-        generated = `<p>${exemptedNarrative}</p>`;
+      if (state.status === 'exempted') {
+        generated = buildExemptedNarrative();
       } else if (narrativeBuilder) {
         generated = narrativeBuilder(projectId);
       }
@@ -72,11 +132,13 @@ export default function AppraisalDetailPage() {
 
   const updateStatus = (s: AppraisalStatus) => {
     setStatus(s);
-    if (s === 'exempted' && exemptedNarrative) {
-      const html = `<p>${exemptedNarrative}</p>`;
-      setNarrative(html);
-      saveAppraisalState(projectId, code, { status: s, narrativeHtml: html });
-      return;
+    if (s === 'exempted') {
+      const html = buildExemptedNarrative();
+      if (html) {
+        setNarrative(html);
+        saveAppraisalState(projectId, code, { status: s, narrativeHtml: html });
+        return;
+      }
     }
     saveAppraisalState(projectId, code, { status: s });
   };
