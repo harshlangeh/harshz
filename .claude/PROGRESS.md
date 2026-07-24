@@ -48,6 +48,30 @@ A web tool for green building certification consultants to track compliance and 
 
 ## Session Log (newest first)
 
+### [2026-07-25 00:10 IST] Claude (claude-sonnet-4-6) — Criteria 1.1.3 and 1.1.4 calculators + auto-narratives
+
+**PR merged:** #38 (squash)
+
+**Files changed:**
+- Added: `src/components/calculators/TreePlantingCalculator.tsx` — calculator for 1.1.3; row A: Site Area (m², prefilled from `sumSiteAreaTotal(getProjectDetails(projectId))`), row B: Trees Required = `Math.ceil(A ÷ 80)` (highlighted green); `SQMT_PER_TREE = 80` constant
+- Added: `src/components/calculators/PerCapitaAreaCalculator.tsx` — calculator for 1.1.4; exports `TYPOLOGY_BENCHMARKS` (7 typologies with min/max/unit from GRIHA Table 1.1c); typology dropdown prefilled from `getProjectDetails(projectId).typologyCategory`; healthcare shows beds input inline within row A; built-up area + occupancy prefilled from `project_info`; compliance row: below min → `NON-COMPLIANT — below minimum benchmark of X`, above max → `NON-COMPLIANT — exceeds maximum benchmark of X`, in range → `COMPLIANT`
+- Modified: `src/lib/calculator-registry.ts` — added `tree-planting` entry (1.1.3) and `per-capita-area` entry (1.1.4); `getSummary` for tree-planting returns tree count; `getSummary` for per-capita-area reads typology, benchmark, built-up area, and occupancy/beds
+- Modified: `src/app/project/[projectId]/griha-v6/appraisal/[code]/page.tsx` — added `DYNAMIC_NARRATIVE_BUILDERS` entries for `'1.1.3'` (embeds computed tree count: "The project team will plant **X trees** on the site…") and `'1.1.4'` (embeds typology, per-capita value, and compliance status)
+
+**What was done:**
+- [x] 1.1.3 tree planting calculator with site area prefill and required trees computed as ceiling(siteArea ÷ 80)
+- [x] 1.1.4 per-capita area calculator with all 7 GRIHA V6 typologies (Table 1.1c), healthcare uses beds, others use fixed + floating occupancy
+- [x] Typology for 1.1.4 auto-prefills from Project Details on first load
+- [x] Healthcare Facility shows Number of Beds input inline below the typology dropdown (same row A), not as a separate row
+- [x] Row letters auto-adjust between healthcare (A–E) and non-healthcare (A–F) modes
+- [x] Dynamic narrative builders for both appraisals auto-seed on first visit
+
+**Decisions made:**
+- `TYPOLOGY_BENCHMARKS` exported from `PerCapitaAreaCalculator.tsx` so the calculator registry can reuse it in `getSummary` without duplicating the table
+- Beds input placed inline in row A (under the dropdown) rather than as a new row — matches user's instruction to put it "in building typology"
+
+---
+
 ### [2026-07-24 08:15 IST] Claude (claude-sonnet-4-6) — Criteria 18, 24, 27 appraisals + OWC calculator + exemption system
 
 **PR merged:** #37 (squash)
