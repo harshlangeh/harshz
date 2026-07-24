@@ -6,7 +6,9 @@ import { InnovationCalculator } from '@/components/calculators/InnovationCalcula
 import { WaterFactorCalculator } from '@/components/calculators/WaterFactorCalculator';
 import { OWCCalculator } from '@/components/calculators/OWCCalculator';
 import { TreePlantingCalculator } from '@/components/calculators/TreePlantingCalculator';
+import { PerCapitaAreaCalculator, TYPOLOGY_BENCHMARKS } from '@/components/calculators/PerCapitaAreaCalculator';
 import { getProjectDetails, sumSiteAreaTotal } from '@/data/building-typology';
+import { scopedKey } from '@/lib/projects';
 import type React from 'react';
 
 export type CalcStatus = 'pass' | 'fail' | 'pending';
@@ -83,6 +85,43 @@ export const CALCULATOR_REGISTRY: CalcRegistration[] = [
         result: `${trees} trees`,
         status: 'pass',
         compliance: `${trees} trees required (1 per 80 m²)`,
+      };
+    },
+  },
+  {
+    id: 'per-capita-area',
+    title: 'Per Capita Gross Area Benchmark',
+    description: 'Built-up area ÷ occupancy (or beds for healthcare) vs GRIHA Table 1.1c typology limits',
+    rating: 'griha-v6',
+    ratingLabel: 'GRIHA V6',
+    criterionCode: '1.1.4',
+    criterionLabel: 'Criterion 1 · Green Infrastructure',
+    criterionPath: (p) => `/project/${p}/griha-v6/appraisal/1.1.4`,
+    Component: PerCapitaAreaCalculator,
+    getSummary: (projectId) => {
+      const state = getAppraisalState(projectId, '1.1.4');
+      const calc = state.calculator || {};
+      const typology = calc['typology'] || '';
+      const benchmark = typology ? TYPOLOGY_BENCHMARKS[typology] : null;
+      if (!benchmark) return { result: '—', status: 'pending' };
+      const builtUpArea = parseFloat(calc['builtUpArea'] || '') || 0;
+      const denominator = benchmark.isHealthcare
+        ? parseFloat(calc['beds'] || '') || 0
+        : parseFloat(calc['occupancy'] || '') || (() => {
+            try {
+              const info = JSON.parse(localStorage.getItem(scopedKey(projectId, 'project_info')) || '{}');
+              return (parseFloat(info.occupancyFixed || '') || 0) + (parseFloat(info.occupancyFloating || '') || 0);
+            } catch { return 0; }
+          })();
+      if (!builtUpArea || !denominator) return { result: '—', status: 'pending' };
+      const perCapita = builtUpArea / denominator;
+      const belowMin = perCapita < benchmark.min;
+      const aboveMax = benchmark.max !== null && perCapita > benchmark.max;
+      const pass = !belowMin && !aboveMax;
+      return {
+        result: `${perCapita.toFixed(2)} ${benchmark.unit}`,
+        status: pass ? 'pass' : 'fail',
+        compliance: pass ? 'Compliant' : belowMin ? `Below min (${benchmark.min})` : `Exceeds max (${benchmark.max})`,
       };
     },
   },

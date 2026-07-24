@@ -15,6 +15,7 @@ import { INNOVATION_STRATEGIES, buildInnovationNarrativeHtml } from '@/data/inno
 import { getProjectDetails, sumSiteAreaTotal } from '@/data/building-typology';
 import { sumAreas } from '@/components/AreaList';
 import { scopedKey } from '@/lib/projects';
+import { TYPOLOGY_BENCHMARKS } from '@/components/calculators/PerCapitaAreaCalculator';
 import { CalculatorGrid } from '@/components/CalculatorGrid';
 import { complianceBadge, rowClass } from '@/lib/griha-compliance';
 import { DataTab } from '@/components/DataTab';
@@ -44,6 +45,36 @@ const DYNAMIC_NARRATIVE_BUILDERS: Record<string, (projectId: string) => string> 
     const trees = siteArea > 0 ? Math.ceil(siteArea / 80) : 0;
     const treesText = trees > 0 ? String(trees) : '[to be calculated]';
     return `<p>The project team will plant <strong>${treesText} trees</strong> on the site in compliance with the GRIHA V6 requirement of one tree for every 80 sq.m of site area. The trees to be planted shall be of native or naturalized species, appropriately selected for the local climate and soil conditions, and shall be maintained for the life of the building to ensure long-term green cover and ecological benefit.</p>`;
+  },
+  '1.1.4': (projectId) => {
+    let perCapita = 0;
+    let typologyName = '';
+    let unitLabel = 'm²/person';
+    let benchmarkText = '';
+    try {
+      const info = JSON.parse(localStorage.getItem(scopedKey(projectId, 'project_info')) || '{}');
+      const state = (typeof window !== 'undefined')
+        ? (() => { try { return JSON.parse(localStorage.getItem(scopedKey(projectId, 'appraisals_v6')) || '{}')['1.1.4'] || {}; } catch { return {}; } })()
+        : {};
+      const calc = state.calculator || {};
+      typologyName = calc['typology'] || '';
+      const benchmark = typologyName ? TYPOLOGY_BENCHMARKS[typologyName] : null;
+      if (benchmark) {
+        unitLabel = benchmark.unit;
+        const builtUp = parseFloat(calc['builtUpArea'] || info.builtUpArea || '') || 0;
+        const denom = benchmark.isHealthcare
+          ? parseFloat(calc['beds'] || '') || 0
+          : (parseFloat(calc['occupancy'] || '') || 0) ||
+            ((parseFloat(info.occupancyFixed || '') || 0) + (parseFloat(info.occupancyFloating || '') || 0));
+        if (builtUp > 0 && denom > 0) perCapita = builtUp / denom;
+        benchmarkText = benchmark.max !== null
+          ? `${benchmark.min}–${benchmark.max} ${benchmark.unit}`
+          : `minimum ${benchmark.min} ${benchmark.unit}`;
+      }
+    } catch {}
+    const areaText = perCapita > 0 ? `${perCapita.toFixed(2)} ${unitLabel}` : '[to be calculated]';
+    const typologyText = typologyName || 'the project typology';
+    return `<p>The per capita gross area of the project has been calculated as <strong>${areaText}</strong>, which falls within the GRIHA V6 benchmark range of <strong>${benchmarkText || '[refer Table 1.1c]'}</strong> applicable for ${typologyText} buildings. The gross built-up area used in this calculation includes circulation, service, and toilet areas but excludes basements and parking, in accordance with GRIHA V6 requirements. The project is therefore compliant with Appraisal 1.1.4 — Per Capita Gross Area Benchmark.</p>`;
   },
   '18.1.1': buildOwcNarrative,
   '24.1.1': () =>
