@@ -5,6 +5,8 @@ import { TreePreservationCalculator } from '@/components/calculators/TreePreserv
 import { InnovationCalculator } from '@/components/calculators/InnovationCalculator';
 import { WaterFactorCalculator } from '@/components/calculators/WaterFactorCalculator';
 import { OWCCalculator } from '@/components/calculators/OWCCalculator';
+import { TreePlantingCalculator } from '@/components/calculators/TreePlantingCalculator';
+import { getProjectDetails, sumSiteAreaTotal } from '@/data/building-typology';
 import type React from 'react';
 
 export type CalcStatus = 'pass' | 'fail' | 'pending';
@@ -58,6 +60,29 @@ export const CALCULATOR_REGISTRY: CalcRegistration[] = [
         result: pass ? 'COMPLIANT' : 'NON-COMPLIANT',
         status: pass ? 'pass' : 'fail',
         compliance: pass ? 'Compliant' : 'Non-Compliant',
+      };
+    },
+  },
+  {
+    id: 'tree-planting',
+    title: 'Tree Planting Requirement',
+    description: '1 tree per 80 m² of site area — total trees the project must plant',
+    rating: 'griha-v6',
+    ratingLabel: 'GRIHA V6',
+    criterionCode: '1.1.3',
+    criterionLabel: 'Criterion 1 · Green Infrastructure',
+    criterionPath: (p) => `/project/${p}/griha-v6/appraisal/1.1.3`,
+    Component: TreePlantingCalculator,
+    getSummary: (projectId) => {
+      const state = getAppraisalState(projectId, '1.1.3');
+      const calc = state.calculator || {};
+      const siteArea = parseFloat(calc['siteArea'] || '') || sumSiteAreaTotal(getProjectDetails(projectId));
+      if (!siteArea) return { result: '—', status: 'pending' };
+      const trees = Math.ceil(siteArea / 80);
+      return {
+        result: `${trees} trees`,
+        status: 'pass',
+        compliance: `${trees} trees required (1 per 80 m²)`,
       };
     },
   },

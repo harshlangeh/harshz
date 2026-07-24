@@ -12,7 +12,7 @@ import {
 } from '@/data/griha-v6-appraisals';
 import { buildProjectApprovalsNarrative } from '@/lib/project-narrative';
 import { INNOVATION_STRATEGIES, buildInnovationNarrativeHtml } from '@/data/innovation-strategies';
-import { getProjectDetails } from '@/data/building-typology';
+import { getProjectDetails, sumSiteAreaTotal } from '@/data/building-typology';
 import { sumAreas } from '@/components/AreaList';
 import { scopedKey } from '@/lib/projects';
 import { CalculatorGrid } from '@/components/CalculatorGrid';
@@ -39,6 +39,12 @@ function buildOwcNarrative(projectId: string): string {
 /** Appraisals whose narrative can be auto-generated from Project Information / Project Details. */
 const DYNAMIC_NARRATIVE_BUILDERS: Record<string, (projectId: string) => string> = {
   '1.1.1': buildProjectApprovalsNarrative,
+  '1.1.3': (projectId) => {
+    const siteArea = sumSiteAreaTotal(getProjectDetails(projectId));
+    const trees = siteArea > 0 ? Math.ceil(siteArea / 80) : 0;
+    const treesText = trees > 0 ? String(trees) : '[to be calculated]';
+    return `<p>The project team will plant <strong>${treesText} trees</strong> on the site in compliance with the GRIHA V6 requirement of one tree for every 80 sq.m of site area. The trees to be planted shall be of native or naturalized species, appropriately selected for the local climate and soil conditions, and shall be maintained for the life of the building to ensure long-term green cover and ecological benefit.</p>`;
+  },
   '18.1.1': buildOwcNarrative,
   '24.1.1': () =>
     `<p>The project has followed all the guidelines of Universal Accessibility to ensure that the building is fully accessible to differently abled (DA) individuals. The following DA facilities have been incorporated in the design and construction of the project:</p>
