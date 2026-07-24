@@ -48,6 +48,30 @@ A web tool for green building certification consultants to track compliance and 
 
 ## Session Log (newest first)
 
+### [2026-07-24 08:15 IST] Claude (claude-sonnet-4-6) — Criteria 18, 24, 27 appraisals + OWC calculator + exemption system
+
+**PR merged:** #37 (squash)
+
+**Files changed:**
+- Added: `src/components/calculators/OWCCalculator.tsx` — new calculator for 18.1.1; rows A (occupancy, prefilled from `project_info.occupancyFixed + occupancyFloating`), B (landscape area, prefilled from `sumAreas(siteAreaLandscape)`), C (waste rate, default 0.2 Kg/capita/day), D (leaf litter rate, default 67 gms/m²/year), E (total building waste = A×C), F (organic fraction = E×40%), G (landscape waste/year = B×D/1000), H (landscape waste/day = G÷365), I (required OWC capacity = F+H, highlighted), J (applicability check: ≥50 Kg/day → APPLICABLE, <50 → EXEMPT)
+- Modified: `src/lib/calculator-registry.ts` — added OWC entry (`id: 'owc-capacity'`, criterionCode `18.1.1`); `getSummary` returns Kg/day result
+- Modified: `src/data/griha-v6-appraisals.ts` — added `CRITERION_APPRAISALS[18]` override (`18.1.1 Organic Waste Converter Capacity`, 2 pts, Optional, `exemptable: true`); added `CRITERION_APPRAISALS[24]` override (`24.1.1 DA Facilities`, 2 pts, Optional); added `CRITERION_APPRAISALS[27]` override (`27.1.1 HVAC, Lighting and Electrical Systems` + `27.1.2 Water and Waste Systems`, both 2 pts, Optional)
+- Modified: `src/app/project/[projectId]/griha-v6/appraisal/[code]/page.tsx` — added `DYNAMIC_NARRATIVE_BUILDERS` entries for `18.1.1` (dynamic OWC capacity embedded in narrative), `24.1.1` (Universal Accessibility guidelines), `27.1.1` (HVAC/Lighting/Electrical commissioning), `27.1.2` (Water/Waste commissioning), `29.x` (already present); added `DYNAMIC_EXEMPTED_NARRATIVE_BUILDERS` record for dynamic exempted narratives; added `18.1.1` entry that reads live project data and embeds computed total + exemption reason; refactored `updateStatus` and `useEffect` to check `DYNAMIC_EXEMPTED_NARRATIVE_BUILDERS` before `EXEMPTED_NARRATIVES`
+
+**What was done:**
+- [x] Criterion 18 has real appraisal (`18.1.1`) with full OWC calculator
+- [x] OWC calculator prefills occupancy and landscape area from project data on first load
+- [x] Applicability row J: if total organic waste < 50 Kg/day → EXEMPT (amber); ≥ 50 Kg/day → APPLICABLE (green)
+- [x] Exempted status available for 18.1.1; dynamic narrative auto-generates with the computed total explaining why it's not applicable
+- [x] Criterion 24 DA Facilities with default Universal Accessibility narrative (dual ramps, Braille lifts, accessible toilets, tactile paths, NBC 2016)
+- [x] Criterion 27 Commissioning appraisals (27.1.1 + 27.1.2) with default narratives
+
+**Decisions made:**
+- `DYNAMIC_EXEMPTED_NARRATIVE_BUILDERS` introduced as a parallel pattern to `DYNAMIC_NARRATIVE_BUILDERS` — lets exempted narratives be computed from live project data rather than static strings
+- OWC capacity in default narrative computed fresh from `project_info` at generation time (not from calculator state, so it works even before the user opens the calculator)
+
+---
+
 ### [2026-07-23 22:00 IST] Claude (claude-sonnet-4-6) — Criterion 29 O&M Protocol appraisals
 
 **PR merged:** #36 (squash, commit `fb1983f`)
